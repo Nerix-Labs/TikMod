@@ -100,6 +100,17 @@ class LiveWatchService : Service() {
         startInForeground()
         isRunning = true
         alive = true
+        // Channels that were being recorded when the process died (update, crash, low memory) resume
+        // right away, even in "only when it starts" mode.
+        runCatching {
+            val prev = Prefs.readAutoLiveState(this)
+            prev.keys().forEach { k ->
+                val st = prev.optJSONObject(k)?.optString("status")
+                if (st == "recording" || st == "saving") resumeAllowed.add(k)
+            }
+        }
+        // Save whatever an interrupted recording left behind, then start watching.
+        thread(name = "TikMod-LiveSalvage") { runCatching { TikModDownloader.salvageInterruptedRecordings(this) } }
         thread(name = "TikMod-LiveWatch") { watchLoop() }
         XLog.log("AutoLive: service started")
     }

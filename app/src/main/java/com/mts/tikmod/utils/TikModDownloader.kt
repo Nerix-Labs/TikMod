@@ -446,6 +446,25 @@ object TikModDownloader {
         val ctx = context.applicationContext ?: context
         val baseName = sanitize("Live_${owner}_${timestamp()}")
         val temp = File(ctx.cacheDir, "tikmod_live_${System.nanoTime()}.flv")
+        activeLiveTemps.add(temp.absolutePath)
+        // Sidecar so an interrupted recording (process killed, module updated) can be recovered with its name.
+        runCatching {
+            File(temp.path + ".json").writeText(JSONObject().put("owner", owner).put("title", title).put("base", baseName).toString())
+        }
+        try {
+            return recordAndSave(ctx, temp, baseName, owner, title, urls, isRunning, onConn, onProgress, onSaving, maxFailures, maxEmptySegments)
+        } finally {
+            activeLiveTemps.remove(temp.absolutePath)
+        }
+    }
+
+    private val activeLiveTemps: MutableSet<String> = java.util.Collections.synchronizedSet(HashSet())
+
+    private fun recordAndSave(
+        ctx: Context, temp: File, baseName: String, owner: String, title: String,
+        urls: () -> List<String>, isRunning: () -> Boolean, onConn: (HttpURLConnection?) -> Unit,
+        onProgress: (Long, Long) -> Unit, onSaving: () -> Unit, maxFailures: Int, maxEmptySegments: Int
+    ): LiveResult? {
         var writer: FlvRemuxer.Writer? = null
         var failures = 0
         var emptySegments = 0
@@ -497,11 +516,39 @@ object TikModDownloader {
         onSaving()
 
         if (writer == null || durationMs < 500) {
-            temp.delete()
+            temp.delete(); File(temp.path + ".json").delete()
             toast(ctx, "❌ ההקלטה של $owner נכשלה — לא התקבל וידאו מהשידור")
             return null
         }
+        return saveLiveFile(ctx, temp, baseName, owner, title, durationMs)
+    }
 
+    /**
+     * Saves recordings that were cut off before they could be saved (TikMod's process was killed, e.g. by a
+     * module update). Each leftover FLV in the cache is remuxed to MP4 and saved like a normal recording.
+     */
+    fun salvageInterruptedRecordings(context: Context) {
+        val ctx = context.applicationContext ?: context
+        synchronized(activeLiveTemps) {
+            val orphans = ctx.cacheDir.listFiles { f -> f.name.startsWith("tikmod_live_") && f.name.endsWith(".flv") }
+                .orEmpty().filter { it.absolutePath !in activeLiveTemps }
+            for (f in orphans) {
+                if (f.length() < 64 * 1024) { f.delete(); File(f.path + ".json").delete(); continue }
+                val meta = runCatching { JSONObject(File(f.path + ".json").readText()) }.getOrNull()
+                val owner = meta?.optString("owner").orEmpty().ifBlank { "LIVE" }
+                val base = meta?.optString("base").orEmpty().ifBlank {
+                    sanitize("Live_${owner}_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date(f.lastModified())))
+                }
+                XLog.log("LiveRecorder: recovering interrupted recording ${f.name} (${formatSize(f.length())}) for $owner")
+                toast(ctx, "♻️ משחזר הקלטה שנקטעה של $owner…")
+                activeLiveTemps.add(f.absolutePath)
+                try { saveLiveFile(ctx, f, base, owner, meta?.optString("title").orEmpty(), 0L) }
+                finally { activeLiveTemps.remove(f.absolutePath) }
+            }
+        }
+    }
+
+    private fun saveLiveFile(ctx: Context, temp: File, baseName: String, owner: String, title: String, durationMs: Long): LiveResult? {
         val job = Job(ctx, Kind.LIVE, owner.ifBlank { "LIVE" })
         val label = title.ifBlank { "LIVE @$owner" }
         try {
@@ -535,6 +582,7 @@ object TikModDownloader {
             }.onFailure { job.fail(it.message ?: "save failed") }.getOrNull()
         } finally {
             temp.delete()
+            File(temp.path + ".json").delete()
         }
     }
 
