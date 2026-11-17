@@ -5,6 +5,12 @@ message privacy and a quieter feed.
 
 Made by **Nerix Labs**.
 
+<p>
+  <a href="https://github.com/Nerix-Labs/TikMod/releases/latest"><img src="https://img.shields.io/github/v/release/Nerix-Labs/TikMod?style=flat-square&label=release" alt="Latest release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="GPL-3.0"></a>
+  <a href="https://buymeacoffee.com/nerixlabs"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?style=flat-square&logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
+</p>
+
 [עברית למטה](#בעברית)
 
 ---
@@ -77,6 +83,12 @@ Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 All changes go through pull requests and are reviewed before they are merged; releases are published by the
 maintainer only.
 
+## Support
+
+TikMod is free and always will be. If it saves you time, you can support its development:
+
+<a href="https://buymeacoffee.com/nerixlabs"><img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=nerixlabs&button_colour=FFDD00&font_colour=000000&font_family=Inter&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a coffee" height="44"></a>
+
 ## Disclaimer
 
 TikMod is an independent project and is not affiliated with, endorsed by or connected to TikTok or ByteDance.
@@ -100,6 +112,8 @@ Modifying apps may violate their terms of service — use at your own risk.
 - **לייב:** הקלטת שידורים חיים ל-MP4 תקין, כולל הקלטה אוטומטית של ערוצים במעקב, שממשיכה גם כשטיקטוק סגור.
 - **צ'אט:** "נצפה" רק אחרי שעונים, הסתרת "מקליד/ה" ו"פעיל/ה עכשיו", והודעות שנמחקו נשארות עם סימן פח קטן.
 - **פיד:** חסימת פרסומות וסינון שידורים, סרטוני קניות ופוסטי תמונות.
+
+**תמיכה:** TikMod חינמי ותמיד יהיה. אם הוא עוזר לך, אפשר לפרגן בקפה ב-[Buy Me a Coffee](https://buymeacoffee.com/nerixlabs).
 
 **התקנה:** מתקינים את ה-APK מעמוד ה-Releases, מפעילים ב-LSPosed עם טיקטוק בטווח, ומפעילים מחדש את טיקטוק.
 נבדק על טיקטוק 47.7.3.
