@@ -1,0 +1,35 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: input
+    id: tiktok
+    attributes:
+      label: TikTok version
+      placeholder: "47.7.3"
+    validations:
+      required: true
+  - type: input
+    id: tikmod
+    attributes:
+      label: TikMod version
+      placeholder: "4.0.0"
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device / Android / LSPosed version
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Steps to reproduce, what you expected and what you got.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: LSPosed log
+      description: Lines containing "TikMod".
+      render: text
