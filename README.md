@@ -51,7 +51,7 @@ signature, but a few are pinned to 47.7.3; other versions may need small adjustm
 ## Building
 
 ```bash
-git clone https://github.com/neriyaomesi/TikMod.git
+git clone https://github.com/Nerix-Labs/TikMod.git
 cd TikMod
 ./gradlew assembleDebug
 ```

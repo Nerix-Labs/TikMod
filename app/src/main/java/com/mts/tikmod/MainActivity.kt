@@ -311,7 +311,7 @@ private fun AboutCard() {
                 Text("TikMod ${BuildConfig.VERSION_NAME} • קוד פתוח, רישיון GPL-3.0", fontSize = 12.5.sp, color = Subtle)
             }
             IconButton(onClick = {
-                runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/neriyaomesi/TikMod")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Nerix-Labs/TikMod")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
             }) { Icon(Icons.Rounded.Code, "קוד המקור", tint = Neon.Cyan) }
         }
     }
