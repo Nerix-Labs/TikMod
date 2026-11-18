@@ -64,6 +64,16 @@ class HookEntry : IXposedHookLoadPackage {
                 return
             }
 
+            // Diagnostic kill switch: `adb shell setprop debug.tikmod.off 1` loads TikTok with no TikMod hooks at
+            // all, to tell a TikMod problem apart from one caused by root / LSPosed itself.
+            val off = runCatching {
+                Class.forName("android.os.SystemProperties").getMethod("get", String::class.java).invoke(null, "debug.tikmod.off") == "1"
+            }.getOrDefault(false)
+            if (off) {
+                XLog.log("TikMod: disabled by debug.tikmod.off — no hooks installed in $pkg")
+                return
+            }
+
             XLog.log("==========================================")
             XLog.log("TikMod Loaded into $pkg (${lpparam.processName})")
             XLog.log("==========================================")

@@ -41,7 +41,14 @@ object ModuleManager {
             }
 
             XLog.log("TikMod ModuleManager: Applying ${hooks.size} isolated hooks on ClassLoader: $classLoader")
+            // Diagnostic: `adb shell setprop debug.tikmod.skip PresenceHook,AdsHook` leaves those hooks out.
+            val skip = runCatching {
+                (Class.forName("android.os.SystemProperties").getMethod("get", String::class.java).invoke(null, "debug.tikmod.skip") as String)
+                    .split(',').map { it.trim() }.filter { it.isNotEmpty() }.toSet()
+            }.getOrDefault(emptySet())
+            if (skip.isNotEmpty()) XLog.log("TikMod: skipping hooks $skip")
             for (hook in hooks) {
+                if (hook.javaClass.simpleName in skip) continue
                 try {
                     hook.apply(classLoader, context)
                 } catch (t: Throwable) {
