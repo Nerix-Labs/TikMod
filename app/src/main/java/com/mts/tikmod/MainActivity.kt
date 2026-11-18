@@ -660,6 +660,8 @@ private fun LiveScreen() {
         }
     }
 
+    Appear(4) { com.mts.tikmod.ui.CaptionsSection() }
+
     Appear(4) { LiveHistorySection(channels, onFollow = { h ->
         channels = (channels + h).distinct()
         Prefs.setAutoLiveChannels(ctx, channels)

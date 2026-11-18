@@ -1027,7 +1027,7 @@ object TikModDownloader {
 
     private fun timestamp() = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
 
-    private fun open(url: String, readTimeoutMs: Int = 30_000): HttpURLConnection {
+    internal fun open(url: String, readTimeoutMs: Int = 30_000): HttpURLConnection {
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.connectTimeout = 15_000
         conn.readTimeout = readTimeoutMs

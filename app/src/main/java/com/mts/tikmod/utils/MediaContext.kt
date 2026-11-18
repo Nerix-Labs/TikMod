@@ -23,7 +23,8 @@ object MediaContext {
         private set
     @Volatile private var liveShareRoomId: String? = null
 
-    data class LiveStream(val roomId: String, val title: String, val owner: String, val urls: List<String>)
+    /** @param light the same stream, lightest first (audio-only when the room has it): for live captions. */
+    data class LiveStream(val roomId: String, val title: String, val owner: String, val urls: List<String>, val light: List<String> = emptyList())
 
     private val rooms = ConcurrentHashMap<String, LiveStream>()
     @Volatile private var lastRoomId: String? = null
@@ -68,29 +69,34 @@ object MediaContext {
     @Volatile private var lastRoomObj: WeakReference<Any>? = null
     @Volatile private var lastStreamObj: WeakReference<Any>? = null
 
-    // ---- LIVE history: which stream is really being watched
+    // ---- which LIVE stream is really being watched
     /** True while TikTok's LIVE room screen is in front (set from the activity lifecycle). */
     @Volatile var liveScreenVisible = false
-    private class Watch(var first: Long, var last: Long)
-    private val watching = ConcurrentHashMap<String, Watch>()
+    /** The room TikTok last sent an "enter room" request for (and hasn't left since). */
+    @Volatile private var enteredId: String? = null
     private val recorded = ConcurrentHashMap<String, Boolean>()
-    @Volatile private var lastPolledId: String? = null
+    private val mainHandler by lazy { android.os.Handler(android.os.Looper.getMainLooper()) }
 
     /**
-     * TikTok also loads rooms it only previews or preloads. A room counts as "entered" when the player keeps
-     * polling it for a few seconds in a row while the LIVE room screen is open.
+     * TikTok asked its server to enter a LIVE room. Rooms it only previews or preloads never get this request,
+     * and swiping to the next stream sends a new one, so this is the stream on screen.
      */
-    private fun touch(id: String) {
-        if (!liveScreenVisible) { watching.remove(id); return }
-        val now = System.currentTimeMillis()
-        val w = watching.getOrPut(id) { Watch(now, now) }
-        if (now - w.last > 3000) w.first = now
-        w.last = now
-        if (now - w.first < 6000 || recorded.putIfAbsent(id, true) != null) return
-        val live = rooms[id] ?: run { recorded.remove(id); return }
-        if (watching.size > 32) watching.clear()
+    fun onRoomEntered(id: String) {
+        enteredId = id
+        XLog.log("MediaContext: entered LIVE room $id")
+        // LIVE history: counts once the viewer stayed a few seconds.
+        mainHandler.postDelayed({ if (enteredId == id && liveScreenVisible) addToHistory(id) }, 6000)
+    }
+
+    fun onRoomLeft(id: String) {
+        if (enteredId == id) enteredId = null
+    }
+
+    private fun addToHistory(id: String) {
+        val live = rooms[id] ?: return
         val ctx = Prefs.hostContext ?: return
-        if (!Prefs.bool(ctx, Prefs.KEY_LIVE_HISTORY)) return
+        if (!Prefs.bool(ctx, Prefs.KEY_LIVE_HISTORY) || recorded.putIfAbsent(id, true) != null) return
+        if (recorded.size > 200) recorded.clear()
         Thread({
             runCatching {
                 val entry = org.json.JSONObject().put("room", id).put("handle", live.owner).put("title", live.title)
@@ -101,9 +107,12 @@ object MediaContext {
         }, "TikMod-LiveHistory").start()
     }
 
+    /** The LIVE room that is on screen right now, or null (also until its stream addresses are known). */
+    fun watchingNow(): LiveStream? = if (liveScreenVisible) enteredId?.let { rooms[it] } else null
+
     fun onLiveRoom(room: Any, streamUrl: Any?) {
         // Hot path: the player polls getStreamUrl() constantly on the same objects.
-        if (lastRoomObj?.get() === room && lastStreamObj?.get() === streamUrl) { lastPolledId?.let { touch(it) }; return }
+        if (lastRoomObj?.get() === room && lastStreamObj?.get() === streamUrl) return
         lastRoomObj = WeakReference(room)
         lastStreamObj = streamUrl?.let { WeakReference(it) }
         runCatching {
@@ -118,11 +127,10 @@ object MediaContext {
                 title = (Reflect.call(room, "getTitle") as? String).orEmpty(),
                 owner = Reflect.string(owner, "getDisplayId", "displayId")
                     ?: Reflect.string(owner, "getNickName", "nickName") ?: "",
-                urls = urls
+                urls = urls,
+                light = (listOfNotNull(audioOnlyUrl(streamUrl)) + urls.reversed()).distinct()
             )
             lastRoomId = id
-            lastPolledId = id
-            touch(id)
             if (rooms.size > 64) rooms.keys.take(rooms.size - 64).forEach { rooms.remove(it) }
         }
     }
@@ -132,6 +140,36 @@ object MediaContext {
         liveShareRoomId?.let { rooms[it] }?.let { return it }
         return lastRoomId?.let { rooms[it] }
     }
+
+    /**
+     * The audio-only variant ("ao") some rooms have. It's listed in the stream description JSON that the
+     * stream object carries in one of its (obfuscated) fields, so the fields are searched for that JSON.
+     */
+    private fun audioOnlyUrl(streamUrl: Any?): String? = runCatching {
+        val queue = ArrayDeque<Pair<Any, Int>>()
+        queue.add((streamUrl ?: return null) to 0)
+        var visited = 0
+        while (queue.isNotEmpty() && visited++ < 120) {
+            val (obj, depth) = queue.removeFirst()
+            var c: Class<*>? = obj.javaClass
+            while (c != null && c != Any::class.java) {
+                for (f in c.declaredFields) {
+                    if (java.lang.reflect.Modifier.isStatic(f.modifiers) || f.type.isPrimitive) continue
+                    val v = runCatching { f.isAccessible = true; f.get(obj) }.getOrNull() ?: continue
+                    if (v is String) {
+                        if (v.length > 200 && v.contains("\"ao\"") && v.contains("flv")) {
+                            val url = org.json.JSONObject(v).optJSONObject("data")?.optJSONObject("ao")?.optJSONObject("main")?.optString("flv")
+                            if (!url.isNullOrBlank() && url.startsWith("http")) return url
+                        }
+                    } else if (depth < 2 && !v.javaClass.name.startsWith("java.") && !v.javaClass.name.startsWith("android.") && !v.javaClass.isArray) {
+                        queue.add(v to depth + 1)
+                    }
+                }
+                c = c.superclass
+            }
+        }
+        null
+    }.getOrNull()
 
     /** FLV first (a raw FLV byte stream is a playable file), best resolution first. */
     private fun bestLiveUrls(streamUrl: Any?): List<String> {

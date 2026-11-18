@@ -2,6 +2,7 @@ package com.mts.tikmod.hooks
 
 import android.content.Context
 import com.mts.tikmod.Prefs
+import com.mts.tikmod.utils.MediaContext
 import com.mts.tikmod.utils.XLog
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
@@ -45,6 +46,8 @@ class PresenceHook : BaseHook() {
                     val path = url.substringAfter("://").substringAfter('/', "").substringBefore('?')
                     if (netlog && seen.add(path)) XLog.log("NET ${url.substringAfter("://").substringBefore('/')} /$path")
                     if (netlog && path.startsWith("webcast/room/enter")) dump(param.args, url)
+                    if (path.startsWith("webcast/room/enter")) roomId(param.args, url)?.let { MediaContext.onRoomEntered(it) }
+                    else if (path.startsWith("webcast/room/leave")) roomId(param.args, url)?.let { MediaContext.onRoomLeft(it) }
                     val rule = matchRule(path) ?: return
                     param.args[i] = BLOCKED
                     if (seen.add("blocked:$path")) XLog.log("Presence: blocked /$path ($rule)")
@@ -53,6 +56,16 @@ class PresenceHook : BaseHook() {
             XLog.log("Presence: hooked ${cls.name} (${cls.declaredConstructors.size} constructors, netlog=$netlog)")
         }
     }
+
+    /** room_id of an enter/leave request: in the form body, or in the query. */
+    private fun roomId(args: Array<Any?>, url: String): String? = runCatching {
+        val pattern = Regex("(?:^|[?&])room_id=(\\d+)")
+        pattern.find(url)?.let { return@runCatching it.groupValues[1] }
+        val body = args.filterNotNull().firstOrNull { a -> a.javaClass.methods.any { it.name == "writeTo" && it.parameterTypes.size == 1 } } ?: return@runCatching null
+        val out = java.io.ByteArrayOutputStream()
+        body.javaClass.methods.first { it.name == "writeTo" && it.parameterTypes.size == 1 }.invoke(body, out)
+        pattern.find(out.toString("UTF-8"))?.groupValues?.get(1)
+    }.getOrNull()
 
     private fun headerName(h: Any?): String? = runCatching {
         h?.javaClass?.methods?.firstOrNull { it.name == "getName" && it.parameterTypes.isEmpty() }?.invoke(h) as? String

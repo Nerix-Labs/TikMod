@@ -139,7 +139,7 @@ class HookEntry : IXposedHookLoadPackage {
                                             }
                                         }
                                         override fun onActivityPaused(activity: Activity) {}
-                                        override fun onActivityStopped(activity: Activity) {}
+                                        override fun onActivityStopped(activity: Activity) { ModuleManager.onActivityStopped(activity) }
                                         override fun onActivitySaveInstanceState(activity: Activity, outState: android.os.Bundle) {}
                                         override fun onActivityDestroyed(activity: Activity) {}
                                     })
@@ -177,7 +177,7 @@ class HookEntry : IXposedHookLoadPackage {
                                             }
                                         }
                                         override fun onActivityPaused(activity: Activity) {}
-                                        override fun onActivityStopped(activity: Activity) {}
+                                        override fun onActivityStopped(activity: Activity) { ModuleManager.onActivityStopped(activity) }
                                         override fun onActivitySaveInstanceState(activity: Activity, outState: android.os.Bundle) {}
                                         override fun onActivityDestroyed(activity: Activity) {}
                                     })

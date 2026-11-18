@@ -67,7 +67,9 @@ object LiveApi {
         val qualities = runCatching { JSONObject(raw).optJSONObject("data") }.getOrNull() ?: return emptyList()
         val start = QUALITY_ORDER.indexOf(preferred).coerceAtLeast(0)
         // Preferred quality first, then lower ones, then anything higher as a last resort.
-        val order = QUALITY_ORDER.drop(start) + QUALITY_ORDER.take(start).reversed()
+        // "ao" is the audio-only variant some streams have (captions): then the lightest video.
+        val order = if (preferred == "ao") listOf("ao") + QUALITY_ORDER.reversed()
+        else QUALITY_ORDER.drop(start) + QUALITY_ORDER.take(start).reversed()
         return order.mapNotNull { q -> qualities.optJSONObject(q)?.optJSONObject("main")?.optString("flv")?.takeIf { it.startsWith("http") } }
             .distinct()
     }

@@ -2,6 +2,30 @@
 
 All notable changes to TikMod. Versions follow [semantic versioning](https://semver.org).
 
+## 4.3.0 — 2026-11-18
+
+### Added
+- **Live captions with translation.** Translated subtitles over the LIVE stream you're watching. TikMod pulls the
+  stream's audio (the audio-only variant when the room has one), runs it through Android's on-device speech
+  recognizer and translates the text. The caption bubble can be dragged, tapped for a quick menu and held to
+  hide it for that stream.
+  - Sentence by sentence: the recognizer's running text is cut into finished sentences (with punctuation), each
+    translated once. The previous sentence stays above the one being spoken.
+  - Quick menu on the stream: spoken language, caption language, text size, original sentence, copy the
+    transcript, hide, turn off.
+  - Quiet streams are raised to a normal speaking level before recognition, and the channel name and stream
+    title are given to the recognizer as vocabulary hints.
+  - Translation falls back to a second endpoint when the first one fails or rate-limits.
+  - Spoken language: automatic (remembers the language picked for each channel and follows the recognizer's
+    language detection once it is consistent) or a fixed one. Speech packs are downloaded from the app.
+  - Caption language: the app's language by default, or any of the 10 supported ones.
+  - Needs Android 13+. Which speech languages exist depends on the phone's recognizer.
+  - Speech is recognized on the phone; only the recognized text is sent to Google Translate.
+
+### Fixed
+- **LIVE history stayed empty.** The stream on screen is now taken from TikTok's own "enter room" request
+  instead of guessing from the player, which also makes it follow swipes to the next stream.
+
 ## 4.2.2 — 2026-11-18
 
 ### Fixed

@@ -24,6 +24,7 @@ object ModuleManager {
             AdsHook(),
             ChatPrivacyHook(),
             PresenceHook(),
+            LiveCaptionHook(),
             RegionHook(),
             VideoControlHook(),
             AutoScrollHook(),
@@ -73,13 +74,24 @@ object ModuleManager {
             }
 
             val className = activity.javaClass.name
-            com.mts.tikmod.utils.MediaContext.liveScreenVisible = className.contains("LivePlay")
+            val live = className.contains("LivePlay")
+            com.mts.tikmod.utils.MediaContext.liveScreenVisible = live
+            (hooks.firstOrNull { it is LiveCaptionHook } as? LiveCaptionHook)?.onScreen(if (live) activity else null)
             if (className.contains("Setting", ignoreCase = true)) {
                 XLog.log("TikMod Settings Activity Detected: $className")
                 (hooks.firstOrNull { it is SettingsHook } as? SettingsHook)?.injectIntoActivity(activity)
             }
         } catch (t: Throwable) {
             XLog.log("TikMod ModuleManager onActivityResumed error: ${t.message}")
+        }
+    }
+
+    /** The LIVE screen went to the background (home button, another app): nothing is being watched. */
+    fun onActivityStopped(activity: Activity) {
+        runCatching {
+            if (!activity.javaClass.name.contains("LivePlay")) return
+            com.mts.tikmod.utils.MediaContext.liveScreenVisible = false
+            (hooks.firstOrNull { it is LiveCaptionHook } as? LiveCaptionHook)?.onScreen(null)
         }
     }
 

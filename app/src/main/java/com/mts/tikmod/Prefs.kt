@@ -103,6 +103,11 @@ object Prefs {
     const val KEY_APP_LANGUAGE = "key_app_language"             // "system" or a language tag (see L.LANGUAGES)
     const val KEY_AUTO_UPDATE_CHECK = "key_auto_update_check"
     const val KEY_LIVE_MAX_PARALLEL = "key_live_max_parallel"   // 0 = unlimited
+    const val KEY_LIVE_CAPTIONS = "key_live_captions"           // translated captions over LIVE streams
+    const val KEY_CAPTION_SOURCE = "key_caption_source"         // spoken language: "auto" or a tag (en-US…)
+    const val KEY_CAPTION_TARGET = "key_caption_target"         // caption language; empty = the app's language
+    const val KEY_CAPTION_ORIGINAL = "key_caption_original"     // also show the original sentence
+    const val KEY_CAPTION_SIZE = "key_caption_size"             // s | m | l
     const val KEY_AUTO_LIVE_STATE = "auto_live_state_json"      // runtime status for the UI (not exported)
 
     // App look
@@ -191,7 +196,12 @@ object Prefs {
         KEY_AUTO_UPDATE_CHECK to true,
         KEY_APP_LANGUAGE to "system",
         KEY_LIVE_HISTORY to true,
-        KEY_HIDE_VIEWS to false
+        KEY_HIDE_VIEWS to false,
+        KEY_LIVE_CAPTIONS to false,
+        KEY_CAPTION_SOURCE to "auto",
+        KEY_CAPTION_TARGET to "",
+        KEY_CAPTION_ORIGINAL to false,
+        KEY_CAPTION_SIZE to "m"
     )
 
     @Volatile private var cache: Map<String, Any> = HashMap(SPECS)

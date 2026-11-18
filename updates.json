@@ -1,6 +1,13 @@
 {
   "releases": [
     {
+      "version": "4.3.0",
+      "date": "2026-11-18",
+      "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.3.0/TikMod-4.3.0.apk",
+      "size": 23983336,
+      "notes": "- Live captions with translation over any LIVE stream\n- Quick menu on the stream: languages, text size, transcript\n- LIVE history works now"
+    },
+    {
       "version": "4.2.2",
       "date": "2026-11-18",
       "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.2.2/TikMod-4.2.2.apk",
