@@ -31,6 +31,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import com.mts.tikmod.BuildConfig
 import com.mts.tikmod.Prefs
 import com.mts.tikmod.R
@@ -44,20 +49,50 @@ import kotlinx.coroutines.launch
 // ================================================================== "What's new" sheet
 
 /** Shown automatically once after every update; also opened from the version history. */
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * A centered panel that stays put: the content scrolls inside it and the footer button is always visible.
+ * (A draggable bottom sheet fought with the inner scrolling and kept jumping.)
+ */
+@Composable
+fun Panel(onDismiss: () -> Unit, footer: (@Composable () -> Unit)? = null, content: @Composable ColumnScope.() -> Unit) {
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        val enter = remember { Animatable(0f) }
+        LaunchedEffect(Unit) { enter.animateTo(1f, spring(Spring.DampingRatioLowBouncy, Spring.StiffnessMediumLow)) }
+        val maxH = LocalConfiguration.current.screenHeightDp.dp * 0.84f
+        Box(
+            Modifier.fillMaxSize().clickable(remember { MutableInteractionSource() }, null, onClick = onDismiss).padding(horizontal = 18.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+                Column(
+                    Modifier.graphicsLayer { alpha = enter.value.coerceIn(0f, 1f); scaleX = 0.92f + 0.08f * enter.value; scaleY = scaleX }
+                        .widthIn(max = 520.dp).fillMaxWidth().heightIn(max = maxH)
+                        .clip(RoundedCornerShape(30.dp))
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .border(1.dp, Brush.linearGradient(listOf(Neon.Cyan.copy(alpha = 0.7f), Neon.Violet.copy(alpha = 0.4f), Neon.Pink.copy(alpha = 0.7f))), RoundedCornerShape(30.dp))
+                        .clickable(remember { MutableInteractionSource() }, null) {} // taps inside don't dismiss
+                ) {
+                    Column(
+                        Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(top = 22.dp, bottom = 8.dp),
+                        content = content
+                    )
+                    if (footer != null) Box(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 8.dp, bottom = 18.dp)) { footer() }
+                }
+            }
+        }
+    }
+}
+
+/** Shown automatically once after every update; also opened from the version history. */
 @Composable
 fun WhatsNewSheet(version: Changelog.Version, onDismiss: () -> Unit) {
-    val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val scope = rememberCoroutineScope()
-    ModalBottomSheet(
-        onDismissRequest = onDismiss, sheetState = sheet,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = Subtle) }
-    ) {
-        Column(
-            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    Panel(onDismiss, footer = {
+        Button(
+            onClick = onDismiss, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(18.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Neon.Pink, contentColor = Neon.OnAccent)
+        ) { Text(L.t(R.string.whatsnew_ok), fontWeight = FontWeight.Bold, fontSize = 16.sp) }
+    }) {
+        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             SparkleBurst()
             Spacer(Modifier.height(10.dp))
             Text(
@@ -74,12 +109,6 @@ fun WhatsNewSheet(version: Changelog.Version, onDismiss: () -> Unit) {
                 Appear(i + 1) { ChangeRow(item) }
                 Spacer(Modifier.height(10.dp))
             }
-            Spacer(Modifier.height(8.dp))
-            Button(
-                onClick = { scope.launch { sheet.hide() }.invokeOnCompletion { onDismiss() } },
-                modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(18.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Neon.Pink, contentColor = Neon.OnAccent)
-            ) { Text(L.t(R.string.whatsnew_ok), fontWeight = FontWeight.Bold, fontSize = 16.sp) }
         }
     }
 }
@@ -244,7 +273,6 @@ fun UpdateBanner(release: Updater.Release, onOpen: () -> Unit) {
 
 // ================================================================== version history
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistorySheet(onDismiss: () -> Unit) {
     val ctx = LocalContext.current
@@ -252,12 +280,10 @@ fun HistorySheet(onDismiss: () -> Unit) {
     LaunchedEffect(Unit) { if (Updater.releases.isEmpty()) Updater.check(ctx, silent = true) }
     // Local (translated) entries, plus newer releases that only exist on GitHub so far.
     val remoteOnly = Updater.releases.filter { r -> Changelog.forVersion(r.version) == null && Updater.isNewer(r.version) }
-    ModalBottomSheet(
-        onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = Subtle) }
-    ) {
-        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 28.dp)) {
+    Panel(onDismiss, footer = {
+        TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) { Text(L.t(R.string.action_close), fontWeight = FontWeight.Bold) }
+    }) {
+        Column(Modifier.fillMaxWidth()) {
             Text(L.t(R.string.update_history), fontSize = 26.sp, fontWeight = FontWeight.Black)
             Text(L.t(R.string.update_history_sub), fontSize = 13.sp, color = Subtle)
             Spacer(Modifier.height(18.dp))

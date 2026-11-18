@@ -379,4 +379,7 @@
     <string name="cl400_privacy_desc">回复后才显示\"已读\"，并隐藏输入状态和在线状态。</string>
     <string name="cl400_feed">清爽推荐流</string>
     <string name="cl400_feed_desc">拦截广告，还可在推荐流中隐藏 LIVE、购物和图文作品。</string>
+    <string name="action_close">关闭</string>
+    <string name="language_title">语言</string>
+    <string name="language_system">跟随系统</string>
 </resources>

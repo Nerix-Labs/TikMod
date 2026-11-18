@@ -412,4 +412,7 @@
     <string name="cl400_privacy_desc">«Просмотрено» — только после вашего ответа, а также скрытые «печатает…» и статус «В сети».</string>
     <string name="cl400_feed">Чистая лента</string>
     <string name="cl400_feed_desc">Блокирует рекламу и может скрывать в ленте LIVE, товары и фотопосты.</string>
+    <string name="action_close">Закрыть</string>
+    <string name="language_title">Язык</string>
+    <string name="language_system">Как на телефоне</string>
 </resources>

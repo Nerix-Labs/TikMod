@@ -10,6 +10,7 @@ All notable changes to TikMod. Versions follow [semantic versioning](https://sem
 - **Record now.** Start recording any live stream instantly from the Live screen, followed or not.
 - **Parallel recordings.** Record several streams at once, with a live panel showing time and size for each and a
   "stop and save all" button. Optional limit on parallel recordings.
+- **Language picker.** Choose the app language manually (Home → System), or keep following the phone.
 - **In-app updates.** Check for updates, read what changed in every version and update straight from the app.
   A "What's new" sheet opens once after each update.
 
@@ -21,8 +22,11 @@ All notable changes to TikMod. Versions follow [semantic versioning](https://sem
 - Interrupted recordings (process killed, module updated) are recovered and saved automatically, and a channel that
   was being recorded resumes when the service restarts.
 
+- **New entry in TikTok's settings.** A TikMod card in the app's own style replaces the old floating label.
+
 ### Fixed
 - Text was black and hard to read in dark mode on some screens.
+- Cards in the System area of the home screen overlapped each other.
 
 ## 4.0.0 — 2026-11-17
 

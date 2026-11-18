@@ -101,7 +101,10 @@ private fun Color.luminance() = 0.2126f * red + 0.7152f * green + 0.0722f * blue
 fun Appear(index: Int, content: @Composable () -> Unit) {
     val p = remember { Animatable(0f) }
     LaunchedEffect(Unit) { delay(40L * index); p.animateTo(1f, tween(420, easing = FastOutSlowInEasing)) }
-    Box(Modifier.graphicsLayer { alpha = p.value; translationY = (1f - p.value) * 36f; scaleX = 0.97f + 0.03f * p.value; scaleY = scaleX }) {
+    Column(
+        Modifier.graphicsLayer { alpha = p.value; translationY = (1f - p.value) * 36f; scaleX = 0.97f + 0.03f * p.value; scaleY = scaleX },
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
         content()
     }
 }

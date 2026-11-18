@@ -412,4 +412,7 @@
     <string name="cl400_privacy_desc">\"נצפה\" רק אחרי שעונים, והסתרה של \"מקליד/ה\" ו\"פעיל/ה עכשיו\".</string>
     <string name="cl400_feed">פיד נקי</string>
     <string name="cl400_feed_desc">חוסם פרסומות, ואפשר להסתיר שידורים, סרטוני קניות ופוסטי תמונות בפיד.</string>
+    <string name="action_close">סגירה</string>
+    <string name="language_title">שפה</string>
+    <string name="language_system">לפי הטלפון</string>
 </resources>

@@ -390,4 +390,7 @@
     <string name="cl400_privacy_desc">\"Görüldü\" yalnızca yanıt verdikten sonra; ayrıca \"Yazıyor…\" ve çevrimiçi durumu gizlenir.</string>
     <string name="cl400_feed">Temiz akış</string>
     <string name="cl400_feed_desc">Reklamları engeller; akıştaki LIVE, alışveriş ve fotoğraf gönderilerini gizleyebilir.</string>
+    <string name="action_close">Kapat</string>
+    <string name="language_title">Dil</string>
+    <string name="language_system">Telefonun dili</string>
 </resources>

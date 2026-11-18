@@ -391,4 +391,7 @@
     <string name="cl400_privacy_desc">\"Seen\" only after you reply, plus hidden typing and online status.</string>
     <string name="cl400_feed">Clean feed</string>
     <string name="cl400_feed_desc">Blocks ads and can hide LIVE, shopping and photo posts in the feed.</string>
+    <string name="action_close">Close</string>
+    <string name="language_title">Language</string>
+    <string name="language_system">Same as the phone</string>
 </resources>

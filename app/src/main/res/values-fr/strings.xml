@@ -401,4 +401,7 @@
     <string name="cl400_privacy_desc">« Vu » seulement après votre réponse, et statut de saisie et de connexion masqués.</string>
     <string name="cl400_feed">Fil épuré</string>
     <string name="cl400_feed_desc">Bloque les pubs et peut masquer les LIVE, les achats et les publications photo dans le fil.</string>
+    <string name="action_close">Fermer</string>
+    <string name="language_title">Langue</string>
+    <string name="language_system">Langue du téléphone</string>
 </resources>

@@ -81,7 +81,12 @@ class MainActivity : ComponentActivity() {
             var themeKey by remember { mutableStateOf(Prefs.string(this, Prefs.KEY_UI_THEME)) }
             val mode = when (themeKey) { "dynamic" -> ThemeMode.DYNAMIC; "system" -> ThemeMode.SYSTEM; else -> ThemeMode.NEON }
             TikModTheme(mode) {
-                TikModApp(startTab, onThemeChange = { themeKey = it })
+                // Re-read every string and flip the layout direction when the language changes.
+                key(L.revision) {
+                    CompositionLocalProvider(LocalLayoutDirection provides if (L.isRtl()) LayoutDirection.Rtl else LayoutDirection.Ltr) {
+                        TikModApp(startTab, onThemeChange = { themeKey = it })
+                    }
+                }
             }
         }
     }
@@ -92,12 +97,16 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class Screen(val icon: ImageVector, val label: String, val accent: Color) {
-    HOME(Icons.Rounded.SpaceDashboard, L.t(R.string.nav_home), Neon.Cyan),
-    DOWNLOADS(Icons.Rounded.Download, L.t(R.string.nav_downloads), Neon.Cyan),
-    LIVE(Icons.Rounded.Sensors, L.t(R.string.nav_live), Neon.Pink),
-    CHAT(Icons.Rounded.Forum, L.t(R.string.nav_chat), Neon.Violet),
-    FEED(Icons.Rounded.AutoAwesome, L.t(R.string.nav_feed), Neon.Amber)
+private enum class Screen(val icon: ImageVector, private val labelRes: Int, private val tint: () -> Color) {
+    HOME(Icons.Rounded.SpaceDashboard, R.string.nav_home, { Neon.Cyan }),
+    DOWNLOADS(Icons.Rounded.Download, R.string.nav_downloads, { Neon.Cyan }),
+    LIVE(Icons.Rounded.Sensors, R.string.nav_live, { Neon.Pink }),
+    CHAT(Icons.Rounded.Forum, R.string.nav_chat, { Neon.Violet }),
+    FEED(Icons.Rounded.AutoAwesome, R.string.nav_feed, { Neon.Amber });
+
+    // Resolved when used, so they follow the current language and theme.
+    val label: String get() = L.t(labelRes)
+    val accent: Color get() = tint()
 }
 
 @Composable
@@ -138,6 +147,10 @@ private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
                 }
             }
         }
+        Box(
+            Modifier.align(Alignment.TopCenter).fillMaxWidth().windowInsetsTopHeight(WindowInsets.statusBars)
+                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.94f))
+        )
         FloatingNav(screen, Modifier.align(Alignment.BottomCenter)) { screen = it }
     }
     if (showWhatsNew) Changelog.forVersion(BuildConfig.VERSION_NAME)?.let { v ->
@@ -286,6 +299,7 @@ private fun SystemSection(onThemeChange: (String) -> Unit, onShowHistory: () -> 
             }
         }
     }
+    LanguageSection()
     Section(Icons.Rounded.Palette, L.t(R.string.sys_look), accent = Neon.Violet) {
         SegmentedPref(L.t(R.string.sys_theme), Prefs.KEY_UI_THEME, listOf(
             Opt("neon", L.t(R.string.theme_neon), Icons.Rounded.Bolt), Opt("dynamic", "Material You", Icons.Rounded.ColorLens), Opt("system", L.t(R.string.theme_system), Icons.Rounded.Contrast)
@@ -310,6 +324,47 @@ private fun SystemSection(onThemeChange: (String) -> Unit, onShowHistory: () -> 
     }
     UpdatesSection(onShowHistory)
     AboutCard()
+}
+
+/** Manual language choice: follow the phone, or one of the bundled translations. */
+@Composable
+private fun LanguageSection() {
+    val ctx = LocalContext.current
+    var open by remember { mutableStateOf(false) }
+    val current = L.language()
+    val currentName = L.LANGUAGES.firstOrNull { it.first == current }?.second ?: L.t(R.string.language_system)
+    GlassCard(padding = 0.dp) {
+        Row(
+            Modifier.fillMaxWidth().clickable { open = true }.padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconTile(Icons.Rounded.Translate, Neon.Cyan, 44.dp)
+            Spacer(Modifier.width(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text(L.t(R.string.language_title), fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                Text(currentName, fontSize = 13.sp, color = Subtle)
+            }
+            Icon(Icons.Rounded.UnfoldMore, null, tint = Subtle)
+        }
+    }
+    if (open) Panel(onDismiss = { open = false }) {
+        Text(L.t(R.string.language_title), fontSize = 24.sp, fontWeight = FontWeight.Black)
+        Spacer(Modifier.height(12.dp))
+        (listOf(L.SYSTEM to L.t(R.string.language_system)) + L.LANGUAGES).forEach { (tag, name) ->
+            val on = tag == current
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 3.dp).clip(RoundedCornerShape(16.dp))
+                    .background(if (on) Neon.Cyan.copy(alpha = 0.14f) else Color.Transparent)
+                    .clickable { open = false; if (!on) L.setLanguage(ctx, tag) }
+                    .padding(horizontal = 14.dp, vertical = 13.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (tag == L.SYSTEM) { Icon(Icons.Rounded.PhoneAndroid, null, tint = if (on) Neon.Cyan else Subtle, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(10.dp)) }
+                Text(name, Modifier.weight(1f), fontSize = 15.5.sp, fontWeight = if (on) FontWeight.Bold else FontWeight.Medium)
+                if (on) Icon(Icons.Rounded.Check, null, tint = Neon.Cyan, modifier = Modifier.size(20.dp))
+            }
+        }
+    }
 }
 
 @Composable

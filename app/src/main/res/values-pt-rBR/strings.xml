@@ -401,4 +401,7 @@
     <string name="cl400_privacy_desc">\"Visto\" só depois que você responde, além de ocultar \"digitando…\" e o status online.</string>
     <string name="cl400_feed">Feed limpo</string>
     <string name="cl400_feed_desc">Bloqueia anúncios e pode ocultar LIVE, compras e posts de fotos no feed.</string>
+    <string name="action_close">Fechar</string>
+    <string name="language_title">Idioma</string>
+    <string name="language_system">Idioma do telefone</string>
 </resources>

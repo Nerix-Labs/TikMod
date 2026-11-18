@@ -390,4 +390,7 @@
     <string name="cl400_privacy_desc">„Gesehen“ erst nach deiner Antwort, dazu verborgenes Schreiben und verborgener Online-Status.</string>
     <string name="cl400_feed">Sauberer Feed</string>
     <string name="cl400_feed_desc">Blockiert Werbung und kann LIVE-, Shopping- und Foto-Beiträge im Feed ausblenden.</string>
+    <string name="action_close">Schließen</string>
+    <string name="language_title">Sprache</string>
+    <string name="language_system">Wie das Telefon</string>
 </resources>

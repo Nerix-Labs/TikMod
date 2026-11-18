@@ -434,4 +434,7 @@
     <string name="cl400_privacy_desc">لا تظهر \"تمت المشاهدة\" إلا بعد أن ترد، مع إخفاء حالة الكتابة والاتصال.</string>
     <string name="cl400_feed">خلاصة نظيفة</string>
     <string name="cl400_feed_desc">يحظر الإعلانات ويمكنه إخفاء منشورات LIVE والتسوق والصور في الخلاصة.</string>
+    <string name="action_close">إغلاق</string>
+    <string name="language_title">اللغة</string>
+    <string name="language_system">لغة الهاتف</string>
 </resources>
