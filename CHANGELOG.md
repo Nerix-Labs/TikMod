@@ -2,6 +2,40 @@
 
 All notable changes to TikMod. Versions follow [semantic versioning](https://semver.org).
 
+## 4.5.0 — 2026-11-19
+
+Tested and working on TikTok 47.9.1 (the obfuscated hooks re-resolve themselves on each TikTok update).
+
+### Added — 10 general updates
+- **Feed: filter by keywords** — hide posts whose caption or hashtags contain your words.
+- **Feed: mute creators** — hide posts from a list of @handles.
+- **Feed: hide reposts** reposted into your feed by people you follow.
+- **Feed: hide by length** — hide videos shorter than / longer than N seconds.
+- **Feed: hide suggestion cards** — the "suggested accounts" and search cards mixed into the feed.
+- **Playback speed control** (0.25×–3×) with a proper setting.
+- **Keep videos muted** (start videos without sound).
+- **Keep the screen on** while TikTok is open.
+- **Disable vibration** (haptic feedback) across the app.
+- **Open links in your browser** — outside links skip TikTok's in-app browser (internal pages stay in-app).
+- **Progress bar on every video** — a seek bar on all videos, on by default, now with its own setting.
+
+## 4.4.0 — 2026-11-19
+
+### Added
+- **Record the live chat.** While you watch a stream, its chat is collected and saved as a text file in
+  Downloads when you leave. Turn it on in Live → Record the live chat. (Only works while TikTok is open on the
+  stream; the background auto-recorder can't see chat.) TikMod reads the chat through the live SDK's own
+  message listener, so your own chat is never affected.
+- **Move the captions anywhere.** Drag the bubble to any spot on screen (not just up and down).
+- **Pinch to resize the captions** live, with a wider size range than the presets.
+- **Double-tap to pause a caption** so you can read it; double-tap again to resume.
+- **Caption background:** solid, dimmed or none.
+- **High-contrast caption text** (a heavier outline for bright streams).
+- **Keep captions on screen** option (no fading out between sentences).
+- **Lines on screen** setting (1–4) for the current sentence.
+- **Reset position & size** from the quick menu.
+- Caption position and size are remembered separately for portrait and landscape.
+
 ## 4.3.0 — 2026-11-18
 
 ### Added

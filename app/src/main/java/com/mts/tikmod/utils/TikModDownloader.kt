@@ -627,6 +627,24 @@ object TikModDownloader {
         }
     }
 
+    /** Saves a live-chat transcript as a UTF-8 text file in Downloads, and adds it to the history. */
+    fun saveChat(context: Context, owner: String, title: String, text: String): Boolean {
+        val ctx = context.applicationContext ?: context
+        if (text.isBlank()) return false
+        val job = Job(ctx, Kind.LIVE, owner.ifBlank { "LIVE" })
+        return try {
+            val bytes = text.toByteArray(Charsets.UTF_8)
+            val base = sanitize("Live_${owner.ifBlank { "chat" }}_${timestamp()}_chat")
+            val saved = java.io.ByteArrayInputStream(bytes).use { job.saveStream(it, "$base.txt", "text/plain", bytes.size.toLong(), owner) }
+            job.finish(saved, formatSize(saved.bytes))
+            addHistoryRaw(ctx, Kind.LIVE, (title.ifBlank { "LIVE @$owner" }) + " — " + L.t(R.string.chat_label), owner, saved, "TXT")
+            XLog.log("LiveChat: saved ${base}.txt (${formatSize(saved.bytes)})")
+            true
+        } catch (t: Throwable) {
+            job.fail(t.message ?: "save failed"); XLog.log("LiveChat: save failed: ${t.message}"); false
+        }
+    }
+
     fun stopLiveRecording(context: Context) {
         if (!localRecording) return
         localRecording = false

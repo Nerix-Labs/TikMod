@@ -322,6 +322,11 @@ private fun SystemSection(onThemeChange: (String) -> Unit, onShowHistory: () -> 
         }
         Hint(L.t(R.string.sys_hint))
     }
+    Section(Icons.Rounded.Tune, L.t(R.string.tweaks_title), L.t(R.string.tweaks_sub), accent = Neon.Lime, collapsible = true, initiallyExpanded = false) {
+        ToggleRow(L.t(R.string.tweak_screen_on), L.t(R.string.tweak_screen_on_desc), Prefs.KEY_KEEP_SCREEN_ON, Icons.Rounded.ScreenLockPortrait, Neon.Lime)
+        ToggleRow(L.t(R.string.tweak_haptics), L.t(R.string.tweak_haptics_desc), Prefs.KEY_HAPTICS_OFF, Icons.Rounded.Vibration, Neon.Lime)
+        ToggleRow(L.t(R.string.tweak_links), L.t(R.string.tweak_links_desc), Prefs.KEY_EXTERNAL_LINKS, Icons.Rounded.OpenInBrowser, Neon.Lime)
+    }
     UpdatesSection(onShowHistory)
     AboutCard()
 }
@@ -662,6 +667,8 @@ private fun LiveScreen() {
 
     Appear(4) { com.mts.tikmod.ui.CaptionsSection() }
 
+    Appear(4) { com.mts.tikmod.ui.ChatRecordingSection() }
+
     Appear(4) { LiveHistorySection(channels, onFollow = { h ->
         channels = (channels + h).distinct()
         Prefs.setAutoLiveChannels(ctx, channels)
@@ -947,5 +954,73 @@ private fun FeedScreen() {
             ToggleRow(L.t(R.string.card_photos), L.t(R.string.feed_photos_desc), Prefs.KEY_HIDE_PHOTO_POSTS, Icons.Rounded.Collections, Neon.Amber)
             Hint(L.t(R.string.feed_hint))
         }
+    }
+    Appear(4) {
+        Section(Icons.Rounded.Speed, L.t(R.string.feed_playback), accent = Neon.Cyan) {
+            SegmentedPref(L.t(R.string.feed_speed), Prefs.KEY_PLAYBACK_SPEED, listOf(
+                Opt("0.25", "0.25×"), Opt("0.5", "0.5×"), Opt("1.0", "1×"),
+                Opt("1.5", "1.5×"), Opt("2.0", "2×"), Opt("3.0", "3×")
+            ), accent = Neon.Cyan)
+            ToggleRow(L.t(R.string.feed_seekbar), L.t(R.string.feed_seekbar_desc), Prefs.KEY_FORCE_SEEKBAR, Icons.Rounded.Timeline, Neon.Cyan)
+            ToggleRow(L.t(R.string.feed_mute), L.t(R.string.feed_mute_desc), Prefs.KEY_MUTE_DEFAULT, Icons.Rounded.VolumeOff, Neon.Cyan)
+        }
+    }
+    Appear(5) {
+        Section(Icons.Rounded.FilterList, L.t(R.string.feed_filters), L.t(R.string.feed_filters_sub), accent = Neon.Amber, collapsible = true, initiallyExpanded = false) {
+            ToggleRow(L.t(R.string.feed_reposts), L.t(R.string.feed_reposts_desc), Prefs.KEY_HIDE_REPOSTS, Icons.Rounded.Repeat, Neon.Amber)
+            ToggleRow(L.t(R.string.feed_cards), L.t(R.string.feed_cards_desc), Prefs.KEY_CLEAN_FEED, Icons.Rounded.Dashboard, Neon.Amber)
+            ListEditor(L.t(R.string.feed_keywords), L.t(R.string.feed_keywords_hint), Prefs.KEY_FEED_KEYWORDS, Icons.Rounded.Tag)
+            ListEditor(L.t(R.string.feed_creators), L.t(R.string.feed_creators_hint), Prefs.KEY_MUTED_CREATORS, Icons.Rounded.PersonOff)
+            DurationFilter()
+            Hint(L.t(R.string.feed_filters_hint))
+        }
+    }
+}
+
+/** A multi-line text box bound to a pref (comma or newline separated list). */
+@Composable
+private fun ListEditor(title: String, hint: String, key: String, icon: ImageVector) {
+    val ctx = LocalContext.current
+    var value by remember { mutableStateOf(Prefs.string(ctx, key)) }
+    Column(Modifier.padding(horizontal = 10.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, null, tint = Neon.Amber, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(10.dp))
+            Text(title, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+        }
+        OutlinedTextField(
+            value = value, onValueChange = { value = it },
+            placeholder = { Text(hint, fontSize = 13.sp, color = Subtle) },
+            shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth(), minLines = 1, maxLines = 4,
+            trailingIcon = {
+                IconButton(onClick = {
+                    Prefs.setString(ctx, key, value.trim()); Toast.makeText(ctx, L.t(R.string.toast_saved), Toast.LENGTH_SHORT).show()
+                }) { Icon(Icons.Rounded.Check, L.t(R.string.action_save), tint = Neon.Amber) }
+            }
+        )
+    }
+}
+
+/** Two number boxes: hide videos shorter than / longer than N seconds (blank = off). */
+@Composable
+private fun DurationFilter() {
+    val ctx = LocalContext.current
+    var minv by remember { mutableStateOf(Prefs.string(ctx, Prefs.KEY_HIDE_SHORT).let { if (it == "0") "" else it }) }
+    var maxv by remember { mutableStateOf(Prefs.string(ctx, Prefs.KEY_HIDE_LONG).let { if (it == "0") "" else it }) }
+    val ltr = LocalTextStyle.current.copy(textDirection = TextDirection.Ltr)
+    Column(Modifier.padding(horizontal = 10.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Rounded.Timer, null, tint = Neon.Amber, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(10.dp))
+            Text(L.t(R.string.feed_duration), fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            OutlinedTextField(minv, { v -> minv = v.filter { it.isDigit() } }, Modifier.weight(1f), singleLine = true, textStyle = ltr,
+                label = { Text(L.t(R.string.feed_duration_min)) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), shape = RoundedCornerShape(16.dp))
+            OutlinedTextField(maxv, { v -> maxv = v.filter { it.isDigit() } }, Modifier.weight(1f), singleLine = true, textStyle = ltr,
+                label = { Text(L.t(R.string.feed_duration_max)) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), shape = RoundedCornerShape(16.dp))
+        }
+        TextButton(onClick = {
+            Prefs.setString(ctx, Prefs.KEY_HIDE_SHORT, minv.ifBlank { "0" }); Prefs.setString(ctx, Prefs.KEY_HIDE_LONG, maxv.ifBlank { "0" })
+            Toast.makeText(ctx, L.t(R.string.toast_saved), Toast.LENGTH_SHORT).show()
+        }) { Text(L.t(R.string.action_save)) }
     }
 }

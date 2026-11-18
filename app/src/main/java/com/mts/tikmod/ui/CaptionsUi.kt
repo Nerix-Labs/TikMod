@@ -20,6 +20,7 @@ import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ClosedCaption
 import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Forum
 import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Subtitles
 import androidx.compose.material.icons.rounded.Translate
@@ -104,6 +105,14 @@ fun CaptionsSection() {
         SegmentedPref(L.t(R.string.captions_size), Prefs.KEY_CAPTION_SIZE, listOf(
             Opt("s", L.t(R.string.caption_size_s)), Opt("m", L.t(R.string.caption_size_m)), Opt("l", L.t(R.string.caption_size_l))
         ), accent = accent)
+        SegmentedPref(L.t(R.string.captions_lines), Prefs.KEY_CAPTION_LINES, listOf(
+            Opt("1", "1"), Opt("2", "2"), Opt("3", "3"), Opt("4", "4")
+        ), accent = accent)
+        SegmentedPref(L.t(R.string.captions_bg), Prefs.KEY_CAPTION_BG, listOf(
+            Opt("solid", L.t(R.string.caption_bg_solid)), Opt("dim", L.t(R.string.caption_bg_dim)), Opt("none", L.t(R.string.caption_bg_none))
+        ), accent = accent)
+        ToggleRow(L.t(R.string.captions_outline), L.t(R.string.captions_outline_desc), Prefs.KEY_CAPTION_OUTLINE, accent = accent)
+        ToggleRow(L.t(R.string.captions_always), L.t(R.string.captions_always_desc), Prefs.KEY_CAPTION_ALWAYS, accent = accent)
         Hint(L.t(R.string.captions_hint_use))
         Hint(L.t(R.string.captions_hint_privacy))
     }
@@ -140,6 +149,15 @@ fun CaptionsSection() {
                 target = tag; Prefs.setString(ctx, Prefs.KEY_CAPTION_TARGET, tag); pickTarget = false
             }
         }
+    }
+}
+
+/** Save the chat of streams you watch to a text file. Works only while TikTok is open on the room. */
+@Composable
+fun ChatRecordingSection() {
+    Section(Icons.Rounded.Forum, L.t(R.string.chat_rec_title), L.t(R.string.chat_rec_sub), accent = Neon.Pink, badge = L.t(R.string.tag_new), collapsible = true) {
+        ToggleRow(L.t(R.string.chat_rec_toggle), L.t(R.string.chat_rec_toggle_desc), Prefs.KEY_RECORD_CHAT, Icons.Rounded.Forum, Neon.Pink)
+        Hint(L.t(R.string.chat_rec_hint))
     }
 }
 

@@ -108,6 +108,11 @@ object Prefs {
     const val KEY_CAPTION_TARGET = "key_caption_target"         // caption language; empty = the app's language
     const val KEY_CAPTION_ORIGINAL = "key_caption_original"     // also show the original sentence
     const val KEY_CAPTION_SIZE = "key_caption_size"             // s | m | l
+    const val KEY_CAPTION_BG = "key_caption_bg"                 // solid | dim | none
+    const val KEY_CAPTION_LINES = "key_caption_lines"           // 1..4 visible lines of the current sentence
+    const val KEY_CAPTION_OUTLINE = "key_caption_outline"       // heavy outline for bright streams
+    const val KEY_CAPTION_ALWAYS = "key_caption_always"         // keep the bubble on screen (no auto-hide)
+    const val KEY_RECORD_CHAT = "key_record_chat"               // save the live chat of streams you watch
     const val KEY_AUTO_LIVE_STATE = "auto_live_state_json"      // runtime status for the UI (not exported)
 
     // App look
@@ -117,6 +122,16 @@ object Prefs {
     const val KEY_AUTO_SCROLL = "key_auto_scroll"
     const val KEY_PURE_MODE = "key_pure_mode"
     const val KEY_PLAYBACK_SPEED = "key_playback_speed"
+    const val KEY_MUTE_DEFAULT = "key_mute_default"             // keep videos muted
+    const val KEY_KEEP_SCREEN_ON = "key_keep_screen_on"         // don't let the screen dim
+    const val KEY_HAPTICS_OFF = "key_haptics_off"               // suppress in-app vibration
+    const val KEY_EXTERNAL_LINKS = "key_external_links"         // open outside links in the real browser
+    const val KEY_HIDE_REPOSTS = "key_hide_reposts"             // feed: drop reposted videos
+    const val KEY_CLEAN_FEED = "key_clean_feed"                 // feed: drop non-media suggestion cards
+    const val KEY_FEED_KEYWORDS = "key_feed_keywords"           // feed: hide posts matching these words
+    const val KEY_MUTED_CREATORS = "key_muted_creators"         // feed: hide posts from these @handles
+    const val KEY_HIDE_SHORT = "key_hide_short"                 // feed: hide videos under N seconds (0=off)
+    const val KEY_HIDE_LONG = "key_hide_long"                   // feed: hide videos over N seconds (0=off)
     const val KEY_FORCE_SEEKBAR = "key_force_seekbar"
     const val KEY_DISABLE_AUTO_PAUSE = "key_disable_auto_pause"
     const val KEY_BLOCK_LIVE_GIFTS = "key_block_live_gifts"
@@ -175,6 +190,16 @@ object Prefs {
         KEY_AUTO_SCROLL to false,
         KEY_PURE_MODE to false,
         KEY_PLAYBACK_SPEED to "1.0",
+        KEY_MUTE_DEFAULT to false,
+        KEY_KEEP_SCREEN_ON to false,
+        KEY_HAPTICS_OFF to false,
+        KEY_EXTERNAL_LINKS to false,
+        KEY_HIDE_REPOSTS to false,
+        KEY_CLEAN_FEED to false,
+        KEY_FEED_KEYWORDS to "",
+        KEY_MUTED_CREATORS to "",
+        KEY_HIDE_SHORT to "0",
+        KEY_HIDE_LONG to "0",
         KEY_FORCE_SEEKBAR to true,
         KEY_DISABLE_AUTO_PAUSE to true,
         KEY_BLOCK_LIVE_GIFTS to true,
@@ -201,7 +226,12 @@ object Prefs {
         KEY_CAPTION_SOURCE to "auto",
         KEY_CAPTION_TARGET to "",
         KEY_CAPTION_ORIGINAL to false,
-        KEY_CAPTION_SIZE to "m"
+        KEY_CAPTION_SIZE to "m",
+        KEY_CAPTION_BG to "dim",
+        KEY_CAPTION_LINES to "2",
+        KEY_CAPTION_OUTLINE to false,
+        KEY_CAPTION_ALWAYS to false,
+        KEY_RECORD_CHAT to false
     )
 
     @Volatile private var cache: Map<String, Any> = HashMap(SPECS)

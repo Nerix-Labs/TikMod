@@ -18,8 +18,10 @@ import android.os.Handler
 import android.os.Looper
 import android.util.TypedValue
 import android.view.ContextThemeWrapper
+import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
@@ -67,6 +69,10 @@ class LiveCaptionHook : BaseHook() {
     private var sizeNow: String? = null
     private var originalNow: Boolean? = null
     private var targetNow: String? = null
+    private var bgNow: String? = null
+    private var linesNow: String? = null
+    private var outlineNow: Boolean? = null
+    private var alwaysNow: Boolean? = null
 
     override fun apply(classLoader: ClassLoader, context: Context?) {
         tryHook { status = status.copy(foundClass = "activity lifecycle") }
@@ -102,7 +108,7 @@ class LiveCaptionHook : BaseHook() {
         room = live.roomId
         lastPing = System.currentTimeMillis()
         lastStatus = ""
-        sizeNow = null; originalNow = null; targetNow = null
+        sizeNow = null; originalNow = null; targetNow = null; bgNow = null; linesNow = null; outlineNow = null; alwaysNow = null
         ensureReceiver(act)
         attach(act).showStatus(L.t(R.string.caption_listening))
         XLog.log("Captions: asking for captions on @${live.owner} (${live.light.size} addresses)")
@@ -193,6 +199,10 @@ class LiveCaptionHook : BaseHook() {
     private fun size(act: Activity) = sizeNow ?: Prefs.string(act, Prefs.KEY_CAPTION_SIZE).ifBlank { "m" }
     private fun showOriginal(act: Activity) = originalNow ?: Prefs.bool(act, Prefs.KEY_CAPTION_ORIGINAL)
     private fun target(act: Activity) = targetNow ?: Prefs.string(act, Prefs.KEY_CAPTION_TARGET)
+    private fun bg(act: Activity) = bgNow ?: Prefs.string(act, Prefs.KEY_CAPTION_BG).ifBlank { "dim" }
+    private fun lines(act: Activity) = (linesNow ?: Prefs.string(act, Prefs.KEY_CAPTION_LINES)).toIntOrNull()?.coerceIn(1, 4) ?: 2
+    private fun outline(act: Activity) = outlineNow ?: Prefs.bool(act, Prefs.KEY_CAPTION_OUTLINE)
+    private fun always(act: Activity) = alwaysNow ?: Prefs.bool(act, Prefs.KEY_CAPTION_ALWAYS)
 
     private fun dialog(act: Activity) = AlertDialog.Builder(ContextThemeWrapper(act, android.R.style.Theme_DeviceDefault_Dialog_Alert))
 
@@ -204,8 +214,11 @@ class LiveCaptionHook : BaseHook() {
 
     private fun menu(act: Activity) {
         val sizes = mapOf("s" to R.string.caption_size_s, "m" to R.string.caption_size_m, "l" to R.string.caption_size_l)
+        val bgs = mapOf("solid" to R.string.caption_bg_solid, "dim" to R.string.caption_bg_dim, "none" to R.string.caption_bg_none)
         val original = showOriginal(act)
         val tgt = target(act)
+        val outlineOn = outline(act)
+        val alwaysOn = always(act)
         val actions = listOf<Pair<String, () -> Unit>>(
             L.t(R.string.caption_menu_source, if (listeningLang.isBlank()) L.t(R.string.caption_auto) else CaptionLanguages.name(listeningLang)) to { chooseLanguage(act) },
             L.t(R.string.caption_menu_target, if (tgt.isBlank()) L.t(R.string.captions_target_app) else CaptionLanguages.name(tgt)) to { chooseTarget(act) },
@@ -213,9 +226,24 @@ class LiveCaptionHook : BaseHook() {
                 val next = when (size(act)) { "s" -> "m"; "m" -> "l"; else -> "s" }
                 sizeNow = next; setPref(Prefs.KEY_CAPTION_SIZE, next); bubble?.restyle()
             },
+            L.t(R.string.caption_menu_lines, lines(act)) to {
+                val next = (lines(act) % 4) + 1
+                linesNow = next.toString(); setPref(Prefs.KEY_CAPTION_LINES, next.toString()); bubble?.restyle()
+            },
+            L.t(R.string.caption_menu_bg, L.t(bgs[bg(act)] ?: R.string.caption_bg_dim)) to {
+                val next = when (bg(act)) { "dim" -> "solid"; "solid" -> "none"; else -> "dim" }
+                bgNow = next; setPref(Prefs.KEY_CAPTION_BG, next); bubble?.restyle()
+            },
+            L.t(if (outlineOn) R.string.caption_menu_outline_off else R.string.caption_menu_outline_on) to {
+                outlineNow = !outlineOn; setPref(Prefs.KEY_CAPTION_OUTLINE, !outlineOn); bubble?.restyle()
+            },
+            L.t(if (alwaysOn) R.string.caption_menu_always_off else R.string.caption_menu_always_on) to {
+                alwaysNow = !alwaysOn; setPref(Prefs.KEY_CAPTION_ALWAYS, !alwaysOn); bubble?.onAlwaysChanged()
+            },
             L.t(if (original) R.string.caption_menu_original_hide else R.string.caption_menu_original_show) to {
                 originalNow = !original; setPref(Prefs.KEY_CAPTION_ORIGINAL, !original); bubble?.restyle()
             },
+            L.t(R.string.caption_menu_reset) to { bubble?.resetPlacement() },
             L.t(R.string.caption_menu_copy) to { copyTranscript(act) },
             L.t(R.string.caption_menu_hide) to { onHide(act) },
             L.t(R.string.caption_menu_off) to { setPref(Prefs.KEY_LIVE_CAPTIONS, false); hiddenRoom = room; stop() },
@@ -272,6 +300,10 @@ class LiveCaptionHook : BaseHook() {
     /**
      * The caption bubble. The sentence being spoken is the main line; the sentence before it stays above it,
      * dimmed, so nothing disappears before it could be read. The original words can be shown underneath.
+     *
+     * Gestures: one finger drags it anywhere on screen, two fingers pinch to resize, a tap opens the quick
+     * menu, a double-tap freezes/unfreezes the current line, a long press hides captions for this stream.
+     * Position and size are remembered separately for portrait and landscape.
      */
     private inner class Bubble(private val act: Activity) : LinearLayout(act) {
         private val previous = TextView(act)
@@ -279,29 +311,49 @@ class LiveCaptionHook : BaseHook() {
         private val original = TextView(act)
         private val store = act.getSharedPreferences("tikmod_captions_ui", Context.MODE_PRIVATE)
         private val slop = ViewConfiguration.get(act).scaledTouchSlop
+        private val bgDrawable = GradientDrawable().apply { }
         private var fade: ValueAnimator? = null
         private var captioned = false
         private var lastFinal = ""
         private var lastFinalSource = ""
         private var liveText = ""
         private var liveSource = ""
-        private var downY = 0f
-        private var startY = 0f
+        private var pendingFinal: String? = null       // arrived while frozen
+        private var pendingSource = ""
+        private var frozen = false
+        private var userScale = 1f
+
+        private var downX = 0f; private var downY = 0f
+        private var startTx = 0f; private var startTy = 0f
         private var dragging = false
-        private val hide = Runnable { fadeTo(0f) }
-        private val longPress = Runnable { if (!dragging) { dragging = true; onHide(act) } }
+        private var multi = false
+        private val hide = Runnable { if (!always(act) && !frozen) fadeTo(0f) }
+        private val longPress = Runnable { if (!dragging && !multi) onHide(act) }
+
+        private val scaleDetector = ScaleGestureDetector(act, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(d: ScaleGestureDetector): Boolean {
+                userScale = (userScale * d.scaleFactor).coerceIn(0.6f, 2.4f); applyScale(); return true
+            }
+        })
+        private val gestures = GestureDetector(act, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onSingleTapConfirmed(e: MotionEvent): Boolean { onTap(act); return true }
+            override fun onDoubleTap(e: MotionEvent): Boolean { toggleFreeze(); return true }
+        }).apply { setIsLongpressEnabled(false) }
 
         private fun dp(v: Float) = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, v, resources.displayMetrics).toInt()
+        private fun portrait() = resources.configuration.orientation != android.content.res.Configuration.ORIENTATION_LANDSCAPE
+        private fun key(k: String) = if (portrait()) k + "_p" else k + "_l"
 
         init {
             orientation = VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
             setPadding(dp(14f), dp(8f), dp(14f), dp(9f))
-            background = GradientDrawable().apply { cornerRadius = dp(16f).toFloat(); setColor(0xC2000000.toInt()); setStroke(dp(0.6f).coerceAtLeast(1), 0x33FFFFFF) }
+            bgDrawable.cornerRadius = dp(16f).toFloat()
+            background = bgDrawable
             elevation = dp(6f).toFloat()
-            val maxW = (resources.displayMetrics.widthPixels * 0.88f).toInt()
+            val maxW = (resources.displayMetrics.widthPixels * 0.9f).toInt()
             previous.apply {
-                setTextColor(0x99FFFFFF.toInt()); gravity = Gravity.CENTER; maxWidth = maxW; maxLines = 2
+                setTextColor(0x99FFFFFF.toInt()); gravity = Gravity.CENTER; maxWidth = maxW; maxLines = 1
                 ellipsize = android.text.TextUtils.TruncateAt.END
                 textDirection = View.TEXT_DIRECTION_FIRST_STRONG; visibility = View.GONE
                 setPadding(0, 0, 0, dp(3f))
@@ -310,7 +362,6 @@ class LiveCaptionHook : BaseHook() {
                 setTextColor(0xFFFFFFFF.toInt())
                 typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
                 gravity = Gravity.CENTER; maxWidth = maxW; setLineSpacing(0f, 1.12f)
-                setShadowLayer(4f, 0f, 1f, 0xAA000000.toInt())
                 textDirection = View.TEXT_DIRECTION_FIRST_STRONG
             }
             original.apply {
@@ -321,23 +372,70 @@ class LiveCaptionHook : BaseHook() {
             }
             addView(previous); addView(text); addView(original)
             alpha = 0f
+            userScale = store.getFloat(key("scale"), 1f).coerceIn(0.6f, 2.4f)
             restyle()
-            post { place(store.getFloat("y", 0.5f)) }
+            post { placeFromStore(); applyScale() }
         }
 
-        /** Text size and the original line follow the settings (also when changed from the quick menu). */
+        /** Size, colours, outline, line count — from the settings or the quick menu. */
         fun restyle() {
             val base = when (size(act)) { "s" -> 14f; "l" -> 19.5f; else -> 16.5f }
             text.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (captioned) base else 13f)
             previous.setTextSize(TypedValue.COMPLEX_UNIT_SP, base - 3f)
             original.setTextSize(TypedValue.COMPLEX_UNIT_SP, base - 4f)
+            text.maxLines = lines(act)
+            val heavy = outline(act)
+            val shadow = if (heavy) 9f else 4f
+            text.setShadowLayer(shadow, 0f, if (heavy) 0f else 1f, 0xE6000000.toInt())
+            previous.setShadowLayer(shadow, 0f, 0f, 0xCC000000.toInt())
+            original.setShadowLayer(shadow, 0f, 0f, 0xCC000000.toInt())
+            val fill = when (bg(act)) { "solid" -> 0xF0000000.toInt(); "none" -> 0x00000000; else -> 0xC2000000.toInt() }
+            bgDrawable.setColor(if (frozen) 0xF01A1A1A.toInt() else fill)
+            bgDrawable.setStroke(dp(0.6f).coerceAtLeast(1), if (frozen) 0x66FFFFFF else 0x33FFFFFF)
             if (captioned) render()
         }
 
-        /** [fraction] of the screen height where the bubble's top sits. */
-        private fun place(fraction: Float) {
-            val h = (parent as? View)?.height?.takeIf { it > 0 } ?: resources.displayMetrics.heightPixels
-            translationY = (h * fraction.coerceIn(0.08f, 0.85f))
+        private fun applyScale() { scaleX = userScale; scaleY = userScale }
+
+        private fun placeFromStore() {
+            val p = parent as? View ?: return
+            translationX = store.getFloat(key("x"), 0f) * p.width
+            translationY = store.getFloat(key("y"), 0.5f) * p.height
+            clampIntoParent()
+        }
+
+        private fun savePlacement() {
+            val p = parent as? View ?: return
+            store.edit()
+                .putFloat(key("x"), translationX / p.width.coerceAtLeast(1))
+                .putFloat(key("y"), translationY / p.height.coerceAtLeast(1))
+                .putFloat(key("scale"), userScale)
+                .apply()
+        }
+
+        fun resetPlacement() {
+            userScale = 1f; applyScale()
+            translationX = 0f
+            (parent as? View)?.let { translationY = it.height * 0.5f }
+            store.edit().remove(key("x")).remove(key("y")).remove(key("scale")).apply()
+            reveal(4000)
+        }
+
+        fun onAlwaysChanged() = reveal(4000)
+
+        private fun clampIntoParent() {
+            val p = parent as? View ?: return
+            val marginX = p.width / 2f - dp(24f)
+            translationX = translationX.coerceIn(-marginX, marginX)
+            translationY = translationY.coerceIn(0f, (p.height - dp(36f)).toFloat())
+        }
+
+        private fun toggleFreeze() {
+            frozen = !frozen
+            if (!frozen) { pendingFinal?.let { lastFinal = it; lastFinalSource = pendingSource; pendingFinal = null }; render() }
+            restyle()
+            reveal(0)
+            runCatching { Toast.makeText(act, L.t(if (frozen) R.string.caption_frozen else R.string.caption_unfrozen), Toast.LENGTH_SHORT).show() }
         }
 
         fun hasCaption() = captioned && alpha > 0.5f
@@ -353,6 +451,7 @@ class LiveCaptionHook : BaseHook() {
 
         fun showCaption(translated: String, source: String, final: Boolean) {
             if (translated.isBlank()) return
+            if (frozen) { if (final) { pendingFinal = translated; pendingSource = source }; return }
             if (final) { lastFinal = translated; lastFinalSource = source; liveText = ""; liveSource = "" }
             else { liveText = translated; liveSource = source }
             if (!captioned) { captioned = true; restyle() } else render()
@@ -364,7 +463,7 @@ class LiveCaptionHook : BaseHook() {
             val mainText = if (growing) liveText else lastFinal
             val mainSource = if (growing) liveSource else lastFinalSource
             if (text.text.toString() != mainText) text.text = mainText
-            val showPrevious = growing && lastFinal.isNotBlank()
+            val showPrevious = growing && lastFinal.isNotBlank() && lines(act) >= 2
             previous.visibility = if (showPrevious) View.VISIBLE else View.GONE
             if (showPrevious && previous.text.toString() != lastFinal) previous.text = lastFinal
             val showOrig = showOriginal(act) && mainSource.isNotBlank() && mainSource != mainText
@@ -375,7 +474,7 @@ class LiveCaptionHook : BaseHook() {
         private fun reveal(hideAfterMs: Long) {
             removeCallbacks(hide)
             fadeTo(1f)
-            if (hideAfterMs > 0) postDelayed(hide, hideAfterMs)
+            if (hideAfterMs > 0 && !always(act) && !frozen) postDelayed(hide, hideAfterMs)
         }
 
         private fun fadeTo(target: Float) {
@@ -390,26 +489,28 @@ class LiveCaptionHook : BaseHook() {
 
         override fun onTouchEvent(e: MotionEvent): Boolean {
             if (alpha < 0.3f) return false // invisible: touches go to the stream
+            scaleDetector.onTouchEvent(e)
+            gestures.onTouchEvent(e)
             when (e.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    downY = e.rawY; startY = translationY; dragging = false
+                    downX = e.rawX; downY = e.rawY; startTx = translationX; startTy = translationY
+                    dragging = false; multi = false
                     postDelayed(longPress, 600)
                     parent?.requestDisallowInterceptTouchEvent(true)
                 }
+                MotionEvent.ACTION_POINTER_DOWN -> { multi = true; dragging = false; removeCallbacks(longPress) }
                 MotionEvent.ACTION_MOVE -> {
-                    val dy = e.rawY - downY
-                    if (!dragging && abs(dy) > slop) { dragging = true; removeCallbacks(longPress) }
-                    if (dragging && parent != null) {
-                        val h = (parent as View).height.toFloat()
-                        translationY = (startY + dy).coerceIn(h * 0.08f, h * 0.85f)
-                    }
+                    if (multi || scaleDetector.isInProgress) return true
+                    val dx = e.rawX - downX; val dy = e.rawY - downY
+                    if (!dragging && (abs(dx) > slop || abs(dy) > slop)) { dragging = true; removeCallbacks(longPress) }
+                    if (dragging) { translationX = startTx + dx; translationY = startTy + dy; clampIntoParent(); reveal(0) }
                 }
-                MotionEvent.ACTION_UP -> {
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     removeCallbacks(longPress)
-                    if (!dragging) onTap(act)
-                    else if (parent != null) store.edit().putFloat("y", translationY / (parent as View).height.coerceAtLeast(1)).apply()
+                    if (dragging || userScale != store.getFloat(key("scale"), 1f)) savePlacement()
+                    if (multi || dragging) reveal(8000)
+                    multi = false; dragging = false
                 }
-                MotionEvent.ACTION_CANCEL -> removeCallbacks(longPress)
             }
             return true
         }

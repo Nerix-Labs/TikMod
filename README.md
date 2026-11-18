@@ -28,7 +28,8 @@ Made by **Nerix Labs**.
 **LIVE**
 - Record any live stream from the share sheet into a standard MP4 that plays everywhere
 - Record now: start recording any live stream from the app, and record several streams in parallel
-- Live captions: translated subtitles over any stream, recognized on the phone (Android 13+)
+- Live captions: translated subtitles over any stream — move, pinch-resize, freeze, styles (Android 13+)
+- Record the live chat of streams you watch to a text file
 - LIVE history: the streams you entered, kept on the phone only
 - Auto-record: follow channels and recording starts by itself when they go live, even when TikTok is closed
 - Recordings run in TikMod's own foreground service, so they keep going after TikTok is swiped away
@@ -84,6 +85,7 @@ The APK ends up in `app/build/outputs/apk/debug/`. JDK 17+ and the Android SDK a
 | LIVE: FLV reader, timestamp rebasing and a small MP4 muxer | `utils/FlvRemuxer.kt` |
 | Auto-recorder service | `live/LiveWatchService.kt`, `utils/LiveApi.kt` |
 | Live captions: stream audio to PCM, speech recognition, translation | `captions/`, `hooks/LiveCaptionHook.kt` |
+| Live chat recording (live SDK message listener) | `hooks/LiveChatHook.kt` |
 | Chat privacy and deleted messages | `hooks/ChatPrivacyHook.kt`, `hooks/AntiRecallHook.kt`, `hooks/DeletedBubble.kt` |
 | Feed cleaning | `hooks/AdsHook.kt` |
 | Locating obfuscated classes across TikTok versions | `discovery/Resolver.kt` |

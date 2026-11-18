@@ -93,7 +93,14 @@ class AdsHook : BaseHook() {
         val hideShop = Prefs.bool(context, Prefs.KEY_HIDE_SHOP)
         val hidePaid = Prefs.bool(context, Prefs.KEY_HIDE_PAID_PARTNERSHIP)
         val hidePhotos = Prefs.bool(context, Prefs.KEY_HIDE_PHOTO_POSTS)
-        if (!removeAds && !hideLive && !hideShop && !hidePaid && !hidePhotos) return
+        val hideReposts = Prefs.bool(context, Prefs.KEY_HIDE_REPOSTS)
+        val cleanFeed = Prefs.bool(context, Prefs.KEY_CLEAN_FEED)
+        val keywords = splitList(Prefs.string(context, Prefs.KEY_FEED_KEYWORDS))
+        val creators = splitList(Prefs.string(context, Prefs.KEY_MUTED_CREATORS)).map { it.removePrefix("@") }
+        val minSec = Prefs.string(context, Prefs.KEY_HIDE_SHORT).toIntOrNull() ?: 0
+        val maxSec = Prefs.string(context, Prefs.KEY_HIDE_LONG).toIntOrNull() ?: 0
+        if (!removeAds && !hideLive && !hideShop && !hidePaid && !hidePhotos && !hideReposts && !cleanFeed &&
+            keywords.isEmpty() && creators.isEmpty() && minSec <= 0 && maxSec <= 0) return
 
         val before = list.size
         val reasons = HashMap<String, Int>()
@@ -105,6 +112,11 @@ class AdsHook : BaseHook() {
                 hideShop && isShop(a) -> "shop"
                 hidePaid && isPaid(a) -> "paid"
                 hidePhotos && Reflect.int(a, "getAwemeType", "awemeType") == 150 -> "photo"
+                hideReposts && isRepost(a) -> "repost"
+                creators.isNotEmpty() && isFrom(a, creators) -> "creator"
+                keywords.isNotEmpty() && matchesKeyword(a, keywords) -> "keyword"
+                (minSec > 0 || maxSec > 0) && matchesDuration(a, minSec, maxSec) -> "duration"
+                cleanFeed && isCard(a) -> "card"
                 else -> null
             }
             if (reason != null) reasons[reason] = (reasons[reason] ?: 0) + 1
@@ -143,6 +155,46 @@ class AdsHook : BaseHook() {
         if ((Reflect.get(a, "getBrandContentAccounts", "brandContentAccounts") as? List<*>)?.isNotEmpty() == true) return true
         val commerce = Reflect.get(a, "getCommerceVideoAuthInfo", "commerceVideoAuthInfo") ?: return false
         return Reflect.long(commerce, "getBrandedContentType", "brandedContentType") != 0L
+    }
+
+    private fun splitList(s: String) = s.split(',', '\n', ';').map { it.trim().lowercase() }.filter { it.isNotEmpty() }
+
+    private fun textOf(a: Any): String {
+        val sb = StringBuilder(Reflect.string(a, "getDesc", "desc") ?: "")
+        (Reflect.get(a, "getChallengeList", "challengeList") as? List<*>)?.forEach { sb.append(' ').append(Reflect.string(it, "getChallengeName", "challengeName") ?: "") }
+        return sb.toString().lowercase()
+    }
+
+    private fun matchesKeyword(a: Any, kws: List<String>): Boolean { val t = textOf(a); return kws.any { t.contains(it) } }
+
+    private fun isFrom(a: Any, handles: List<String>): Boolean {
+        val author = Reflect.get(a, "getAuthor", "author") ?: return false
+        val uid = Reflect.string(author, "getUniqueId", "uniqueId")?.lowercase()
+        val nick = Reflect.string(author, "getNickName", "nickName")?.lowercase()
+        return (uid != null && uid in handles) || (nick != null && nick in handles)
+    }
+
+    private fun isRepost(a: Any): Boolean =
+        Reflect.get(a, "getForwardItem", "forwardItem") != null ||
+            Reflect.long(a, "getRepostFromGroupId", "repostFromGroupId") != 0L ||
+            Reflect.call(a, "isForwardAweme") == true
+
+    private fun matchesDuration(a: Any, minSec: Int, maxSec: Int): Boolean {
+        val video = Reflect.get(a, "getVideo", "video") ?: return false
+        val ms = Reflect.long(video, "getDuration", "duration")
+        if (ms <= 0) return false
+        val sec = ms / 1000
+        return (minSec > 0 && sec < minSec) || (maxSec > 0 && sec > maxSec)
+    }
+
+    /** A feed cell with no playable media of its own: a "suggested accounts" / search / widget card. */
+    private fun isCard(a: Any): Boolean {
+        if (isLive(a) || isAd(a)) return false
+        if (Reflect.int(a, "getAwemeType", "awemeType") == 150) return false
+        if (Reflect.get(a, "getVideo", "video") != null) return false
+        if (Reflect.get(a, "getImageInfos", "imageInfos") != null) return false
+        if (Reflect.get(a, "getImagePostStruct", "imagePostStruct") != null) return false
+        return true
     }
 
     /** Batched "blocked" counter shown in the TikMod app. */

@@ -1,6 +1,13 @@
 {
   "releases": [
     {
+      "version": "4.5.0",
+      "date": "2026-11-19",
+      "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.5.0/TikMod-4.5.0.apk",
+      "size": 24173268,
+      "notes": "- 10 general updates: feed filters, playback speed, mute, keep screen on, no vibration, external links\n- Progress bar on every video (setting)\n- Also includes live captions with translation and live chat recording\n- Works on TikTok 47.9.1"
+    },
+    {
       "version": "4.3.0",
       "date": "2026-11-18",
       "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.3.0/TikMod-4.3.0.apk",

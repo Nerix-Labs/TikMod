@@ -99,7 +99,8 @@ class TikModProvider : ContentProvider() {
                 // A caption setting changed from the quick menu on the stream.
                 "caption_pref" -> {
                     val key = extras?.getString("key")
-                    val allowed = setOf(Prefs.KEY_LIVE_CAPTIONS, Prefs.KEY_CAPTION_TARGET, Prefs.KEY_CAPTION_ORIGINAL, Prefs.KEY_CAPTION_SIZE)
+                    val allowed = setOf(Prefs.KEY_LIVE_CAPTIONS, Prefs.KEY_CAPTION_TARGET, Prefs.KEY_CAPTION_ORIGINAL,
+                        Prefs.KEY_CAPTION_SIZE, Prefs.KEY_CAPTION_BG, Prefs.KEY_CAPTION_LINES, Prefs.KEY_CAPTION_OUTLINE, Prefs.KEY_CAPTION_ALWAYS, Prefs.KEY_RECORD_CHAT)
                     if (key != null && key in allowed) {
                         if (extras.containsKey("bool")) Prefs.setBool(ctx, key, extras.getBoolean("bool"))
                         else Prefs.setString(ctx, key, extras.getString("value").orEmpty())

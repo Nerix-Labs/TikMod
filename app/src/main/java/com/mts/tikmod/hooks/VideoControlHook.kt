@@ -40,6 +40,9 @@ class VideoControlHook : BaseHook() {
             // 2. Playback Speed Hook
             hookPlaybackSpeed(classLoader, context)
 
+            // 2b. Keep videos muted
+            hookMute(classLoader, context)
+
             // 3. Prevent Auto-Pause when switching apps/background
             if (Prefs.isDisableAutoPause(context)) {
                 hookAntiAutoPause(classLoader)
@@ -62,6 +65,17 @@ class VideoControlHook : BaseHook() {
                     }
                 })
             }
+        }
+    }
+
+    private fun hookMute(classLoader: ClassLoader, context: Context?) {
+        runCatching {
+            val engine = XposedHelpers.findClassIfExists("com.ss.ttvideoengine.TTVideoEngine", classLoader) ?: return
+            hookAllMethodsSafely(engine, "setIsMute", object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    if (Prefs.bool(context, Prefs.KEY_MUTE_DEFAULT) && param.args.isNotEmpty() && param.args[0] is Boolean) param.args[0] = true
+                }
+            })
         }
     }
 

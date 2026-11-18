@@ -25,6 +25,8 @@ object ModuleManager {
             ChatPrivacyHook(),
             PresenceHook(),
             LiveCaptionHook(),
+            LiveChatHook(),
+            TweaksHook(),
             RegionHook(),
             VideoControlHook(),
             AutoScrollHook(),
@@ -72,11 +74,16 @@ object ModuleManager {
                     activity.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
                 }
             }
+            runCatching {
+                if (Prefs.bool(activity, Prefs.KEY_KEEP_SCREEN_ON)) activity.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                else activity.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
 
             val className = activity.javaClass.name
             val live = className.contains("LivePlay")
             com.mts.tikmod.utils.MediaContext.liveScreenVisible = live
             (hooks.firstOrNull { it is LiveCaptionHook } as? LiveCaptionHook)?.onScreen(if (live) activity else null)
+            (hooks.firstOrNull { it is LiveChatHook } as? LiveChatHook)?.onScreen(live)
             if (className.contains("Setting", ignoreCase = true)) {
                 XLog.log("TikMod Settings Activity Detected: $className")
                 (hooks.firstOrNull { it is SettingsHook } as? SettingsHook)?.injectIntoActivity(activity)
@@ -92,6 +99,7 @@ object ModuleManager {
             if (!activity.javaClass.name.contains("LivePlay")) return
             com.mts.tikmod.utils.MediaContext.liveScreenVisible = false
             (hooks.firstOrNull { it is LiveCaptionHook } as? LiveCaptionHook)?.onScreen(null)
+            (hooks.firstOrNull { it is LiveChatHook } as? LiveChatHook)?.onScreen(false)
         }
     }
 
