@@ -31,6 +31,9 @@ import java.net.URL
  */
 object Updater {
     const val REPO = "Nerix-Labs/TikMod"
+    /** Release index kept in the repository. Served as a plain file, so it has no API rate limit. */
+    private const val INDEX = "https://raw.githubusercontent.com/$REPO/main/updates.json"
+    /** Fallback only: the GitHub API allows 60 anonymous requests per hour per IP (often shared). */
     private const val API = "https://api.github.com/repos/$REPO/releases?per_page=20"
     private const val PREFS = "tikmod_updates"
 
@@ -92,11 +95,44 @@ object Updater {
     suspend fun checkIfDue(context: Context, enabled: Boolean) {
         if (!enabled) return
         val last = prefs(context).getLong("last_check", 0L)
-        if (System.currentTimeMillis() - last < 24 * 60 * 60 * 1000L && releases.isNotEmpty()) return
+        val age = System.currentTimeMillis() - last
+        // Once a day; when the list isn't loaded yet (fresh process), at most once an hour.
+        if (age < 60 * 60 * 1000L || (age < 24 * 60 * 60 * 1000L && releases.isNotEmpty())) return
+        prefs(context).edit().putLong("last_check", System.currentTimeMillis()).apply()
         check(context, silent = true)
     }
 
-    private fun fetch(): List<Release> {
+    private fun newest(list: List<Release>) =
+        list.sortedWith { a, b -> if (isNewer(a.version, b.version)) -1 else if (isNewer(b.version, a.version)) 1 else 0 }
+
+    private fun fetch(): List<Release> =
+        runCatching { fetchIndex() }.onFailure { XLog.log("Updater: index failed (${it.message}), trying the API") }
+            .getOrNull()?.takeIf { it.isNotEmpty() } ?: fetchApi()
+
+    private fun fetchIndex(): List<Release> {
+        val conn = URL(INDEX).openConnection() as HttpURLConnection
+        conn.connectTimeout = 15_000
+        conn.readTimeout = 15_000
+        conn.useCaches = false
+        conn.setRequestProperty("User-Agent", "TikMod/${BuildConfig.VERSION_NAME}")
+        try {
+            if (conn.responseCode !in 200..299) error("HTTP ${conn.responseCode}")
+            val arr = org.json.JSONObject(conn.inputStream.bufferedReader().use { it.readText() }).getJSONArray("releases")
+            return newest((0 until arr.length()).mapNotNull { i ->
+                val o = arr.optJSONObject(i) ?: return@mapNotNull null
+                val v = o.optString("version").ifBlank { return@mapNotNull null }
+                Release(
+                    version = v, name = "TikMod $v", notes = o.optString("notes"), publishedAt = o.optString("date"),
+                    apkUrl = o.optString("apk").takeIf { it.startsWith("https://") }, apkSize = o.optLong("size"),
+                    pageUrl = "https://github.com/$REPO/releases/tag/v$v"
+                )
+            })
+        } finally {
+            runCatching { conn.disconnect() }
+        }
+    }
+
+    private fun fetchApi(): List<Release> {
         val conn = URL(API).openConnection() as HttpURLConnection
         conn.connectTimeout = 15_000
         conn.readTimeout = 15_000
@@ -120,7 +156,7 @@ object Updater {
                     apkSize = apk?.optLong("size") ?: 0L,
                     pageUrl = o.optString("html_url")
                 )
-            }.sortedWith { a, b -> if (isNewer(a.version, b.version)) -1 else if (isNewer(b.version, a.version)) 1 else 0 }
+            }.let { newest(it) }
         } finally {
             runCatching { conn.disconnect() }
         }

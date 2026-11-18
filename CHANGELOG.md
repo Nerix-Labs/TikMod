@@ -2,6 +2,14 @@
 
 All notable changes to TikMod. Versions follow [semantic versioning](https://semver.org).
 
+## 4.2.2 — 2026-11-18
+
+### Fixed
+- **"Couldn't reach GitHub" when checking for updates.** The updater used GitHub's API, which allows only 60
+  anonymous requests per hour per IP address (often shared between many people). It now reads a release index
+  from the repository (`updates.json`), which has no such limit, and only falls back to the API.
+- The background update check runs at most once an hour.
+
 ## 4.2.1 — 2026-11-18
 
 ### Changed

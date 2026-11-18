@@ -1,0 +1,39 @@
+{
+  "releases": [
+    {
+      "version": "4.2.2",
+      "date": "2026-11-18",
+      "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.2.2/TikMod-4.2.2.apk",
+      "size": 22967557,
+      "notes": "- Update checks no longer depend on GitHub's rate-limited API"
+    },
+    {
+      "version": "4.2.1",
+      "date": "2026-11-18",
+      "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.2.1/TikMod-4.2.1.apk",
+      "size": 22965713,
+      "notes": "- Recordings continue into the same file after a restart\n- Fixed repeated human-verification prompts in LIVE and failing subscriptions"
+    },
+    {
+      "version": "4.2.0",
+      "date": "2026-11-18",
+      "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.2.0/TikMod-4.2.0.apk",
+      "size": 22959333,
+      "notes": "- LIVE history\n- \"Active now\" hidden at the HTTP layer\n- Optional: don't report views"
+    },
+    {
+      "version": "4.1.0",
+      "date": "2026-11-18",
+      "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.1.0/TikMod-4.1.0.apk",
+      "size": 23586777,
+      "notes": "- 10 languages\n- Record now and parallel recordings\n- In-app updates"
+    },
+    {
+      "version": "4.0.0",
+      "date": "2026-11-17",
+      "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.0.0/TikMod-4.0.0.apk",
+      "size": 21831346,
+      "notes": "First public release"
+    }
+  ]
+}
