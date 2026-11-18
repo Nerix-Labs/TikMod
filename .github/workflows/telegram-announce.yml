@@ -1,0 +1,35 @@
+name: Announce release on Telegram
+
+# Manual only: nothing is ever sent without someone pressing "Run workflow".
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version to announce (e.g. 4.5.0) — its GitHub release and APK must already exist"
+        required: true
+      confirm:
+        description: 'Type SEND to confirm posting to the channel'
+        required: true
+        default: ""
+
+jobs:
+  announce:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Guard
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "SEND" ]; then
+            echo "Confirmation not given (type SEND). Nothing was posted."; exit 1
+          fi
+      - uses: actions/checkout@v4
+      - name: Post to Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "Missing TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID repo secrets."; exit 1
+          fi
+          python3 tools/telegram_announce.py "${{ github.event.inputs.version }}"

@@ -1,0 +1,40 @@
+{
+  "_note": "Per-release Telegram post. English block first, then Hebrew. To use a premium (custom) emoji, put its id in the matching \"id\" (keep \"e\" as the normal fallback). Leave \"id\" empty for a normal emoji.",
+  "en": {
+    "badge": { "e": "🚀", "id": "" },
+    "title": "TikMod 4.5.0 — 10 general updates",
+    "summary": "Full control over your feed, playback and the app.",
+    "bullets": [
+      { "icon": { "e": "🧹", "id": "" }, "text": "Feed filters: hide by keyword/#hashtag" },
+      { "icon": { "e": "🙈", "id": "" }, "text": "Mute creators by @handle" },
+      { "icon": { "e": "🔁", "id": "" }, "text": "Hide reposts" },
+      { "icon": { "e": "⏱️", "id": "" }, "text": "Hide videos by length" },
+      { "icon": { "e": "🪪", "id": "" }, "text": "Hide \"suggested accounts\" & search cards" },
+      { "icon": { "e": "⚡", "id": "" }, "text": "Playback speed control (0.25×–3×)" },
+      { "icon": { "e": "🔇", "id": "" }, "text": "Keep videos muted" },
+      { "icon": { "e": "📊", "id": "" }, "text": "Progress bar on every video (on by default)" },
+      { "icon": { "e": "📱", "id": "" }, "text": "Keep the screen on, disable vibration" },
+      { "icon": { "e": "🌐", "id": "" }, "text": "Open links in your real browser" },
+      { "icon": { "e": "💬", "id": "" }, "text": "Also: live captions with translation + chat recording" }
+    ]
+  },
+  "he": {
+    "badge": { "e": "🚀", "id": "" },
+    "title": "TikMod 4.5.0 — 10 עדכונים כלליים",
+    "summary": "שליטה מלאה בפיד, בנגינה ובאפליקציה.",
+    "bullets": [
+      { "icon": { "e": "🧹", "id": "" }, "text": "מסנני פיד: הסתרה לפי מילים/#תגיות" },
+      { "icon": { "e": "🙈", "id": "" }, "text": "השתקת יוצרים לפי @שם" },
+      { "icon": { "e": "🔁", "id": "" }, "text": "הסתרת שיתופים (reposts)" },
+      { "icon": { "e": "⏱️", "id": "" }, "text": "הסתרה לפי אורך הסרטון" },
+      { "icon": { "e": "🪪", "id": "" }, "text": "הסתרת כרטיסי \"חשבונות מוצעים\" וחיפוש" },
+      { "icon": { "e": "⚡", "id": "" }, "text": "בקרת מהירות נגינה (0.25×–3×)" },
+      { "icon": { "e": "🔇", "id": "" }, "text": "השארת סרטונים מושתקים" },
+      { "icon": { "e": "📊", "id": "" }, "text": "קו התקדמות בכל סרטון (דלוק כברירת מחדל)" },
+      { "icon": { "e": "📱", "id": "" }, "text": "מסך שנשאר דלוק, כיבוי רטט" },
+      { "icon": { "e": "🌐", "id": "" }, "text": "פתיחת קישורים בדפדפן האמיתי שלך" },
+      { "icon": { "e": "💬", "id": "" }, "text": "כולל גם כתוביות חיות עם תרגום והקלטת צ'אט" }
+    ]
+  },
+  "footer": "Works on TikTok 47.9.1 · עובד על טיקטוק 47.9.1"
+}
