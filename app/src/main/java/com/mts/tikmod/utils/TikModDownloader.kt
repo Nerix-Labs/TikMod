@@ -447,18 +447,22 @@ object TikModDownloader {
         onProgress: (Long, Long) -> Unit = { _, _ -> },
         onSaving: () -> Unit = {},
         maxFailures: Int = 6,
-        maxEmptySegments: Int = 5
+        maxEmptySegments: Int = 5,
+        resume: Interrupted? = null
     ): LiveResult? {
         val ctx = context.applicationContext ?: context
-        val baseName = sanitize("Live_${owner}_${timestamp()}")
-        val temp = File(ctx.cacheDir, "tikmod_live_${System.nanoTime()}.flv")
+        // Continuing an interrupted recording: same temp file, same final name, the clock goes on.
+        val existing = resume?.let { FlvRemuxer.prepareForAppend(it.file) }
+        val baseName = if (existing != null) resume!!.baseName else sanitize("Live_${owner}_${timestamp()}")
+        val temp = if (existing != null) resume!!.file else File(ctx.cacheDir, "tikmod_live_${System.nanoTime()}.flv")
+        if (existing != null) XLog.log("LiveRecorder[$owner]: resuming ${temp.name} at ${formatDuration(existing.durationMs)}")
         activeLiveTemps.add(temp.absolutePath)
         // Sidecar so an interrupted recording (process killed, module updated) can be recovered with its name.
         runCatching {
             File(temp.path + ".json").writeText(JSONObject().put("owner", owner).put("title", title).put("base", baseName).toString())
         }
         try {
-            return recordAndSave(ctx, temp, baseName, owner, title, urls, isRunning, onConn, onProgress, onSaving, maxFailures, maxEmptySegments)
+            return recordAndSave(ctx, temp, baseName, owner, title, urls, isRunning, onConn, onProgress, onSaving, maxFailures, maxEmptySegments, existing)
         } finally {
             activeLiveTemps.remove(temp.absolutePath)
         }
@@ -469,7 +473,8 @@ object TikModDownloader {
     private fun recordAndSave(
         ctx: Context, temp: File, baseName: String, owner: String, title: String,
         urls: () -> List<String>, isRunning: () -> Boolean, onConn: (HttpURLConnection?) -> Unit,
-        onProgress: (Long, Long) -> Unit, onSaving: () -> Unit, maxFailures: Int, maxEmptySegments: Int
+        onProgress: (Long, Long) -> Unit, onSaving: () -> Unit, maxFailures: Int, maxEmptySegments: Int,
+        existing: FlvRemuxer.Existing? = null
     ): LiveResult? {
         var writer: FlvRemuxer.Writer? = null
         var failures = 0
@@ -477,7 +482,8 @@ object TikModDownloader {
         var urlIndex = 0
         var currentUrls = urls()
 
-        temp.outputStream().buffered(256 * 1024).use { out ->
+        java.io.FileOutputStream(temp, existing != null).buffered(256 * 1024).use { out ->
+            if (existing != null) writer = FlvRemuxer.Writer(out, existing.hasAudio, existing.hasVideo, existing)
             while (isRunning() && failures < maxFailures && emptySegments < maxEmptySegments) {
                 if (currentUrls.isEmpty()) { currentUrls = urls(); if (currentUrls.isEmpty()) { failures++; Thread.sleep(3000); continue } }
                 val url = currentUrls[urlIndex % currentUrls.size]
@@ -527,6 +533,35 @@ object TikModDownloader {
             return null
         }
         return saveLiveFile(ctx, temp, baseName, owner, title, durationMs)
+    }
+
+    /** A recording that was cut off (process killed, module updated) and is still in the cache. */
+    class Interrupted(val file: File, val owner: String, val title: String, val baseName: String)
+
+    fun interruptedRecordings(context: Context): List<Interrupted> {
+        val ctx = context.applicationContext ?: context
+        return ctx.cacheDir.listFiles { f -> f.name.startsWith("tikmod_live_") && f.name.endsWith(".flv") }.orEmpty()
+            .filter { it.absolutePath !in activeLiveTemps }
+            .mapNotNull { f ->
+                if (f.length() < 64 * 1024) { f.delete(); File(f.path + ".json").delete(); return@mapNotNull null }
+                val meta = runCatching { JSONObject(File(f.path + ".json").readText()) }.getOrNull()
+                val owner = meta?.optString("owner").orEmpty().ifBlank { "LIVE" }
+                val base = meta?.optString("base").orEmpty().ifBlank {
+                    sanitize("Live_${owner}_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date(f.lastModified())))
+                }
+                Interrupted(f, owner, meta?.optString("title").orEmpty(), base)
+            }
+    }
+
+    /** Saves one interrupted recording as it is (when it can't be continued). */
+    fun saveInterrupted(context: Context, rec: Interrupted) {
+        val ctx = context.applicationContext ?: context
+        if (!activeLiveTemps.add(rec.file.absolutePath)) return
+        try {
+            XLog.log("LiveRecorder: saving interrupted recording ${rec.file.name} (${formatSize(rec.file.length())}) for ${rec.owner}")
+            toast(ctx, L.t(R.string.toast_rec_recovering, rec.owner))
+            saveLiveFile(ctx, rec.file, rec.baseName, rec.owner, rec.title, 0L)
+        } finally { activeLiveTemps.remove(rec.file.absolutePath) }
     }
 
     /**

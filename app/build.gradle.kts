@@ -11,8 +11,8 @@ android {
         applicationId = "com.mts.tikmod"
         minSdk = 24
         targetSdk = 35
-        versionCode = 6
-        versionName = "4.2.0"
+        versionCode = 7
+        versionName = "4.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

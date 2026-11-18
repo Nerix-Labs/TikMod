@@ -89,22 +89,62 @@ object FlvRemuxer {
      * Writes a clean FLV: only whole tags, timestamps starting at 0 on the first key frame, continuous
      * across reconnects ([startSegment]). Decoder-config tags are written once, right before media.
      */
-    class Writer(private val out: OutputStream, private val hasAudio: Boolean, private val hasVideo: Boolean) {
-        var durationMs = 0L; private set
-        var bytes = 0L; private set
+    /** What [prepareForAppend] found in an interrupted recording. */
+    class Existing(val durationMs: Long, val bytes: Long, val hasAudio: Boolean, val hasVideo: Boolean)
+
+    /**
+     * Makes an interrupted clean FLV safe to continue: drops a half-written tag at the end and reports how
+     * long the recording already is. Returns null when the file isn't a usable FLV.
+     */
+    fun prepareForAppend(file: java.io.File): Existing? = runCatching {
+        java.io.RandomAccessFile(file, "rw").use { raf ->
+            val len = raf.length()
+            if (len < 13) return null
+            val head = ByteArray(13); raf.readFully(head)
+            if (head[0] != 'F'.code.toByte() || head[1] != 'L'.code.toByte() || head[2] != 'V'.code.toByte()) return null
+            val flags = head[4].toInt()
+            var pos = 13L
+            var lastTs = 0L
+            val h = ByteArray(11)
+            while (pos + 11 <= len) {
+                raf.seek(pos); raf.readFully(h)
+                val size = ((h[1].toInt() and 0xFF) shl 16) or ((h[2].toInt() and 0xFF) shl 8) or (h[3].toInt() and 0xFF)
+                val ts = (((h[7].toInt() and 0xFF).toLong() shl 24) or ((h[4].toInt() and 0xFF).toLong() shl 16) or
+                    ((h[5].toInt() and 0xFF).toLong() shl 8) or (h[6].toInt() and 0xFF).toLong())
+                val end = pos + 11 + size + 4
+                if (end > len) break
+                if (h[0].toInt() == 8 || h[0].toInt() == 9) lastTs = maxOf(lastTs, ts)
+                pos = end
+            }
+            if (pos < len) raf.setLength(pos)
+            if (lastTs < 500) return null
+            Existing(lastTs, pos, (flags and 0x04) != 0, (flags and 0x01) != 0)
+        }
+    }.getOrNull()
+
+    /**
+     * @param resume when set, [out] appends to that existing clean FLV: no file header is written, the stream
+     *   configuration is already in the file, and the clock continues after what was recorded.
+     */
+    class Writer(private val out: OutputStream, private val hasAudio: Boolean, private val hasVideo: Boolean, resume: Existing? = null) {
+        var durationMs = resume?.durationMs ?: 0L; private set
+        var bytes = resume?.bytes ?: 0L; private set
+        private val resumed = resume != null
         private var segStart = -1L
         private var segOffset = 0L
         private var lastSrcTs = -1L
         private var waitingKey = hasVideo
-        private var wroteScript = false
-        private var wroteVideoCfg = false
-        private var wroteAudioCfg = false
+        private var wroteScript = resumed
+        private var wroteVideoCfg = resumed
+        private var wroteAudioCfg = resumed
         private val pendingConfigs = ArrayList<Tag>()
 
         init {
-            val flags = (if (hasAudio) 0x04 else 0) or (if (hasVideo) 0x01 else 0)
-            out.write(byteArrayOf('F'.code.toByte(), 'L'.code.toByte(), 'V'.code.toByte(), 1, flags.toByte(), 0, 0, 0, 9, 0, 0, 0, 0))
-            bytes += 13
+            if (!resumed) {
+                val flags = (if (hasAudio) 0x04 else 0) or (if (hasVideo) 0x01 else 0)
+                out.write(byteArrayOf('F'.code.toByte(), 'L'.code.toByte(), 'V'.code.toByte(), 1, flags.toByte(), 0, 0, 0, 9, 0, 0, 0, 0))
+                bytes += 13
+            }
         }
 
         /** Call when a new connection starts: the new stream's clock is unrelated to the old one. */

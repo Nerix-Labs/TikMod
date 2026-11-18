@@ -2,6 +2,19 @@
 
 All notable changes to TikMod. Versions follow [semantic versioning](https://semver.org).
 
+## 4.2.1 — 2026-11-18
+
+### Changed
+- **Recordings continue after a restart.** When TikMod's process is replaced mid-recording (module update, crash,
+  low memory) and the channel is still live, the recording continues into the same file: a torn tag at the end is
+  dropped and the clock carries on, so the result is one recording. If the channel is no longer live, what was
+  recorded is saved as before.
+
+### Fixed
+- **Repeated "verify you're human" checks in LIVE, and subscriptions failing.** Two leftovers from the first
+  version were removed: a region override that reported a US SIM by default with no setting on screen, and a
+  hook that rewrote fields in every JSON payload the app parsed. Existing installs are reset to "no region override".
+
 ## 4.2.0 — 2026-11-18
 
 ### Added

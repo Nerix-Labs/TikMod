@@ -41,4 +41,49 @@ class FlvRemuxerTest {
         println("mp4=${target.absolutePath} duration=${res.durationMs}ms size=${target.length()} video=${res.hasVideo}")
         assertTrue(target.length() > 100_000)
     }
+
+    /** A recording that is cut off mid-tag (process killed) and then continued into the same file. */
+    @Test
+    fun resumeInterruptedRecording() {
+        val inPath = System.getenv("TIKMOD_FLV")
+        assumeTrue("TIKMOD_FLV not set", !inPath.isNullOrBlank())
+        val outDir = File(System.getenv("TIKMOD_OUT") ?: System.getProperty("java.io.tmpdir")).apply { mkdirs() }
+        val tags = File(inPath).inputStream().use { ins ->
+            val r = FlvRemuxer.Reader(ins); r.readHeader()
+            generateSequence { r.next() }.toList()
+        }
+        val half = tags.size / 2
+        val file = File(outDir, "resume.flv")
+
+        // 1. First run: half the stream, then the process "dies" in the middle of writing a tag.
+        var firstMs = 0L
+        file.outputStream().buffered().use { out ->
+            val w = FlvRemuxer.Writer(out, hasAudio = true, hasVideo = true)
+            w.startSegment()
+            tags.take(half).forEach { w.write(it) }
+            firstMs = w.durationMs
+        }
+        java.io.FileOutputStream(file, true).use { it.write(byteArrayOf(9, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3)) } // torn tag
+
+        // 2. Second run: repair, then append a new connection (configs re-sent, unrelated clock).
+        val existing = FlvRemuxer.prepareForAppend(file)!!
+        println("existing duration=${existing.durationMs}ms bytes=${existing.bytes} (first run ${firstMs}ms)")
+        assertTrue(kotlin.math.abs(existing.durationMs - firstMs) < 200)
+        var totalMs = 0L
+        java.io.FileOutputStream(file, true).buffered().use { out ->
+            val w = FlvRemuxer.Writer(out, existing.hasAudio, existing.hasVideo, existing)
+            w.startSegment()
+            tags.filter { it.isConfig || it.isScript }.forEach { w.write(it) }
+            tags.drop(half).forEach { w.write(FlvRemuxer.Tag(it.type, it.timestamp + 5_000_000, it.body)) }
+            totalMs = w.durationMs
+        }
+        println("after resume duration=${totalMs}ms")
+        assertTrue(totalMs > firstMs + 1000)
+
+        // 3. The combined file is one valid recording.
+        val res = FlvRemuxer.toMp4(file, outDir)
+        val target = File(outDir, "resume.mp4"); target.delete(); res.file.renameTo(target)
+        println("mp4 duration=${res.durationMs}ms size=${target.length()}")
+        assertTrue(kotlin.math.abs(res.durationMs - totalMs) < 1500)
+    }
 }

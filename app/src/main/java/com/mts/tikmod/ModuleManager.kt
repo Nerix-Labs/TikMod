@@ -16,7 +16,6 @@ object ModuleManager {
 
     val hooks: List<BaseHook> by lazy {
         listOf(
-            FrameworkJsonHook(),
             SharePanelInjector(),
             ShareInterceptHook(),
             SettingsHook(),

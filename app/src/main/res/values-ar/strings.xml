@@ -452,4 +452,9 @@
     <string name="cl420_online_desc">لم تعد حالتك تُرسَل إلى TikTok، وما زلت ترى من هو نشط.</string>
     <string name="cl420_views">عدم الإبلاغ عن المشاهدات</string>
     <string name="cl420_views_desc">اختياري: لا يتم الإبلاغ عن الفيديوهات التي تشاهدها، فلا تُحتسب مشاهدة ولا تدخل سجل المشاهدة.</string>
+    <string name="toast_rec_resuming">▶️ ‎@%1$s ما زال في بث مباشر — متابعة التسجيل</string>
+    <string name="cl421_resume">التسجيل يستمر بعد التحديث</string>
+    <string name="cl421_resume_desc">إذا أُعيد تشغيل TikMod أثناء التسجيل، يُستكمل في الملف نفسه ما دامت القناة في بث مباشر: تسجيل واحد لا اثنان.</string>
+    <string name="cl421_verify">لا مزيد من تكرار \"تحقق أنك إنسان\"</string>
+    <string name="cl421_verify_desc">أُزيل تغيير خفي للمنطقة كان يجعل TikTok يطلب التحقق مرارًا في البث ويمنع الاشتراك.</string>
 </resources>

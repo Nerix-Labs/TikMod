@@ -419,4 +419,9 @@
     <string name="cl420_online_desc">Votre statut n\'est plus signalé à TikTok, et vous voyez toujours qui est actif.</string>
     <string name="cl420_views">Ne pas signaler les vues</string>
     <string name="cl420_views_desc">Optionnel : les vidéos que vous regardez ne sont pas signalées, donc ni vue comptée ni historique.</string>
+    <string name="toast_rec_resuming">▶️ @%1$s est toujours en live — reprise de l\'enregistrement</string>
+    <string name="cl421_resume">L\'enregistrement continue après une mise à jour</string>
+    <string name="cl421_resume_desc">Si TikMod redémarre en plein enregistrement, il reprend dans le même fichier tant que la chaîne est en live : un seul enregistrement, pas deux.</string>
+    <string name="cl421_verify">Fini les vérifications « je ne suis pas un robot » à répétition</string>
+    <string name="cl421_verify_desc">Suppression d\'un changement de région caché qui poussait TikTok à redemander une vérification en live et bloquait les abonnements.</string>
 </resources>

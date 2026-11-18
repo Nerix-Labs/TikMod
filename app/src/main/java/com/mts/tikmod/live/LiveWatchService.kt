@@ -134,8 +134,10 @@ class LiveWatchService : Service() {
             }
         }
         // Save whatever an interrupted recording left behind, then start watching.
-        thread(name = "TikMod-LiveSalvage") { runCatching { TikModDownloader.salvageInterruptedRecordings(this) } }
-        thread(name = "TikMod-LiveWatch") { watchLoop() }
+        thread(name = "TikMod-LiveWatch") {
+            runCatching { resumeInterrupted() }.onFailure { XLog.log("AutoLive: resume failed: ${it.message}") }
+            watchLoop()
+        }
         XLog.log("AutoLive: service started")
     }
 
@@ -190,6 +192,26 @@ class LiveWatchService : Service() {
     // ------------------------------------------------------------------ watching
 
     private fun wake() = synchronized(lock) { lock.notifyAll() }
+
+    /**
+     * After a restart (module update, crash, low memory): a recording that was cut off continues into the
+     * same file when its channel is still live, so the result is one recording. Otherwise it's saved as it is.
+     */
+    private fun resumeInterrupted() {
+        val auto = Prefs.autoLiveChannels(this).toSet()
+        for (rec in TikModDownloader.interruptedRecordings(this)) {
+            val handle = rec.owner.trim().removePrefix("@").lowercase()
+            val room = if (handle == "live" || handle.isBlank()) null
+            else runCatching { LiveApi.fetch(handle, Prefs.string(this, Prefs.KEY_AUTO_LIVE_QUALITY)) }.getOrNull()
+            if (room != null && room.live && room.flvUrls.isNotEmpty() && !sessions.containsKey(handle)) {
+                XLog.log("AutoLive: @$handle is still live — continuing the interrupted recording")
+                TikModDownloader.toast(this, L.t(R.string.toast_rec_resuming, handle))
+                startRecording(handle, room.nickname, rec.title.ifBlank { room.title }, room.flvUrls, manual = handle !in auto, resume = rec)
+            } else {
+                thread(name = "TikMod-LiveSalvage") { runCatching { TikModDownloader.saveInterrupted(this, rec) } }
+            }
+        }
+    }
 
     private fun watchLoop() {
         while (alive) {
@@ -251,7 +273,10 @@ class LiveWatchService : Service() {
         TikModDownloader.toast(this, L.t(R.string.toast_recording_started, handle))
     }
 
-    private fun startRecording(handle: String, nickname: String, title: String, initialUrls: List<String>, manual: Boolean) {
+    private fun startRecording(
+        handle: String, nickname: String, title: String, initialUrls: List<String>, manual: Boolean,
+        resume: TikModDownloader.Interrupted? = null
+    ) {
         val s = Session(handle, nextNotifId++)
         s.title = title
         sessions[handle] = s
@@ -299,6 +324,7 @@ class LiveWatchService : Service() {
                             ?.takeIf { it.isNotEmpty() } ?: initialUrls
                     },
                     isRunning = { alive && !s.stopped },
+                    resume = resume,
                     onConn = { s.conn = it },
                     onProgress = { d, b ->
                         s.durationMs = d; s.bytes = b

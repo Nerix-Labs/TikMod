@@ -419,4 +419,9 @@
     <string name="cl420_online_desc">Seu status não é mais informado ao TikTok, e você continua vendo quem está ativo.</string>
     <string name="cl420_views">Não informar visualizações</string>
     <string name="cl420_views_desc">Opcional: os vídeos que você assiste não são informados, então não contam como visualização nem entram no histórico.</string>
+    <string name="toast_rec_resuming">▶️ @%1$s ainda está ao vivo — continuando a gravação</string>
+    <string name="cl421_resume">A gravação continua após uma atualização</string>
+    <string name="cl421_resume_desc">Se o TikMod reiniciar no meio de uma gravação, ela continua no mesmo arquivo enquanto o canal estiver ao vivo: uma gravação, não duas.</string>
+    <string name="cl421_verify">Chega de verificações repetidas de \"não sou um robô\"</string>
+    <string name="cl421_verify_desc">Removida uma alteração de região oculta que fazia o TikTok pedir verificação repetidamente nas lives e bloqueava assinaturas.</string>
 </resources>

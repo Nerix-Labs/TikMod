@@ -397,4 +397,9 @@
     <string name="cl420_online_desc">你的在线状态不再上报给 TikTok，而你仍能看到谁在线。</string>
     <string name="cl420_views">不上报观看记录</string>
     <string name="cl420_views_desc">可选：你看过的视频不会被上报，不计入播放量，也不进入观看历史。</string>
+    <string name="toast_rec_resuming">▶️ @%1$s 仍在直播，继续录制</string>
+    <string name="cl421_resume">更新后继续录制</string>
+    <string name="cl421_resume_desc">如果 TikMod 在录制中途重启，只要频道仍在直播，就会接着写入同一个文件：一段录像，而不是两段。</string>
+    <string name="cl421_verify">不再反复“验证你是真人”</string>
+    <string name="cl421_verify_desc">移除了一个隐藏的地区改写，它曾导致 TikTok 在直播中反复要求验证，并使订阅无法完成。</string>
 </resources>

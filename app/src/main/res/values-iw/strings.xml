@@ -430,4 +430,9 @@
     <string name="cl420_online_desc">הסטטוס שלך כבר לא מדווח לטיקטוק, ואתה עדיין רואה מי פעיל.</string>
     <string name="cl420_views">לא לדווח על צפיות</string>
     <string name="cl420_views_desc">אופציונלי: סרטונים שצפית בהם לא מדווחים, אז הם לא נספרים כצפייה ולא נכנסים להיסטוריית הצפייה.</string>
+    <string name="toast_rec_resuming">▶️ @%1$s עדיין בשידור — ממשיך את ההקלטה</string>
+    <string name="cl421_resume">ההקלטה ממשיכה אחרי עדכון</string>
+    <string name="cl421_resume_desc">אם TikMod מופעל מחדש באמצע הקלטה, היא ממשיכה לאותו קובץ כל עוד הערוץ משדר: הקלטה אחת, לא שתיים.</string>
+    <string name="cl421_verify">בלי בדיקות \"אני לא רובוט\" חוזרות</string>
+    <string name="cl421_verify_desc">הוסר שינוי אזור נסתר שגרם לטיקטוק לבקש אימות שוב ושוב בלייב וחסם רכישת מנוי.</string>
 </resources>

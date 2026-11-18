@@ -408,4 +408,9 @@
     <string name="cl420_online_desc">Dein Status wird nicht mehr an TikTok gemeldet, und du siehst weiterhin, wer aktiv ist.</string>
     <string name="cl420_views">Aufrufe nicht melden</string>
     <string name="cl420_views_desc">Optional: Angesehene Videos werden nicht gemeldet, zählen also nicht als Aufruf und landen nicht im Verlauf.</string>
+    <string name="toast_rec_resuming">▶️ @%1$s ist noch live – Aufnahme wird fortgesetzt</string>
+    <string name="cl421_resume">Aufnahmen laufen nach einem Update weiter</string>
+    <string name="cl421_resume_desc">Startet TikMod mitten in einer Aufnahme neu, wird in dieselbe Datei weitergeschrieben, solange der Kanal live ist: eine Aufnahme statt zwei.</string>
+    <string name="cl421_verify">Keine ständigen „Bist du ein Mensch?“-Abfragen mehr</string>
+    <string name="cl421_verify_desc">Eine versteckte Regionsänderung wurde entfernt, wegen der TikTok im LIVE immer wieder eine Bestätigung verlangte und Abos blockierte.</string>
 </resources>

@@ -409,4 +409,9 @@
     <string name="cl420_online_desc">Your active status is no longer reported to TikTok, and you still see who is active.</string>
     <string name="cl420_views">Don\'t report views</string>
     <string name="cl420_views_desc">Optional: videos you watch aren\'t reported, so they don\'t count as views or enter your watch history.</string>
+    <string name="toast_rec_resuming">▶️ @%1$s is still live — continuing the recording</string>
+    <string name="cl421_resume">Recordings continue after an update</string>
+    <string name="cl421_resume_desc">If TikMod restarts in the middle of a recording, it continues into the same file while the channel is still live — one recording, not two.</string>
+    <string name="cl421_verify">No more \"verify you\'re human\" loops</string>
+    <string name="cl421_verify_desc">Removed a hidden region override that made TikTok keep asking for verification in LIVE and blocked subscriptions.</string>
 </resources>

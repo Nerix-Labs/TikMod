@@ -139,7 +139,7 @@ object Prefs {
         KEY_ANTI_RECALL to true,
         KEY_REMOVE_WATERMARK to true,
         KEY_FORCE_DOWNLOAD to true,
-        KEY_TARGET_REGION to "US",
+        KEY_TARGET_REGION to "",   // empty = don't touch the region (spoofing it triggers TikTok's risk checks)
         KEY_REMOVE_ADS to true,
         KEY_UNRESTRICT_ALL to true,
         KEY_DOWNLOAD_AUDIO to true,
@@ -241,6 +241,13 @@ object Prefs {
                     editor.putString(KEY_CUSTOM_FILENAME_PATTERN, DEFAULT_FILENAME_PATTERN)
                 }
                 editor.putBoolean("migrated_v3", true)
+                changed = true
+            }
+            // v6: region spoofing used to default to "US" with no setting on screen. A US SIM on a local network made
+            // TikTok show repeated "verify you're human" checks and broke in-app purchases, so it's reset to off.
+            if (!sp.getBoolean("migrated_v6", false)) {
+                editor.putString(KEY_TARGET_REGION, "")
+                editor.putBoolean("migrated_v6", true)
                 changed = true
             }
             if (changed) editor.apply()

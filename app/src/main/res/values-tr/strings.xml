@@ -408,4 +408,9 @@
     <string name="cl420_online_desc">Durumunuz artık TikTok\'a bildirilmez, siz kimin aktif olduğunu görmeye devam edersiniz.</string>
     <string name="cl420_views">İzlemeleri bildirme</string>
     <string name="cl420_views_desc">İsteğe bağlı: izlediğiniz videolar bildirilmez; izlenme sayılmaz ve geçmişe girmez.</string>
+    <string name="toast_rec_resuming">▶️ @%1$s hâlâ yayında — kayıt devam ediyor</string>
+    <string name="cl421_resume">Kayıt güncellemeden sonra devam eder</string>
+    <string name="cl421_resume_desc">TikMod kayıt sırasında yeniden başlarsa, kanal yayındayken aynı dosyaya devam eder: iki değil, tek kayıt.</string>
+    <string name="cl421_verify">Tekrarlayan \"robot değilim\" doğrulamaları bitti</string>
+    <string name="cl421_verify_desc">TikTok\'un yayınlarda sürekli doğrulama istemesine ve aboneliğin engellenmesine yol açan gizli bölge değişikliği kaldırıldı.</string>
 </resources>
