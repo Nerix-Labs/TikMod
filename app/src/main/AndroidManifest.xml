@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
 
@@ -18,6 +19,7 @@
     </queries>
 
     <application
+        android:name=".TikModApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -31,7 +33,7 @@
             android:value="true" />
         <meta-data
             android:name="xposeddescription"
-            android:value="TikMod by Nerix Labs — הורדה בלי סימן מים, הקלטת לייב, הודעות שנמחקו, פרטיות בצ'אט וחסימת פרסומות לטיקטוק" />
+            android:value="TikMod by Nerix Labs — watermark-free downloads, LIVE recording, deleted messages, chat privacy and ad blocking for TikTok" />
         <meta-data
             android:name="xposedminversion"
             android:value="82" />
@@ -66,6 +68,11 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+
+        <!-- In-app updates: PackageInstaller results -->
+        <receiver
+            android:name=".updates.InstallResultReceiver"
+            android:exported="false" />
 
         <!-- Auto LIVE recorder -->
         <service

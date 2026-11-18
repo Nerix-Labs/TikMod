@@ -1,0 +1,43 @@
+package com.mts.tikmod.updates
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.mts.tikmod.R
+import com.mts.tikmod.ui.theme.Neon
+
+/**
+ * What changed in each version, shown in the "What's new" sheet and the version history.
+ * Localized (string resources), unlike GitHub release notes which are English only.
+ * Newest first. Add an entry here with every release.
+ */
+object Changelog {
+    class Item(val icon: ImageVector, val title: Int, val desc: Int, val accent: () -> Color)
+    class Version(val name: String, val date: String, val items: List<Item>)
+
+    val versions: List<Version> = listOf(
+        Version(
+            "4.1.0", "2026-11-18", listOf(
+                Item(Icons.Rounded.Translate, R.string.cl410_lang, R.string.cl410_lang_desc) { Neon.Cyan },
+                Item(Icons.Rounded.FiberManualRecord, R.string.cl410_record, R.string.cl410_record_desc) { Neon.Pink },
+                Item(Icons.Rounded.Shield, R.string.cl410_stable, R.string.cl410_stable_desc) { Neon.Lime },
+                Item(Icons.Rounded.SdStorage, R.string.cl410_storage, R.string.cl410_storage_desc) { Neon.Amber },
+                Item(Icons.Rounded.DarkMode, R.string.cl410_dark, R.string.cl410_dark_desc) { Neon.Violet },
+                Item(Icons.Rounded.SystemUpdate, R.string.cl410_updates, R.string.cl410_updates_desc) { Neon.Cyan },
+            )
+        ),
+        Version(
+            "4.0.0", "2026-11-17", listOf(
+                Item(Icons.Rounded.AutoAwesome, R.string.cl400_ui, R.string.cl400_ui_desc) { Neon.Violet },
+                Item(Icons.Rounded.Sensors, R.string.cl400_autolive, R.string.cl400_autolive_desc) { Neon.Pink },
+                Item(Icons.Rounded.DeleteSweep, R.string.cl400_deleted, R.string.cl400_deleted_desc) { Neon.Violet },
+                Item(Icons.Rounded.Share, R.string.cl400_share, R.string.cl400_share_desc) { Neon.Cyan },
+                Item(Icons.Rounded.VisibilityOff, R.string.cl400_privacy, R.string.cl400_privacy_desc) { Neon.Violet },
+                Item(Icons.Rounded.Block, R.string.cl400_feed, R.string.cl400_feed_desc) { Neon.Amber },
+            )
+        ),
+    )
+
+    fun forVersion(name: String): Version? = versions.firstOrNull { it.name == name }
+}

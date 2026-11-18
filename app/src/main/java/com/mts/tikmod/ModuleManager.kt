@@ -48,6 +48,8 @@ object ModuleManager {
                     XLog.log("TikMod ModuleManager: Error in ${hook.name}: ${t.message}")
                 }
             }
+            // The dex index is only needed while hooks look their targets up.
+            com.mts.tikmod.discovery.Resolver.finish()
         } catch (t: Throwable) {
             XLog.log("TikMod ModuleManager applyAllHooks error: ${t.message}")
         }

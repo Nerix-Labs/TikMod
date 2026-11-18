@@ -70,6 +70,7 @@ class HookEntry : IXposedHookLoadPackage {
 
             writePing()
             ModuleManager.hostPackage = pkg
+            com.mts.tikmod.discovery.Resolver.init(lpparam.appInfo.sourceDir, lpparam.appInfo.dataDir, lpparam.appInfo.splitSourceDirs)
 
             // 1. Immediate application attempt
             runCatching {

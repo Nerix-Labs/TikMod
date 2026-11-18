@@ -37,6 +37,7 @@ class ChatPrivacyHook : BaseHook() {
         // TikTok 47.7.3 senders (obfuscated, verified against the dex). Located by name + signature.
         const val NEW_SENDER = "X.0CfZ"; const val NEW_METHOD = "LLJJJJ"
         const val OLD_SENDER = "X.0CfD"; const val OLD_METHOD = "LJIIZILJ"
+        const val REQUEST = "com.bytedance.im.core.proto.Request"
         const val TYPING_TIMER = "com.ss.android.ugc.aweme.im.typingindicator.timer.TypingStatusSenderTimer"
     }
 
@@ -47,9 +48,24 @@ class ChatPrivacyHook : BaseHook() {
     override fun apply(classLoader: ClassLoader, context: Context?) {
         tryHook {
             var found = 0
-            XposedHelpers.findClassIfExists(NEW_SENDER, classLoader)?.declaredMethods
-                ?.firstOrNull { it.name == NEW_METHOD && it.parameterTypes.size == 3 }
-                ?.let { XposedBridge.hookMethod(it, senderHook(newPath = true)); found++ }
+            // New coroutine sender: (wrapper holding a proto Request, Boolean, Continuation).
+            val newSenders = com.mts.tikmod.discovery.Resolver.findMethod(
+                "im.sender.new", classLoader, listOf(NEW_SENDER to NEW_METHOD),
+                accept = { m ->
+                    // The third parameter is the (obfuscated) coroutine Continuation interface.
+                    !java.lang.reflect.Modifier.isAbstract(m.modifiers) &&
+                        m.parameterTypes.size == 3 && holdsRequest(m.parameterTypes[0]) &&
+                        m.parameterTypes[1] == java.lang.Boolean.TYPE && m.parameterTypes[2].isInterface
+                }
+            ) { b ->
+                val wrappers = b.findClass { matcher { fields { add { type = REQUEST } } } }.map { it.name }
+                wrappers.flatMap { w ->
+                    b.findMethod { matcher { paramTypes(w, "boolean", null) } }
+                        .map { "${it.className}#${it.methodName}" }
+                }.distinct().takeIf { it.size in 1..2 }.orEmpty() // ambiguous → don't guess
+            }
+            newSenders.forEach { XposedBridge.hookMethod(it, senderHook(newPath = true)); found++ }
+            // Legacy sender: only by its known name (a structural match here would be too broad to be safe).
             XposedHelpers.findClassIfExists(OLD_SENDER, classLoader)?.declaredMethods
                 ?.firstOrNull { it.name == OLD_METHOD && it.parameterTypes.size == 1 }
                 ?.let { XposedBridge.hookMethod(it, senderHook(newPath = false)); found++ }
@@ -127,6 +143,10 @@ class ChatPrivacyHook : BaseHook() {
             XLog.log("ChatPrivacy: released 'seen' for conversation $conv after reply")
         }.onFailure { XLog.log("ChatPrivacy: replay failed: ${it.message}") }
     }
+
+    private fun holdsRequest(c: Class<*>): Boolean =
+        c.name == REQUEST || generateSequence(c) { it.superclass }.takeWhile { it != Any::class.java }
+            .any { k -> k.declaredFields.any { it.type.name == REQUEST } }
 
     /** The proto Request inside the sender's argument (found by type, names are obfuscated). */
     private fun requestOf(arg: Any?): Any? {

@@ -27,6 +27,7 @@ Made by **Nerix Labs**.
 
 **LIVE**
 - Record any live stream from the share sheet into a standard MP4 that plays everywhere
+- Record now: start recording any live stream from the app, and record several streams in parallel
 - Auto-record: follow channels and recording starts by itself when they go live, even when TikTok is closed
 - Recordings run in TikMod's own foreground service, so they keep going after TikTok is swiped away
 
@@ -38,6 +39,13 @@ Made by **Nerix Labs**.
 **Feed**
 - Removes feed, splash and comment ads
 - Optional filters for LIVE previews, shop videos, paid partnerships and photo posts
+
+**App**
+- 10 languages, following the phone's language: English, Hebrew, Arabic, Chinese, French, Spanish, Russian,
+  German, Portuguese and Turkish
+- Updates from inside the app, a "What's new" sheet after every update and a full version history
+- Built to survive TikTok updates: obfuscated targets are located by structure ([DexKit](https://github.com/LuckyPray/DexKit))
+  and cached per TikTok build
 
 ## Requirements
 
@@ -75,7 +83,13 @@ The APK ends up in `app/build/outputs/apk/debug/`. JDK 17+ and the Android SDK a
 | Auto-recorder service | `live/LiveWatchService.kt`, `utils/LiveApi.kt` |
 | Chat privacy and deleted messages | `hooks/ChatPrivacyHook.kt`, `hooks/AntiRecallHook.kt`, `hooks/DeletedBubble.kt` |
 | Feed cleaning | `hooks/AdsHook.kt` |
+| Locating obfuscated classes across TikTok versions | `discovery/Resolver.kt` |
 | Settings app (Jetpack Compose, Material 3) | `MainActivity.kt`, `ui/` |
+| In-app updates and changelog | `updates/` |
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## Contributing
 
@@ -112,6 +126,7 @@ Modifying apps may violate their terms of service — use at your own risk.
 - **לייב:** הקלטת שידורים חיים ל-MP4 תקין, כולל הקלטה אוטומטית של ערוצים במעקב, שממשיכה גם כשטיקטוק סגור.
 - **צ'אט:** "נצפה" רק אחרי שעונים, הסתרת "מקליד/ה" ו"פעיל/ה עכשיו", והודעות שנמחקו נשארות עם סימן פח קטן.
 - **פיד:** חסימת פרסומות וסינון שידורים, סרטוני קניות ופוסטי תמונות.
+- **אפליקציה:** 10 שפות לפי שפת הטלפון, עדכונים מתוך האפליקציה, חלונית "מה חדש" והיסטוריית גרסאות.
 
 **תמיכה:** TikMod חינמי ותמיד יהיה. אם הוא עוזר לך, אפשר לפרגן בקפה ב-[Buy Me a Coffee](https://buymeacoffee.com/nerixlabs).
 

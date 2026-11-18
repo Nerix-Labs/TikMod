@@ -97,6 +97,8 @@ object Prefs {
     const val AUTO_LIVE_NOTIFY_MINIMAL = "minimal"   // only "started" and "saved"
     const val KEY_AUTO_LIVE_INTERVAL = "key_auto_live_interval" // seconds
     const val KEY_AUTO_LIVE_QUALITY = "key_auto_live_quality"   // origin | uhd | hd | sd
+    const val KEY_AUTO_UPDATE_CHECK = "key_auto_update_check"
+    const val KEY_LIVE_MAX_PARALLEL = "key_live_max_parallel"   // 0 = unlimited
     const val KEY_AUTO_LIVE_STATE = "auto_live_state_json"      // runtime status for the UI (not exported)
 
     // App look
@@ -180,7 +182,9 @@ object Prefs {
         KEY_AUTO_LIVE_TRIGGER to AUTO_LIVE_TRIGGER_ANY,
         KEY_AUTO_LIVE_NOTIFY to AUTO_LIVE_NOTIFY_PROGRESS,
         KEY_AUTO_LIVE_INTERVAL to "60",
-        KEY_AUTO_LIVE_QUALITY to "origin"
+        KEY_AUTO_LIVE_QUALITY to "origin",
+        KEY_LIVE_MAX_PARALLEL to "0",
+        KEY_AUTO_UPDATE_CHECK to true
     )
 
     @Volatile private var cache: Map<String, Any> = HashMap(SPECS)

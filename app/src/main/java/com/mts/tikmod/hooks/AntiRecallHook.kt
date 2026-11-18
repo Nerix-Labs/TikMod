@@ -44,8 +44,13 @@ class AntiRecallHook : BaseHook() {
 
     override fun apply(classLoader: ClassLoader, context: Context?) {
         tryHook {
-            val msgClass = XposedHelpers.findClassIfExists("X.0CmB", classLoader)
-                ?.takeIf { c -> c.declaredMethods.any { it.name == "isRecalled" } && c.declaredMethods.any { it.name == "getMsgId" } }
+            // IM message model: obfuscated name changes per release, its getters keep their names.
+            fun isModel(c: Class<*>) = c.declaredMethods.any { it.name == "isRecalled" } && c.declaredMethods.any { it.name == "getMsgId" }
+            val msgClass = com.mts.tikmod.discovery.Resolver.findClass("im.message", classLoader, listOf("X.0CmB")) { b ->
+                b.findClass {
+                    matcher { methods { add { name = "isRecalled" }; add { name = "getMsgId" }; add { name = "getMsgType" }; add { name = "getContent" } } }
+                }.map { it.name }.firstOrNull { n -> runCatching { isModel(classLoader.loadClass(n)) }.getOrDefault(false) }
+            }?.takeIf { isModel(it) }
             status = status.copy(foundClass = msgClass?.name ?: "message model not found")
             if (msgClass == null) return@tryHook
             fun m(name: String) = msgClass.declaredMethods.firstOrNull { it.name == name && it.parameterTypes.isEmpty() }

@@ -1,5 +1,8 @@
 package com.mts.tikmod.hooks
 
+import com.mts.tikmod.R
+import com.mts.tikmod.utils.L
+
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
@@ -189,11 +192,11 @@ class SharePanelInjector : BaseHook() {
         }
 
         val (icon, title, subtitle, badge) = when {
-            live != null && recording -> Quad("⏹", "עצור ושמור הקלטה", "מקליט את @${live.owner.ifBlank { live.roomId }} ברקע", "REC")
-            live != null -> Quad("🔴", "הקלט שידור חי", "@${live.owner.ifBlank { live.roomId }} • איכות מקור • MP4", "LIVE")
-            photoMode -> Quad("🖼️", "הורד ${media!!.images.size} תמונות", "ללא סימן מים • איכות מקורית • @${media.authorUniqueId}", "${media.images.size} IMG")
+            live != null && recording -> Quad("⏹", L.t(R.string.card_stop_recording), L.t(R.string.card_recording_bg, live.owner.ifBlank { live.roomId }), "REC")
+            live != null -> Quad("🔴", L.t(R.string.card_record_live), L.t(R.string.card_record_live_sub, live.owner.ifBlank { live.roomId }), "LIVE")
+            photoMode -> Quad("🖼️", L.p(R.plurals.card_download_photos, media!!.images.size), L.t(R.string.card_photos_sub, media.authorUniqueId), "${media.images.size} IMG")
             else -> Quad(
-                "⬇", "הורד וידאו ללא סימן מים",
+                "⬇", L.t(R.string.card_download_video),
                 listOfNotNull(
                     best?.qualityTag,
                     best?.let { if (it.isH265) "H.265" else "H.264" },
@@ -288,9 +291,9 @@ class SharePanelInjector : BaseHook() {
             if (media.hasVideo || media.isPhotoPost) {
                 val modes = listOf(Prefs.SHARE_MODE_MEDIA, Prefs.SHARE_MODE_MEDIA_LINK, Prefs.SHARE_MODE_LINK)
                 fun label(m: String) = when (m) {
-                    Prefs.SHARE_MODE_MEDIA -> if (photoMode) "📤 שליחה: תמונות" else "📤 שליחה: קובץ"
-                    Prefs.SHARE_MODE_MEDIA_LINK -> "📤 שליחה: קובץ+קישור"
-                    else -> "📤 שליחה: קישור"
+                    Prefs.SHARE_MODE_MEDIA -> if (photoMode) L.t(R.string.chip_send_photos) else L.t(R.string.chip_send_file)
+                    Prefs.SHARE_MODE_MEDIA_LINK -> L.t(R.string.chip_send_file_link)
+                    else -> L.t(R.string.chip_send_link)
                 }
                 chip(label(MediaContext.shareModeOverride ?: Prefs.getShareMode(ctx)), dismiss = false) { tv ->
                     val cur = MediaContext.shareModeOverride ?: Prefs.getShareMode(ctx)
@@ -303,18 +306,18 @@ class SharePanelInjector : BaseHook() {
                 }
             }
 
-            if (photoMode && media.hasVideo) chip("🎬 וידאו") { TikModDownloader.downloadVideo(ctx, media) }
-            if (media.isPhotoPost && !photoMode) chip("🖼️ תמונות") { TikModDownloader.downloadImages(ctx, media) }
+            if (photoMode && media.hasVideo) chip(L.t(R.string.chip_video)) { TikModDownloader.downloadVideo(ctx, media) }
+            if (media.isPhotoPost && !photoMode) chip(L.t(R.string.chip_photos)) { TikModDownloader.downloadImages(ctx, media) }
             if (Prefs.isDownloadAudio(ctx) && (media.musicUrls.isNotEmpty() || media.hasVideo))
-                chip("🎵 שמע") { TikModDownloader.downloadAudio(ctx, media) }
+                chip(L.t(R.string.chip_audio)) { TikModDownloader.downloadAudio(ctx, media) }
             if (Prefs.isDownloadCover(ctx) && media.coverUrls.isNotEmpty())
-                chip("🖼️ קאבר") { TikModDownloader.downloadCover(ctx, media) }
+                chip(L.t(R.string.chip_cover)) { TikModDownloader.downloadCover(ctx, media) }
             if (Prefs.isDownloadAvatar(ctx) && media.avatarUrls.isNotEmpty())
-                chip("👤 פרופיל") { TikModDownloader.downloadAvatar(ctx, media) }
+                chip(L.t(R.string.chip_profile)) { TikModDownloader.downloadAvatar(ctx, media) }
             if (Prefs.isCopyLinkButton(ctx))
-                chip("🔗 קישור") { TikModDownloader.copyLink(ctx, media) }
+                chip(L.t(R.string.chip_link)) { TikModDownloader.copyLink(ctx, media) }
             if (media.desc.isNotBlank())
-                chip("📝 תיאור") { TikModDownloader.copyCaption(ctx, media) }
+                chip(L.t(R.string.chip_caption)) { TikModDownloader.copyCaption(ctx, media) }
 
             if (chips.childCount > 0) {
                 root.addView(HorizontalScrollView(ctx).apply {

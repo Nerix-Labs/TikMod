@@ -1,5 +1,7 @@
 package com.mts.tikmod
 
+import com.mts.tikmod.utils.L
+
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -61,6 +63,8 @@ import com.mts.tikmod.ui.theme.Neon
 import com.mts.tikmod.ui.theme.ThemeMode
 import com.mts.tikmod.ui.theme.TikModTheme
 import com.mts.tikmod.utils.TikModDownloader
+import com.mts.tikmod.updates.Changelog
+import com.mts.tikmod.updates.Updater
 import kotlinx.coroutines.delay
 import org.json.JSONObject
 
@@ -77,9 +81,7 @@ class MainActivity : ComponentActivity() {
             var themeKey by remember { mutableStateOf(Prefs.string(this, Prefs.KEY_UI_THEME)) }
             val mode = when (themeKey) { "dynamic" -> ThemeMode.DYNAMIC; "system" -> ThemeMode.SYSTEM; else -> ThemeMode.NEON }
             TikModTheme(mode) {
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    TikModApp(startTab, onThemeChange = { themeKey = it })
-                }
+                TikModApp(startTab, onThemeChange = { themeKey = it })
             }
         }
     }
@@ -91,11 +93,11 @@ class MainActivity : ComponentActivity() {
 }
 
 private enum class Screen(val icon: ImageVector, val label: String, val accent: Color) {
-    HOME(Icons.Rounded.SpaceDashboard, "ראשי", Neon.Cyan),
-    DOWNLOADS(Icons.Rounded.Download, "הורדות", Neon.Cyan),
-    LIVE(Icons.Rounded.Sensors, "לייב", Neon.Pink),
-    CHAT(Icons.Rounded.Forum, "צ'אט", Neon.Violet),
-    FEED(Icons.Rounded.AutoAwesome, "פיד", Neon.Amber)
+    HOME(Icons.Rounded.SpaceDashboard, L.t(R.string.nav_home), Neon.Cyan),
+    DOWNLOADS(Icons.Rounded.Download, L.t(R.string.nav_downloads), Neon.Cyan),
+    LIVE(Icons.Rounded.Sensors, L.t(R.string.nav_live), Neon.Pink),
+    CHAT(Icons.Rounded.Forum, L.t(R.string.nav_chat), Neon.Violet),
+    FEED(Icons.Rounded.AutoAwesome, L.t(R.string.nav_feed), Neon.Amber)
 }
 
 @Composable
@@ -104,7 +106,13 @@ private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
     var screen by rememberSaveable { mutableStateOf(Screen.HOME) }
     LaunchedEffect(startTab) { if (startTab == "live") screen = Screen.LIVE }
     val active = remember { Prefs.isModuleActive(ctx) }
+    // "What's new" opens by itself once after every update; the history sheet from Home → Updates.
+    var showWhatsNew by remember { mutableStateOf(Updater.shouldShowWhatsNew(ctx) && Changelog.forVersion(BuildConfig.VERSION_NAME) != null) }
+    var showHistory by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { Updater.checkIfDue(ctx, Prefs.bool(ctx, Prefs.KEY_AUTO_UPDATE_CHECK)) }
 
+    // No Scaffold/Surface here, so set the default text color explicitly (otherwise it's black in dark mode).
+    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onBackground) {
     Box(Modifier.fillMaxSize()) {
         AuroraBackground()
         AnimatedContent(
@@ -122,7 +130,7 @@ private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 when (s) {
-                    Screen.HOME -> HomeScreen(active, onNavigate = { screen = it }, onThemeChange = onThemeChange)
+                    Screen.HOME -> HomeScreen(active, onNavigate = { screen = it }, onThemeChange = onThemeChange, onShowHistory = { showHistory = true })
                     Screen.DOWNLOADS -> DownloadsScreen()
                     Screen.LIVE -> LiveScreen()
                     Screen.CHAT -> ChatScreen()
@@ -131,6 +139,11 @@ private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
             }
         }
         FloatingNav(screen, Modifier.align(Alignment.BottomCenter)) { screen = it }
+    }
+    if (showWhatsNew) Changelog.forVersion(BuildConfig.VERSION_NAME)?.let { v ->
+        WhatsNewSheet(v) { showWhatsNew = false; Updater.markWhatsNewSeen(ctx) }
+    }
+    if (showHistory) HistorySheet { showHistory = false }
     }
 }
 
@@ -181,7 +194,7 @@ private fun ScreenTitle(title: String, subtitle: String, accent: Color) {
 // ================================================================== HOME
 
 @Composable
-private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onThemeChange: (String) -> Unit) {
+private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onThemeChange: (String) -> Unit, onShowHistory: () -> Unit) {
     val ctx = LocalContext.current
     val history = remember { Prefs.readHistory(ctx) }
     val ads = remember { Prefs.readStat(ctx, Prefs.STAT_ADS_BLOCKED) }
@@ -194,7 +207,7 @@ private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onThemeCha
                     Text("TikMod", fontSize = 34.sp, fontWeight = FontWeight.Black,
                         style = LocalTextStyle.current.copy(brush = Brush.linearGradient(listOf(Neon.Cyan, Neon.Violet, Neon.Pink))))
                     Text("by Nerix Labs", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.5.sp, color = Subtle)
-                    Text("גרסה ${BuildConfig.VERSION_NAME} • TikTok 47.7.3", fontSize = 12.sp, color = Subtle)
+                    Text(L.t(R.string.home_version, BuildConfig.VERSION_NAME), fontSize = 12.sp, color = Subtle)
                     Spacer(Modifier.height(12.dp))
                     Row(
                         Modifier.clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)).padding(horizontal = 12.dp, vertical = 6.dp),
@@ -202,63 +215,66 @@ private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onThemeCha
                     ) {
                         PulsingDot(if (active) Neon.Lime else Neon.Pink, 8.dp)
                         Spacer(Modifier.width(8.dp))
-                        Text(if (active) "מחובר לטיקטוק" else "המודול לא פעיל", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                        Text(if (active) L.t(R.string.status_connected) else L.t(R.string.status_inactive), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
                 CoreOrb(active)
             }
         }
     }
+    (Updater.status as? Updater.Status.Available)?.let { st ->
+        Appear(1) { UpdateBanner(st.release) { onShowHistory() } }
+    }
     if (!active) Appear(1) {
-        Section(Icons.Rounded.WarningAmber, "צריך להפעיל ב-LSPosed", "4 צעדים קצרים", accent = Neon.Amber) {
-            Text("1. פתח את LSPosed Manager\n2. הפעל את TikMod ברשימת המודולים\n3. סמן את TikTok בטווח (Scope)\n4. לחץ למטה על \"הפעל מחדש את טיקטוק\"", fontSize = 13.sp, lineHeight = 21.sp, modifier = Modifier.padding(horizontal = 10.dp))
+        Section(Icons.Rounded.WarningAmber, L.t(R.string.setup_title), L.t(R.string.setup_subtitle), accent = Neon.Amber) {
+            Text(L.t(R.string.setup_steps), fontSize = 13.sp, lineHeight = 21.sp, modifier = Modifier.padding(horizontal = 10.dp))
         }
     }
     Appear(2) {
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            StatTile(Icons.Rounded.Download, history.size.toLong(), "הורדות", Neon.Cyan, Modifier.weight(1f))
-            StatTile(Icons.Rounded.Block, ads, "פרסומות נחסמו", Neon.Amber, Modifier.weight(1f))
-            StatTile(Icons.Rounded.Sensors, channels.toLong(), "ערוצים במעקב", Neon.Pink, Modifier.weight(1f))
+            StatTile(Icons.Rounded.Download, history.size.toLong(), L.t(R.string.nav_downloads), Neon.Cyan, Modifier.weight(1f))
+            StatTile(Icons.Rounded.Block, ads, L.t(R.string.stat_ads_blocked), Neon.Amber, Modifier.weight(1f))
+            StatTile(Icons.Rounded.Sensors, channels.toLong(), L.t(R.string.stat_channels), Neon.Pink, Modifier.weight(1f))
         }
     }
-    Appear(3) { SectionLabel("קיצורים") }
+    Appear(3) { SectionLabel(L.t(R.string.home_shortcuts)) }
     Appear(4) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                QuickTile(Icons.Rounded.Download, "הורדה בלי סימן מים", Prefs.KEY_REMOVE_WATERMARK, Neon.Cyan, Modifier.weight(1f)) { Prefs.setForceDownloadEnabled(ctx, it) }
-                QuickTile(Icons.Rounded.DeleteSweep, "הודעות שנמחקו", Prefs.KEY_ANTI_RECALL, Neon.Violet, Modifier.weight(1f))
+                QuickTile(Icons.Rounded.Download, L.t(R.string.quick_download), Prefs.KEY_REMOVE_WATERMARK, Neon.Cyan, Modifier.weight(1f)) { Prefs.setForceDownloadEnabled(ctx, it) }
+                QuickTile(Icons.Rounded.DeleteSweep, L.t(R.string.quick_deleted), Prefs.KEY_ANTI_RECALL, Neon.Violet, Modifier.weight(1f))
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                QuickTile(Icons.Rounded.Block, "חסימת פרסומות", Prefs.KEY_REMOVE_ADS, Neon.Amber, Modifier.weight(1f))
-                QuickTile(Icons.Rounded.KeyboardHide, "הסתרת \"מקליד/ה\"", Prefs.KEY_DISABLE_TYPING_INDICATOR, Neon.Violet, Modifier.weight(1f))
+                QuickTile(Icons.Rounded.Block, L.t(R.string.quick_ads), Prefs.KEY_REMOVE_ADS, Neon.Amber, Modifier.weight(1f))
+                QuickTile(Icons.Rounded.KeyboardHide, L.t(R.string.quick_typing), Prefs.KEY_DISABLE_TYPING_INDICATOR, Neon.Violet, Modifier.weight(1f))
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                QuickTile(Icons.Rounded.FiberManualRecord, "הקלטת לייב אוטומטית", Prefs.KEY_AUTO_LIVE, Neon.Pink, Modifier.weight(1f)) { LiveWatchService.sync(ctx) }
-                QuickTile(Icons.Rounded.Screenshot, "צילום מסך בכל מקום", Prefs.KEY_UNRESTRICT_ALL, Neon.Lime, Modifier.weight(1f))
+                QuickTile(Icons.Rounded.FiberManualRecord, L.t(R.string.quick_autolive), Prefs.KEY_AUTO_LIVE, Neon.Pink, Modifier.weight(1f)) { LiveWatchService.sync(ctx) }
+                QuickTile(Icons.Rounded.Screenshot, L.t(R.string.quick_screenshot), Prefs.KEY_UNRESTRICT_ALL, Neon.Lime, Modifier.weight(1f))
             }
         }
     }
     if (history.isNotEmpty()) {
-        Appear(5) { SectionLabel("הורדות אחרונות") }
+        Appear(5) { SectionLabel(L.t(R.string.home_recent)) }
         Appear(6) {
             GlassCard(padding = 10.dp) {
                 history.take(3).forEach { HistoryRow(it) }
-                TextButton(onClick = { onNavigate(Screen.DOWNLOADS) }, modifier = Modifier.align(Alignment.End)) { Text("לכל ההורדות") }
+                TextButton(onClick = { onNavigate(Screen.DOWNLOADS) }, modifier = Modifier.align(Alignment.End)) { Text(L.t(R.string.home_all_downloads)) }
             }
         }
     }
-    Appear(7) { SectionLabel("מערכת") }
-    Appear(8) { SystemSection(onThemeChange) }
+    Appear(7) { SectionLabel(L.t(R.string.home_system)) }
+    Appear(8) { SystemSection(onThemeChange, onShowHistory) }
 }
 
 @Composable
-private fun SystemSection(onThemeChange: (String) -> Unit) {
+private fun SystemSection(onThemeChange: (String) -> Unit, onShowHistory: () -> Unit) {
     val ctx = LocalContext.current
     val createFile = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
         uri?.let {
             runCatching {
                 ctx.contentResolver.openOutputStream(it)?.use { s -> s.write(Prefs.exportToJson(ctx).toByteArray()) }
-                Toast.makeText(ctx, "ההגדרות נשמרו לקובץ", Toast.LENGTH_SHORT).show()
+                Toast.makeText(ctx, L.t(R.string.toast_settings_exported), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -266,32 +282,33 @@ private fun SystemSection(onThemeChange: (String) -> Unit) {
         uri?.let {
             runCatching {
                 val json = ctx.contentResolver.openInputStream(it)?.bufferedReader()?.use { r -> r.readText() }
-                if (json != null && Prefs.importFromJson(ctx, json)) Toast.makeText(ctx, "ההגדרות יובאו", Toast.LENGTH_SHORT).show()
+                if (json != null && Prefs.importFromJson(ctx, json)) Toast.makeText(ctx, L.t(R.string.toast_settings_imported), Toast.LENGTH_SHORT).show()
             }
         }
     }
-    Section(Icons.Rounded.Palette, "מראה", accent = Neon.Violet) {
-        SegmentedPref("ערכת צבעים", Prefs.KEY_UI_THEME, listOf(
-            Opt("neon", "ניאון", Icons.Rounded.Bolt), Opt("dynamic", "Material You", Icons.Rounded.ColorLens), Opt("system", "מערכת", Icons.Rounded.Contrast)
+    Section(Icons.Rounded.Palette, L.t(R.string.sys_look), accent = Neon.Violet) {
+        SegmentedPref(L.t(R.string.sys_theme), Prefs.KEY_UI_THEME, listOf(
+            Opt("neon", L.t(R.string.theme_neon), Icons.Rounded.Bolt), Opt("dynamic", "Material You", Icons.Rounded.ColorLens), Opt("system", L.t(R.string.theme_system), Icons.Rounded.Contrast)
         ), accent = Neon.Violet, onChange = onThemeChange)
     }
-    Section(Icons.Rounded.Tune, "ניהול", "גיבוי, איפוס והפעלה מחדש", accent = Neon.Cyan, collapsible = true, initiallyExpanded = false) {
-        ToggleRow("צילום והקלטת מסך בכל מקום", "מבטל את החסימה במסכים מוגנים בטיקטוק", Prefs.KEY_UNRESTRICT_ALL, Icons.Rounded.Screenshot, Neon.Lime)
+    Section(Icons.Rounded.Tune, L.t(R.string.sys_manage), L.t(R.string.sys_manage_sub), accent = Neon.Cyan, collapsible = true, initiallyExpanded = false) {
+        ToggleRow(L.t(R.string.sys_unrestrict), L.t(R.string.sys_unrestrict_desc), Prefs.KEY_UNRESTRICT_ALL, Icons.Rounded.Screenshot, Neon.Lime)
         Hairline()
         Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ActionButton(Icons.Rounded.Upload, "ייצוא", Modifier.weight(1f)) { createFile.launch("tikmod_config.json") }
-            ActionButton(Icons.Rounded.FileOpen, "ייבוא", Modifier.weight(1f)) { openFile.launch("application/json") }
+            ActionButton(Icons.Rounded.Upload, L.t(R.string.sys_export), Modifier.weight(1f)) { createFile.launch("tikmod_config.json") }
+            ActionButton(Icons.Rounded.FileOpen, L.t(R.string.sys_import), Modifier.weight(1f)) { openFile.launch("application/json") }
         }
         Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ActionButton(Icons.Rounded.CleaningServices, "איפוס זיכרון", Modifier.weight(1f)) {
-                Prefs.resetDiscoveryCache(ctx); Toast.makeText(ctx, "הזיכרון אופס", Toast.LENGTH_SHORT).show()
+            ActionButton(Icons.Rounded.CleaningServices, L.t(R.string.sys_reset_cache), Modifier.weight(1f)) {
+                Prefs.resetDiscoveryCache(ctx); Toast.makeText(ctx, L.t(R.string.toast_cache_reset), Toast.LENGTH_SHORT).show()
             }
-            ActionButton(Icons.Rounded.RestartAlt, "הפעל מחדש את טיקטוק", Modifier.weight(1f), accent = Neon.Pink) {
-                Prefs.forceRestartTikTok(ctx); Toast.makeText(ctx, "טיקטוק ייטען מחדש בפתיחה הבאה", Toast.LENGTH_SHORT).show()
+            ActionButton(Icons.Rounded.RestartAlt, L.t(R.string.sys_restart_tiktok), Modifier.weight(1f), accent = Neon.Pink) {
+                Prefs.forceRestartTikTok(ctx); Toast.makeText(ctx, L.t(R.string.toast_tiktok_restart), Toast.LENGTH_SHORT).show()
             }
         }
-        Hint("כל שינוי מגיע לטיקטוק מיד. רק הפעלה או כיבוי של רכיב שלם דורשים הפעלה מחדש של טיקטוק.")
+        Hint(L.t(R.string.sys_hint))
     }
+    UpdatesSection(onShowHistory)
     AboutCard()
 }
 
@@ -308,11 +325,11 @@ private fun AboutCard() {
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
                 Text("Nerix Labs", fontSize = 17.sp, fontWeight = FontWeight.Black)
-                Text("TikMod ${BuildConfig.VERSION_NAME} • קוד פתוח, רישיון GPL-3.0", fontSize = 12.5.sp, color = Subtle)
+                Text(L.t(R.string.about_line, BuildConfig.VERSION_NAME), fontSize = 12.5.sp, color = Subtle)
             }
             IconButton(onClick = {
                 runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Nerix-Labs/TikMod")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
-            }) { Icon(Icons.Rounded.Code, "קוד המקור", tint = Neon.Cyan) }
+            }) { Icon(Icons.Rounded.Code, L.t(R.string.about_source), tint = Neon.Cyan) }
         }
     }
 }
@@ -336,54 +353,54 @@ private fun ActionButton(icon: ImageVector, text: String, modifier: Modifier = M
 @Composable
 private fun DownloadsScreen() {
     val ctx = LocalContext.current
-    Appear(0) { ScreenTitle("הורדות", "מהפוסט שפתחת, באיכות הכי גבוהה", Neon.Cyan) }
+    Appear(0) { ScreenTitle(L.t(R.string.nav_downloads), L.t(R.string.dl_subtitle), Neon.Cyan) }
     Appear(1) {
-        Section(Icons.Rounded.Download, "מנוע ההורדות", "כרטיס TikMod בחלונית השיתוף") {
-            ToggleRow("הפעלת מנוע ההורדות", "מציג את הכרטיס החכם בכל שיתוף", Prefs.KEY_REMOVE_WATERMARK, Icons.Rounded.PowerSettingsNew) { Prefs.setForceDownloadEnabled(ctx, it) }
+        Section(Icons.Rounded.Download, L.t(R.string.dl_engine), L.t(R.string.dl_engine_sub)) {
+            ToggleRow(L.t(R.string.dl_engine_toggle), L.t(R.string.dl_engine_toggle_desc), Prefs.KEY_REMOVE_WATERMARK, Icons.Rounded.PowerSettingsNew) { Prefs.setForceDownloadEnabled(ctx, it) }
             Hairline()
-            SegmentedPref("איכות וידאו", Prefs.KEY_DOWNLOAD_QUALITY, listOf(
-                Opt(Prefs.DOWNLOAD_QUALITY_MAX, "מקסימלית"), Opt(Prefs.DOWNLOAD_QUALITY_HD, "HD"), Opt(Prefs.DOWNLOAD_QUALITY_SD, "חסכונית")
+            SegmentedPref(L.t(R.string.dl_quality), Prefs.KEY_DOWNLOAD_QUALITY, listOf(
+                Opt(Prefs.DOWNLOAD_QUALITY_MAX, L.t(R.string.dl_quality_max)), Opt(Prefs.DOWNLOAD_QUALITY_HD, "HD"), Opt(Prefs.DOWNLOAD_QUALITY_SD, L.t(R.string.dl_quality_sd))
             ))
-            SegmentedPref("קידוד", Prefs.KEY_VIDEO_CODEC, listOf(
-                Opt(Prefs.VIDEO_CODEC_BEST, "הכי טוב · H.265"), Opt(Prefs.VIDEO_CODEC_H264, "תואם הכל · H.264")
-            ), description = "H.264 נפתח בכל מכשיר ונגן, H.265 קטן יותר ובאיכות גבוהה יותר")
+            SegmentedPref(L.t(R.string.dl_codec), Prefs.KEY_VIDEO_CODEC, listOf(
+                Opt(Prefs.VIDEO_CODEC_BEST, L.t(R.string.dl_codec_best)), Opt(Prefs.VIDEO_CODEC_H264, L.t(R.string.dl_codec_h264))
+            ), description = L.t(R.string.dl_codec_desc))
         }
     }
     Appear(2) {
-        Section(Icons.Rounded.Share, "שיתוף חכם", "מה נשלח כשבוחרים אפליקציה בחלונית השיתוף", badge = "חדש") {
-            SegmentedPref("ברירת מחדל", Prefs.KEY_SHARE_MODE, listOf(
-                Opt(Prefs.SHARE_MODE_MEDIA, "הקובץ", Icons.Rounded.Movie),
-                Opt(Prefs.SHARE_MODE_MEDIA_LINK, "קובץ+קישור", Icons.Rounded.AddLink),
-                Opt(Prefs.SHARE_MODE_LINK, "קישור", Icons.Rounded.Link)
+        Section(Icons.Rounded.Share, L.t(R.string.share_title), L.t(R.string.share_sub), badge = L.t(R.string.tag_new)) {
+            SegmentedPref(L.t(R.string.share_default), Prefs.KEY_SHARE_MODE, listOf(
+                Opt(Prefs.SHARE_MODE_MEDIA, L.t(R.string.share_mode_file), Icons.Rounded.Movie),
+                Opt(Prefs.SHARE_MODE_MEDIA_LINK, L.t(R.string.share_mode_file_link), Icons.Rounded.AddLink),
+                Opt(Prefs.SHARE_MODE_LINK, L.t(R.string.share_mode_link), Icons.Rounded.Link)
             ))
-            Hint("סרטון נשלח כ-MP4 נקי, קרוסלה נשלחת כל התמונות יחד, ושידור חי נשאר קישור. בכרטיס יש כפתור להחלפת המצב לשיתוף אחד בלבד.")
+            Hint(L.t(R.string.share_hint))
         }
     }
     Appear(3) {
-        Section(Icons.Rounded.Widgets, "כפתורים בכרטיס", "מה מופיע בכרטיס TikMod", collapsible = true, initiallyExpanded = false) {
-            ToggleRow("פוסטי תמונות", "כל התמונות בקרוסלה, באיכות מקורית", Prefs.KEY_DOWNLOAD_PHOTOS, Icons.Rounded.Collections)
-            ToggleRow("תמונות כ-JPEG", "ממיר HEIC/WebP לפורמט שנפתח בכל מקום", Prefs.KEY_IMAGES_AS_JPEG, Icons.Rounded.Image)
-            ToggleRow("שמע", "הסאונד המקורי או פס הקול של הסרטון", Prefs.KEY_DOWNLOAD_AUDIO, Icons.Rounded.MusicNote)
-            SegmentedPref("מקור השמע", Prefs.KEY_AUDIO_SOURCE, listOf(Opt(Prefs.AUDIO_SOURCE_ORIGINAL, "סאונד מקורי"), Opt(Prefs.AUDIO_SOURCE_VIDEO, "מתוך הסרטון")))
-            ToggleRow("קאבר HD", "הפריים שהיוצר בחר, ברזולוציה מלאה", Prefs.KEY_DOWNLOAD_COVER, Icons.Rounded.Wallpaper)
-            ToggleRow("תמונת פרופיל", "תמונת היוצר ב-1080p", Prefs.KEY_DOWNLOAD_AVATAR, Icons.Rounded.AccountCircle)
-            ToggleRow("קישור ישיר", "קישור לקובץ הנקי, להורדה במחשב", Prefs.KEY_COPY_LINK_BUTTON, Icons.Rounded.Link)
+        Section(Icons.Rounded.Widgets, L.t(R.string.card_buttons), L.t(R.string.card_buttons_sub), collapsible = true, initiallyExpanded = false) {
+            ToggleRow(L.t(R.string.card_photos), L.t(R.string.card_photos_desc), Prefs.KEY_DOWNLOAD_PHOTOS, Icons.Rounded.Collections)
+            ToggleRow(L.t(R.string.card_jpeg), L.t(R.string.card_jpeg_desc), Prefs.KEY_IMAGES_AS_JPEG, Icons.Rounded.Image)
+            ToggleRow(L.t(R.string.card_audio), L.t(R.string.card_audio_desc), Prefs.KEY_DOWNLOAD_AUDIO, Icons.Rounded.MusicNote)
+            SegmentedPref(L.t(R.string.card_audio_source), Prefs.KEY_AUDIO_SOURCE, listOf(Opt(Prefs.AUDIO_SOURCE_ORIGINAL, L.t(R.string.card_audio_original)), Opt(Prefs.AUDIO_SOURCE_VIDEO, L.t(R.string.card_audio_video))))
+            ToggleRow(L.t(R.string.card_cover), L.t(R.string.card_cover_desc), Prefs.KEY_DOWNLOAD_COVER, Icons.Rounded.Wallpaper)
+            ToggleRow(L.t(R.string.card_avatar), L.t(R.string.card_avatar_desc), Prefs.KEY_DOWNLOAD_AVATAR, Icons.Rounded.AccountCircle)
+            ToggleRow(L.t(R.string.card_link), L.t(R.string.card_link_desc), Prefs.KEY_COPY_LINK_BUTTON, Icons.Rounded.Link)
             Hairline()
-            SegmentedPref("כפתור \"שמירה\" של טיקטוק", Prefs.KEY_DOWNLOAD_UI_MODE, listOf(
-                Opt(Prefs.DOWNLOAD_UI_MODE_ADD, "להשאיר מקורי"), Opt(Prefs.DOWNLOAD_UI_MODE_REPLACE, "דרך TikMod")
+            SegmentedPref(L.t(R.string.card_save_button), Prefs.KEY_DOWNLOAD_UI_MODE, listOf(
+                Opt(Prefs.DOWNLOAD_UI_MODE_ADD, L.t(R.string.card_save_keep)), Opt(Prefs.DOWNLOAD_UI_MODE_REPLACE, L.t(R.string.card_save_tikmod))
             ))
         }
     }
     Appear(4) {
-        Section(Icons.Rounded.FolderOpen, "קבצים ושמירה", collapsible = true, initiallyExpanded = false) {
-            SegmentedPref("תיקייה", Prefs.KEY_SAVE_LOCATION, listOf(
+        Section(Icons.Rounded.FolderOpen, L.t(R.string.files_title), collapsible = true, initiallyExpanded = false) {
+            SegmentedPref(L.t(R.string.files_folder), Prefs.KEY_SAVE_LOCATION, listOf(
                 Opt(Prefs.SAVE_LOCATION_MOVIES, "Movies"), Opt(Prefs.SAVE_LOCATION_DCIM, "DCIM"), Opt(Prefs.SAVE_LOCATION_DOWNLOAD, "Download")
             ))
-            ToggleRow("תיקייה לכל יוצר", "TikMod/@username/…", Prefs.KEY_AUTHOR_FOLDERS, Icons.Rounded.CreateNewFolder)
-            ToggleRow("דילוג על כפילויות", "לא מוריד שוב פוסט שכבר שמור", Prefs.KEY_SKIP_DUPLICATES, Icons.Rounded.FilterNone)
-            ToggleRow("העתקת תיאור", "התיאור וההאשטגים ללוח בכל הורדה", Prefs.KEY_COPY_CAPTION, Icons.Rounded.ContentCopy)
-            ToggleRow("התראת התקדמות", "אחוזים, גודל, ופתיחה או שיתוף בסיום", Prefs.KEY_NOTIFICATION_PROGRESS, Icons.Rounded.NotificationsActive)
-            ToggleRow("היסטוריית הורדות", "רשימת ההורדות במסך הזה", Prefs.KEY_DOWNLOAD_HISTORY, Icons.Rounded.History)
+            ToggleRow(L.t(R.string.files_author_folders), "TikMod/@username/…", Prefs.KEY_AUTHOR_FOLDERS, Icons.Rounded.CreateNewFolder)
+            ToggleRow(L.t(R.string.files_skip_dupes), L.t(R.string.files_skip_dupes_desc), Prefs.KEY_SKIP_DUPLICATES, Icons.Rounded.FilterNone)
+            ToggleRow(L.t(R.string.files_copy_caption), L.t(R.string.files_copy_caption_desc), Prefs.KEY_COPY_CAPTION, Icons.Rounded.ContentCopy)
+            ToggleRow(L.t(R.string.files_progress), L.t(R.string.files_progress_desc), Prefs.KEY_NOTIFICATION_PROGRESS, Icons.Rounded.NotificationsActive)
+            ToggleRow(L.t(R.string.files_history), L.t(R.string.files_history_desc), Prefs.KEY_DOWNLOAD_HISTORY, Icons.Rounded.History)
             Hairline()
             FileNamePatternEditor()
         }
@@ -397,11 +414,11 @@ private fun FileNamePatternEditor() {
     var pattern by remember { mutableStateOf(Prefs.getCustomFilenamePattern(ctx)) }
     val presets = listOf("{author}_{id}", "{nickname} - {desc}", "{date}_{author}", "TikTok_{id}_{quality}")
     val preview = pattern.replace("{id}", "7301234567890123456").replace("{author}", "tiktok_user")
-        .replace("{nickname}", "יוצר").replace("{desc}", "הסרטון הכי טוב").replace("{date}", "20261117_204500")
+        .replace("{nickname}", L.t(R.string.pattern_sample_creator)).replace("{desc}", L.t(R.string.pattern_sample_desc)).replace("{date}", "20261117_204500")
         .replace("{quality}", "1080p").replace("{type}", "video")
     val ltr = LocalTextStyle.current.copy(textDirection = TextDirection.Ltr)
     Column(Modifier.padding(horizontal = 10.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("תבנית שם קובץ", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+        Text(L.t(R.string.pattern_title), fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
         OutlinedTextField(
             value = pattern, onValueChange = { pattern = it }, singleLine = true, textStyle = ltr,
             shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth(),
@@ -409,8 +426,8 @@ private fun FileNamePatternEditor() {
             trailingIcon = {
                 IconButton(onClick = {
                     Prefs.setString(ctx, Prefs.KEY_CUSTOM_FILENAME_PATTERN, pattern.ifBlank { Prefs.DEFAULT_FILENAME_PATTERN })
-                    Toast.makeText(ctx, "התבנית נשמרה", Toast.LENGTH_SHORT).show()
-                }) { Icon(Icons.Rounded.Check, "שמור", tint = Neon.Cyan) }
+                    Toast.makeText(ctx, L.t(R.string.toast_pattern_saved), Toast.LENGTH_SHORT).show()
+                }) { Icon(Icons.Rounded.Check, L.t(R.string.action_save), tint = Neon.Cyan) }
             }
         )
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -418,7 +435,7 @@ private fun FileNamePatternEditor() {
                 AssistChip(onClick = { pattern = p; Prefs.setString(ctx, Prefs.KEY_CUSTOM_FILENAME_PATTERN, p) }, label = { Text(p, fontSize = 11.sp, style = ltr) })
             }
         }
-        Text("תגיות: {author} {nickname} {id} {desc} {date} {quality} {type}", fontSize = 11.sp, color = Subtle)
+        Text(L.t(R.string.pattern_tags), fontSize = 11.sp, color = Subtle)
     }
 }
 
@@ -432,22 +449,22 @@ private fun HistorySection() {
         AlertDialog(
             onDismissRequest = { confirmClear = false },
             icon = { Icon(Icons.Rounded.DeleteSweep, null) },
-            title = { Text("לנקות את ההיסטוריה?") },
-            text = { Text("רק הרשימה נמחקת. הקבצים עצמם נשארים בגלריה.") },
-            confirmButton = { TextButton(onClick = { Prefs.clearHistory(ctx); history = emptyList(); confirmClear = false }) { Text("נקה") } },
-            dismissButton = { TextButton(onClick = { confirmClear = false }) { Text("ביטול") } }
+            title = { Text(L.t(R.string.history_clear_title)) },
+            text = { Text(L.t(R.string.history_clear_text)) },
+            confirmButton = { TextButton(onClick = { Prefs.clearHistory(ctx); history = emptyList(); confirmClear = false }) { Text(L.t(R.string.action_clear)) } },
+            dismissButton = { TextButton(onClick = { confirmClear = false }) { Text(L.t(R.string.action_cancel)) } }
         )
     }
-    Section(Icons.Rounded.History, "הורדות אחרונות", "${history.size} פריטים") {
+    Section(Icons.Rounded.History, L.t(R.string.home_recent), L.p(R.plurals.history_items, history.size)) {
         Row(Modifier.padding(horizontal = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ActionButton(Icons.Rounded.Refresh, "רענון", Modifier.weight(1f)) { history = Prefs.readHistory(ctx) }
-            if (history.isNotEmpty()) ActionButton(Icons.Rounded.DeleteOutline, "ניקוי…", Modifier.weight(1f), accent = Neon.Pink) { confirmClear = true }
+            ActionButton(Icons.Rounded.Refresh, L.t(R.string.action_refresh), Modifier.weight(1f)) { history = Prefs.readHistory(ctx) }
+            if (history.isNotEmpty()) ActionButton(Icons.Rounded.DeleteOutline, L.t(R.string.history_clear_button), Modifier.weight(1f), accent = Neon.Pink) { confirmClear = true }
         }
         if (history.isEmpty()) {
-            Hint("עדיין אין הורדות. בטיקטוק: שיתוף ← כרטיס TikMod.")
+            Hint(L.t(R.string.history_empty))
         } else {
             (if (showAll) history else history.take(8)).forEach { HistoryRow(it) }
-            if (history.size > 8) TextButton(onClick = { showAll = !showAll }) { Text(if (showAll) "הצג פחות" else "הצג את כל ${history.size}") }
+            if (history.size > 8) TextButton(onClick = { showAll = !showAll }) { Text(if (showAll) L.t(R.string.history_show_less) else L.p(R.plurals.history_show_all, history.size)) }
         }
     }
 }
@@ -470,7 +487,7 @@ private fun HistoryRow(entry: JSONObject) {
             runCatching {
                 ctx.startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(Uri.parse(entry.optString("uri")), entry.optString("mime"))
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION))
-            }.onFailure { Toast.makeText(ctx, "הקובץ לא נמצא (אולי נמחק)", Toast.LENGTH_SHORT).show() }
+            }.onFailure { Toast.makeText(ctx, L.t(R.string.toast_file_missing), Toast.LENGTH_SHORT).show() }
         }.padding(horizontal = 6.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -484,7 +501,7 @@ private fun HistoryRow(entry: JSONObject) {
         val link = entry.optString("link")
         if (link.isNotBlank()) IconButton(onClick = {
             runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(link)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
-        }) { Icon(Icons.Rounded.OpenInNew, "לפוסט", tint = Subtle, modifier = Modifier.size(20.dp)) }
+        }) { Icon(Icons.Rounded.OpenInNew, L.t(R.string.history_open_post), tint = Subtle, modifier = Modifier.size(20.dp)) }
     }
 }
 
@@ -518,19 +535,27 @@ private fun LiveScreen() {
         if (enabled) LiveWatchService.checkNow(ctx)
     }
 
-    Appear(0) { ScreenTitle("לייב", "הקלטה אוטומטית של שידורים חיים", Neon.Pink) }
+    Appear(0) { ScreenTitle(L.t(R.string.nav_live), L.t(R.string.live_subtitle), Neon.Pink) }
     Appear(1) { LiveHero(enabled, channels.size, state) { setEnabled(it) } }
 
+    val active = state.keys().asSequence().filter { k ->
+        state.optJSONObject(k)?.optString("status").let { it == "recording" || it == "saving" }
+    }.toList()
+    AnimatedVisibility(active.isNotEmpty(), enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
+        ActiveRecordings(active, state)
+    }
+    Appear(2) { RecordNowCard() }
+
     Appear(2) {
-        Section(Icons.Rounded.PersonSearch, "ערוצים במעקב", if (channels.isEmpty()) "הוסף שם משתמש כדי להתחיל" else "${channels.size} ערוצים", accent = Neon.Pink) {
+        Section(Icons.Rounded.PersonSearch, L.t(R.string.live_followed), if (channels.isEmpty()) L.t(R.string.live_followed_empty) else L.p(R.plurals.live_channels_count, channels.size), accent = Neon.Pink) {
             OutlinedTextField(
                 value = input, onValueChange = { input = it }, singleLine = true,
-                placeholder = { Text("@username או קישור לפרופיל") },
+                placeholder = { Text(L.t(R.string.live_add_hint)) },
                 leadingIcon = { Icon(Icons.Rounded.AlternateEmail, null) },
                 trailingIcon = {
                     FilledIconButton(onClick = { addChannel() }, enabled = input.isNotBlank(),
                         colors = IconButtonDefaults.filledIconButtonColors(containerColor = Neon.Pink, contentColor = Neon.OnAccent)) {
-                        Icon(Icons.Rounded.Add, "הוסף")
+                        Icon(Icons.Rounded.Add, L.t(R.string.action_add))
                     }
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done),
@@ -541,7 +566,8 @@ private fun LiveScreen() {
             channels.forEach { h ->
                 key(h) {
                     ChannelRow(h, state.optJSONObject(h), enabled,
-                        onStop = { ctx.startService(Intent(ctx, LiveWatchService::class.java).setAction(LiveWatchService.ACTION_STOP_REC).putExtra(LiveWatchService.EXTRA_HANDLE, h)) },
+                        onStop = { LiveWatchService.stop(ctx, h) },
+                        onRecord = { LiveWatchService.recordNow(ctx, h) },
                         onRemove = {
                             channels = channels - h
                             Prefs.setAutoLiveChannels(ctx, channels)
@@ -551,37 +577,40 @@ private fun LiveScreen() {
             }
             if (channels.isNotEmpty() && enabled) {
                 TextButton(onClick = { LiveWatchService.checkNow(ctx) }, modifier = Modifier.align(Alignment.End)) {
-                    Icon(Icons.Rounded.Refresh, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text("בדוק עכשיו")
+                    Icon(Icons.Rounded.Refresh, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(L.t(R.string.live_check_now))
                 }
             }
         }
     }
 
     Appear(3) {
-        Section(Icons.Rounded.Tune, "מתי ואיך מקליטים", accent = Neon.Pink) {
-            SegmentedPref("מתי להקליט", Prefs.KEY_AUTO_LIVE_TRIGGER, listOf(
-                Opt(Prefs.AUTO_LIVE_TRIGGER_ANY, "כשמשדר (גם עכשיו)", Icons.Rounded.PlayCircle),
-                Opt(Prefs.AUTO_LIVE_TRIGGER_START, "רק כשמתחיל", Icons.Rounded.NewReleases)
-            ), description = "\"רק כשמתחיל\" לא יצטרף לשידור שכבר רץ כשהפעלת את המעקב", accent = Neon.Pink) { LiveWatchService.checkNow(ctx) }
-            SegmentedPref("התראה בזמן הקלטה", Prefs.KEY_AUTO_LIVE_NOTIFY, listOf(
-                Opt(Prefs.AUTO_LIVE_NOTIFY_PROGRESS, "זמן ומשקל", Icons.Rounded.Speed),
-                Opt(Prefs.AUTO_LIVE_NOTIFY_MINIMAL, "רק התחלה וסיום", Icons.Rounded.NotificationsNone)
-            ), description = "\"זמן ומשקל\" מציג התראה חיה עם כפתור עצירה. \"רק התחלה וסיום\" שולח התראה כשההקלטה מתחילה וכשהקובץ נשמר.", accent = Neon.Pink)
-            SegmentedPref("איכות", Prefs.KEY_AUTO_LIVE_QUALITY, listOf(
-                Opt("origin", "מקור"), Opt("uhd", "1080p"), Opt("hd", "720p"), Opt("sd", "480p")
+        Section(Icons.Rounded.Tune, L.t(R.string.live_settings), accent = Neon.Pink) {
+            SegmentedPref(L.t(R.string.live_trigger), Prefs.KEY_AUTO_LIVE_TRIGGER, listOf(
+                Opt(Prefs.AUTO_LIVE_TRIGGER_ANY, L.t(R.string.live_trigger_any), Icons.Rounded.PlayCircle),
+                Opt(Prefs.AUTO_LIVE_TRIGGER_START, L.t(R.string.live_trigger_start), Icons.Rounded.NewReleases)
+            ), description = L.t(R.string.live_trigger_desc), accent = Neon.Pink) { LiveWatchService.checkNow(ctx) }
+            SegmentedPref(L.t(R.string.live_notify), Prefs.KEY_AUTO_LIVE_NOTIFY, listOf(
+                Opt(Prefs.AUTO_LIVE_NOTIFY_PROGRESS, L.t(R.string.live_notify_progress), Icons.Rounded.Speed),
+                Opt(Prefs.AUTO_LIVE_NOTIFY_MINIMAL, L.t(R.string.live_notify_minimal), Icons.Rounded.NotificationsNone)
+            ), description = L.t(R.string.live_notify_desc), accent = Neon.Pink)
+            SegmentedPref(L.t(R.string.live_quality), Prefs.KEY_AUTO_LIVE_QUALITY, listOf(
+                Opt("origin", L.t(R.string.live_quality_source)), Opt("uhd", "1080p"), Opt("hd", "720p"), Opt("sd", "480p")
             ), accent = Neon.Pink)
-            SegmentedPref("תדירות בדיקה", Prefs.KEY_AUTO_LIVE_INTERVAL, listOf(
-                Opt("30", "30 שנ׳"), Opt("60", "דקה"), Opt("120", "2 דק׳"), Opt("300", "5 דק׳")
-            ), description = "בדיקה תכופה יותר תופסת את תחילת השידור מהר יותר, ובדיקה נדירה יותר חוסכת סוללה", accent = Neon.Pink) { LiveWatchService.checkNow(ctx) }
+            SegmentedPref(L.t(R.string.live_interval), Prefs.KEY_AUTO_LIVE_INTERVAL, listOf(
+                Opt("30", L.t(R.string.live_interval_30s)), Opt("60", L.t(R.string.live_interval_1m)), Opt("120", L.t(R.string.live_interval_2m)), Opt("300", L.t(R.string.live_interval_5m))
+            ), description = L.t(R.string.live_interval_desc), accent = Neon.Pink) { LiveWatchService.checkNow(ctx) }
+            SegmentedPref(L.t(R.string.live_parallel), Prefs.KEY_LIVE_MAX_PARALLEL, listOf(
+                Opt("0", L.t(R.string.live_parallel_unlimited)), Opt("2", "2"), Opt("3", "3"), Opt("5", "5")
+            ), description = L.t(R.string.live_parallel_desc), accent = Neon.Pink)
         }
     }
 
     Appear(4) {
         val pm = ctx.getSystemService(PowerManager::class.java)
         var exempt by remember { mutableStateOf(pm.isIgnoringBatteryOptimizations(ctx.packageName)) }
-        Section(Icons.Rounded.BatteryChargingFull, "שיפור אמינות", accent = Neon.Lime) {
+        Section(Icons.Rounded.BatteryChargingFull, L.t(R.string.live_reliability), accent = Neon.Lime) {
             ToggleRowRaw(
-                "החרגה מחיסכון בסוללה", if (exempt) "מוחרג: המעקב ממשיך לרוץ גם כשהמסך כבוי" else "מומלץ: בלי זה אנדרואיד עלול להשהות את המעקב",
+                L.t(R.string.live_battery), if (exempt) L.t(R.string.live_battery_on) else L.t(R.string.live_battery_off),
                 exempt, Icons.Rounded.BatterySaver, Neon.Lime
             ) {
                 runCatching {
@@ -589,8 +618,71 @@ private fun LiveScreen() {
                 }
                 exempt = pm.isIgnoringBatteryOptimizations(ctx.packageName)
             }
-            Hint("ההקלטות נשמרות כ-MP4 בתיקיית ההורדות שבחרת, ומופיעות גם ברשימת ההורדות. אפשר עדיין להקליט ידנית מכל שידור דרך כרטיס TikMod בחלונית השיתוף.")
+            Hint(L.t(R.string.live_saved_hint))
         }
+    }
+}
+
+/** Every recording that's running right now (auto + manual), with live time/size and stop buttons. */
+@Composable
+private fun ActiveRecordings(handles: List<String>, state: JSONObject) {
+    val ctx = LocalContext.current
+    Section(Icons.Rounded.FiberManualRecord, L.t(R.string.live_recording_now), L.p(R.plurals.live_parallel_count, handles.size), accent = Neon.Pink) {
+        handles.forEach { h ->
+            val st = state.optJSONObject(h) ?: return@forEach
+            val saving = st.optString("status") == "saving"
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 3.dp).clip(RoundedCornerShape(16.dp))
+                    .background(Neon.Pink.copy(alpha = 0.10f)).padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                PulsingDot(if (saving) Neon.Amber else Neon.Pink, 10.dp)
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(st.optString("nick").ifBlank { h }, fontWeight = FontWeight.SemiBold, fontSize = 14.5.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(
+                        if (saving) L.t(R.string.live_saving) else "${TikModDownloader.formatDuration(st.optLong("dur"))}  •  ${TikModDownloader.formatSize(st.optLong("bytes"))}  •  " +
+                            if (st.optBoolean("manual")) L.t(R.string.live_manual) else L.t(R.string.live_auto),
+                        fontSize = 12.sp, color = Subtle
+                    )
+                }
+                if (!saving) IconButton(onClick = { LiveWatchService.stop(ctx, h) }) { Icon(Icons.Rounded.StopCircle, L.t(R.string.action_stop_save), tint = Neon.Pink) }
+            }
+        }
+        if (handles.size > 1) TextButton(onClick = { LiveWatchService.stopAll(ctx) }, modifier = Modifier.align(Alignment.End)) {
+            Icon(Icons.Rounded.Stop, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(L.t(R.string.action_stop_save_all))
+        }
+    }
+}
+
+/** Start recording any channel right now, followed or not. */
+@Composable
+private fun RecordNowCard() {
+    val ctx = LocalContext.current
+    var input by remember { mutableStateOf("") }
+    fun go() {
+        val h = input.trim().substringAfterLast("tiktok.com/").removePrefix("@").substringBefore('/').substringBefore('?').lowercase()
+        if (h.isBlank()) return
+        LiveWatchService.recordNow(ctx, h)
+        input = ""
+    }
+    Section(Icons.Rounded.Videocam, L.t(R.string.live_instant), L.t(R.string.live_instant_sub), accent = Neon.Pink) {
+        OutlinedTextField(
+            value = input, onValueChange = { input = it }, singleLine = true,
+            placeholder = { Text(L.t(R.string.live_instant_hint)) },
+            leadingIcon = { Icon(Icons.Rounded.AlternateEmail, null) },
+            trailingIcon = {
+                FilledIconButton(onClick = { go() }, enabled = input.isNotBlank(),
+                    colors = IconButtonDefaults.filledIconButtonColors(containerColor = Neon.Pink, contentColor = Neon.OnAccent)) {
+                    Icon(Icons.Rounded.FiberManualRecord, L.t(R.string.action_record_now))
+                }
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
+            keyboardActions = KeyboardActions(onGo = { go() }),
+            textStyle = LocalTextStyle.current.copy(textDirection = TextDirection.Ltr),
+            shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp)
+        )
+        Hint(L.t(R.string.live_instant_footer))
     }
 }
 
@@ -618,13 +710,13 @@ private fun LiveHero(enabled: Boolean, count: Int, state: JSONObject, onToggle: 
             }
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text("הקלטה אוטומטית", fontWeight = FontWeight.Black, fontSize = 20.sp)
+                Text(L.t(R.string.live_auto_title), fontWeight = FontWeight.Black, fontSize = 20.sp)
                 Text(
                     when {
-                        !enabled -> "כבוי"
-                        count == 0 -> "הוסף ערוץ כדי להתחיל"
-                        recording > 0 -> "מקליט עכשיו $recording ${if (recording == 1) "שידור" else "שידורים"}"
-                        else -> "סורק $count ערוצים"
+                        recording > 0 -> L.p(R.plurals.live_recording_count, recording)
+                        !enabled -> L.t(R.string.state_off)
+                        count == 0 -> L.t(R.string.live_add_channel_first)
+                        else -> L.p(R.plurals.live_scanning, count)
                     },
                     fontSize = 13.sp, color = if (recording > 0) Neon.Pink else Subtle
                 )
@@ -635,21 +727,24 @@ private fun LiveHero(enabled: Boolean, count: Int, state: JSONObject, onToggle: 
 }
 
 @Composable
-private fun ChannelRow(handle: String, st: JSONObject?, enabled: Boolean, onStop: () -> Unit, onRemove: () -> Unit) {
+private fun ChannelRow(handle: String, st: JSONObject?, enabled: Boolean, onStop: () -> Unit, onRecord: () -> Unit, onRemove: () -> Unit) {
     val status = st?.optString("status").orEmpty()
     val nick = st?.optString("nick").orEmpty()
     val (label, color) = when {
-        !enabled -> "המעקב כבוי" to Subtle
-        st?.has("error") == true && status.isBlank() -> "שגיאת רשת, מנסה שוב" to Neon.Amber
-        status == "recording" -> "מקליט • ${TikModDownloader.formatDuration(st!!.optLong("dur"))} • ${TikModDownloader.formatSize(st.optLong("bytes"))}" to Neon.Pink
-        status == "saving" -> "שומר את ההקלטה…" to Neon.Amber
-        status == "live" -> "בשידור חי (ממתין להתחלה חדשה)" to Neon.Lime
-        status == "skipped" -> "בשידור • עצרת את ההקלטה" to Neon.Amber
-        status == "missing" -> "משתמש לא נמצא" to Neon.Amber
-        status == "offline" -> "לא משדר" + (st?.optLong("checked")?.takeIf { it > 0 }?.let { " • נבדק " + DateUtils.getRelativeTimeSpanString(it, System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS) } ?: "") to Subtle
-        else -> "בודק…" to Subtle
+        !enabled -> L.t(R.string.ch_watching_off) to Subtle
+        st?.has("error") == true && status.isBlank() -> L.t(R.string.ch_network_error) to Neon.Amber
+        status == "recording" -> L.t(R.string.ch_recording, TikModDownloader.formatDuration(st!!.optLong("dur")), TikModDownloader.formatSize(st.optLong("bytes"))) to Neon.Pink
+        status == "saving" -> L.t(R.string.ch_saving) to Neon.Amber
+        status == "live" -> L.t(R.string.ch_live_waiting) to Neon.Lime
+        status == "skipped" -> L.t(R.string.ch_live_stopped) to Neon.Amber
+        status == "missing" -> L.t(R.string.ch_not_found) to Neon.Amber
+        status == "queued" -> L.t(R.string.ch_queued) to Neon.Amber
+        status == "nospace" -> L.t(R.string.ch_no_space) to Neon.Amber
+        status == "offline" -> L.t(R.string.ch_offline) + (st?.optLong("checked")?.takeIf { it > 0 }?.let { L.t(R.string.ch_checked) + DateUtils.getRelativeTimeSpanString(it, System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS) } ?: "") to Subtle
+        else -> L.t(R.string.ch_checking) to Subtle
     }
     val rec = status == "recording"
+    val canRecord = status == "live" || status == "skipped" || status == "queued"
     Row(
         Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp).clip(RoundedCornerShape(18.dp))
             .background(if (rec) Neon.Pink.copy(alpha = 0.10f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
@@ -671,8 +766,9 @@ private fun ChannelRow(handle: String, st: JSONObject?, enabled: Boolean, onStop
             Text("@$handle", fontSize = 11.5.sp, color = Subtle, style = LocalTextStyle.current.copy(textDirection = TextDirection.Ltr))
             Text(label, fontSize = 11.5.sp, color = color, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        if (rec) IconButton(onClick = onStop) { Icon(Icons.Rounded.StopCircle, "עצור ושמור", tint = Neon.Pink) }
-        IconButton(onClick = onRemove) { Icon(Icons.Rounded.Close, "הסר", tint = Subtle) }
+        if (rec) IconButton(onClick = onStop) { Icon(Icons.Rounded.StopCircle, L.t(R.string.action_stop_save), tint = Neon.Pink) }
+        if (canRecord) IconButton(onClick = onRecord) { Icon(Icons.Rounded.FiberManualRecord, L.t(R.string.action_record_now), tint = Neon.Pink) }
+        IconButton(onClick = onRemove) { Icon(Icons.Rounded.Close, L.t(R.string.action_remove), tint = Subtle) }
     }
 }
 
@@ -680,27 +776,27 @@ private fun ChannelRow(handle: String, st: JSONObject?, enabled: Boolean, onStop
 
 @Composable
 private fun ChatScreen() {
-    Appear(0) { ScreenTitle("צ'אט", "פרטיות בהודעות הישירות", Neon.Violet) }
+    Appear(0) { ScreenTitle(L.t(R.string.nav_chat), L.t(R.string.chat_subtitle), Neon.Violet) }
     Appear(1) {
-        Section(Icons.Rounded.DoneAll, "אישורי קריאה", "מתי הצד השני רואה \"נצפה\"", accent = Neon.Violet) {
-            SegmentedPref("מצב", Prefs.KEY_READ_RECEIPTS_MODE, listOf(
-                Opt(Prefs.READ_RECEIPTS_MODE_ON_REPLY, "אחרי שאני עונה", Icons.Rounded.Reply),
-                Opt(Prefs.READ_RECEIPTS_MODE_ALWAYS_BLOCK, "אף פעם", Icons.Rounded.VisibilityOff),
-                Opt(Prefs.READ_RECEIPTS_MODE_NORMAL, "רגיל", Icons.Rounded.Visibility)
+        Section(Icons.Rounded.DoneAll, L.t(R.string.chat_receipts), L.t(R.string.chat_receipts_sub), accent = Neon.Violet) {
+            SegmentedPref(L.t(R.string.chat_mode), Prefs.KEY_READ_RECEIPTS_MODE, listOf(
+                Opt(Prefs.READ_RECEIPTS_MODE_ON_REPLY, L.t(R.string.chat_mode_reply), Icons.Rounded.Reply),
+                Opt(Prefs.READ_RECEIPTS_MODE_ALWAYS_BLOCK, L.t(R.string.chat_mode_never), Icons.Rounded.VisibilityOff),
+                Opt(Prefs.READ_RECEIPTS_MODE_NORMAL, L.t(R.string.chat_mode_normal), Icons.Rounded.Visibility)
             ), accent = Neon.Violet)
-            Hint("\"אחרי שאני עונה\": קוראים בשקט, וה\"נצפה\" נשלח לצ'אט רק כששולחים בו הודעה. המונה של הודעות שלא נקראו אצלך נשאר מדויק.")
+            Hint(L.t(R.string.chat_receipts_hint))
         }
     }
     Appear(2) {
-        Section(Icons.Rounded.VisibilityOff, "נוכחות", accent = Neon.Violet) {
-            ToggleRow("הסתרת \"מקליד/ה\"", "הצד השני לא רואה שאתה כותב", Prefs.KEY_DISABLE_TYPING_INDICATOR, Icons.Rounded.KeyboardHide, Neon.Violet)
-            ToggleRow("הסתרת \"פעיל/ה עכשיו\"", "לא מדווח לשרת על התחברות והתנתקות", Prefs.KEY_HIDE_ONLINE_STATUS, Icons.Rounded.WifiOff, Neon.Violet, badge = "ניסיוני")
+        Section(Icons.Rounded.VisibilityOff, L.t(R.string.chat_presence), accent = Neon.Violet) {
+            ToggleRow(L.t(R.string.chat_hide_typing), L.t(R.string.chat_hide_typing_desc), Prefs.KEY_DISABLE_TYPING_INDICATOR, Icons.Rounded.KeyboardHide, Neon.Violet)
+            ToggleRow(L.t(R.string.chat_hide_online), L.t(R.string.chat_hide_online_desc), Prefs.KEY_HIDE_ONLINE_STATUS, Icons.Rounded.WifiOff, Neon.Violet, badge = L.t(R.string.tag_experimental))
         }
     }
     Appear(3) {
-        Section(Icons.Rounded.DeleteSweep, "הודעות שנמחקו", "נשארות אצלך עם סימן פח קטן", accent = Neon.Violet) {
-            ToggleRow("להשאיר הודעות שנמחקו", "הודעה שהצד השני מחק נשארת גלויה", Prefs.KEY_ANTI_RECALL, Icons.Rounded.Restore, Neon.Violet)
-            ToggleRow("לשמור מדיה שנמחקה", "תמונה או סרטון שנמחקו נשמרים לגלריה", Prefs.KEY_SAVE_DELETED_MEDIA, Icons.Rounded.SaveAlt, Neon.Violet)
+        Section(Icons.Rounded.DeleteSweep, L.t(R.string.chat_deleted), L.t(R.string.chat_deleted_sub), accent = Neon.Violet) {
+            ToggleRow(L.t(R.string.chat_keep_deleted), L.t(R.string.chat_keep_deleted_desc), Prefs.KEY_ANTI_RECALL, Icons.Rounded.Restore, Neon.Violet)
+            ToggleRow(L.t(R.string.chat_save_deleted_media), L.t(R.string.chat_save_deleted_media_desc), Prefs.KEY_SAVE_DELETED_MEDIA, Icons.Rounded.SaveAlt, Neon.Violet)
         }
     }
 }
@@ -711,7 +807,7 @@ private fun ChatScreen() {
 private fun FeedScreen() {
     val ctx = LocalContext.current
     val blocked = remember { Prefs.readStat(ctx, Prefs.STAT_ADS_BLOCKED) }
-    Appear(0) { ScreenTitle("פיד", "פחות רעש, יותר תוכן", Neon.Amber) }
+    Appear(0) { ScreenTitle(L.t(R.string.nav_feed), L.t(R.string.feed_subtitle), Neon.Amber) }
     Appear(1) {
         GlassCard(padding = 18.dp) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -719,25 +815,25 @@ private fun FeedScreen() {
                 Spacer(Modifier.width(16.dp))
                 Column {
                     CountUp(blocked, 32.sp, Neon.Amber)
-                    Text("פרסומות נחסמו עד עכשיו", fontSize = 12.5.sp, color = Subtle)
+                    Text(L.t(R.string.feed_ads_counter), fontSize = 12.5.sp, color = Subtle)
                 }
             }
         }
     }
     Appear(2) {
-        Section(Icons.Rounded.Block, "חסימת פרסומות", accent = Neon.Amber) {
-            ToggleRow("פרסומות בפיד", "סרטונים ממומנים מוסרים לפני שהם מוצגים", Prefs.KEY_REMOVE_ADS, Icons.Rounded.Campaign, Neon.Amber)
-            ToggleRow("פרסומת פתיחה", "דילוג על מסך הפרסומת בהפעלה", Prefs.KEY_BLOCK_SPLASH_ADS, Icons.Rounded.FastForward, Neon.Amber)
-            ToggleRow("פרסומות בתגובות", "תגובות ממומנות מוסתרות", Prefs.KEY_HIDE_COMMENT_ADS, Icons.Rounded.CommentsDisabled, Neon.Amber)
-            ToggleRow("שיתופי פעולה בתשלום", "סרטוני \"Paid partnership\" של מותגים", Prefs.KEY_HIDE_PAID_PARTNERSHIP, Icons.Rounded.Handshake, Neon.Amber)
+        Section(Icons.Rounded.Block, L.t(R.string.quick_ads), accent = Neon.Amber) {
+            ToggleRow(L.t(R.string.feed_ads), L.t(R.string.feed_ads_desc), Prefs.KEY_REMOVE_ADS, Icons.Rounded.Campaign, Neon.Amber)
+            ToggleRow(L.t(R.string.feed_splash), L.t(R.string.feed_splash_desc), Prefs.KEY_BLOCK_SPLASH_ADS, Icons.Rounded.FastForward, Neon.Amber)
+            ToggleRow(L.t(R.string.feed_comment_ads), L.t(R.string.feed_comment_ads_desc), Prefs.KEY_HIDE_COMMENT_ADS, Icons.Rounded.CommentsDisabled, Neon.Amber)
+            ToggleRow(L.t(R.string.feed_paid), L.t(R.string.feed_paid_desc), Prefs.KEY_HIDE_PAID_PARTNERSHIP, Icons.Rounded.Handshake, Neon.Amber)
         }
     }
     Appear(3) {
-        Section(Icons.Rounded.FilterAlt, "פיד נקי", "מה לא להציג ב\"בשבילך\"", accent = Neon.Amber) {
-            ToggleRow("שידורים חיים", "מסתיר שידורים שמשתחלים בין הסרטונים", Prefs.KEY_HIDE_FEED_LIVE, Icons.Rounded.Sensors, Neon.Amber)
-            ToggleRow("סרטוני קניות", "סרטונים עם מוצרים וקישורי קנייה", Prefs.KEY_HIDE_SHOP, Icons.Rounded.ShoppingBag, Neon.Amber)
-            ToggleRow("פוסטי תמונות", "רק סרטונים בפיד", Prefs.KEY_HIDE_PHOTO_POSTS, Icons.Rounded.Collections, Neon.Amber)
-            Hint("הסינון קורה ברשימת הפיד עצמה, כך שאין חורים או סרטונים ריקים. שינוי חל מהעמוד הבא שנטען.")
+        Section(Icons.Rounded.FilterAlt, L.t(R.string.feed_clean), L.t(R.string.feed_clean_sub), accent = Neon.Amber) {
+            ToggleRow(L.t(R.string.feed_live), L.t(R.string.feed_live_desc), Prefs.KEY_HIDE_FEED_LIVE, Icons.Rounded.Sensors, Neon.Amber)
+            ToggleRow(L.t(R.string.feed_shop), L.t(R.string.feed_shop_desc), Prefs.KEY_HIDE_SHOP, Icons.Rounded.ShoppingBag, Neon.Amber)
+            ToggleRow(L.t(R.string.card_photos), L.t(R.string.feed_photos_desc), Prefs.KEY_HIDE_PHOTO_POSTS, Icons.Rounded.Collections, Neon.Amber)
+            Hint(L.t(R.string.feed_hint))
         }
     }
 }

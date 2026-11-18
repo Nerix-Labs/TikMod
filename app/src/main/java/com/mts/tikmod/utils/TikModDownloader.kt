@@ -1,5 +1,8 @@
 package com.mts.tikmod.utils
 
+import com.mts.tikmod.R
+import com.mts.tikmod.utils.L
+
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -50,9 +53,12 @@ import kotlin.concurrent.thread
  */
 object TikModDownloader {
 
-    enum class Kind(val label: String, val emoji: String) {
-        VIDEO("סרטון", "🎬"), PHOTO("תמונה", "🖼️"), AUDIO("שמע", "🎵"),
-        COVER("קאבר", "🖼️"), AVATAR("תמונת פרופיל", "👤"), LIVE("שידור חי", "🔴")
+    enum class Kind(private val labelRes: Int, val emoji: String) {
+        VIDEO(R.string.kind_video, "🎬"), PHOTO(R.string.kind_photo, "🖼️"), AUDIO(R.string.kind_audio, "🎵"),
+        COVER(R.string.kind_cover, "🖼️"), AVATAR(R.string.kind_avatar, "👤"), LIVE(R.string.kind_live, "🔴");
+
+        /** Localized name, resolved when used (resources aren't available when the enum is created). */
+        val label: String get() = L.t(labelRes)
     }
 
     private const val CHANNEL_ID = "tikmod_downloads"
@@ -71,7 +77,7 @@ object TikModDownloader {
         val ctx = context.applicationContext ?: context
         if (!media.hasVideo) {
             if (media.isPhotoPost) return downloadImages(ctx, media)
-            return toast(ctx, "⚠️ לא נמצא וידאו בפוסט הזה")
+            return toast(ctx, L.t(R.string.toast_no_video))
         }
         if (isDuplicate(ctx, Kind.VIDEO, media.awemeId)) return
         copyCaptionIfEnabled(ctx, media)
@@ -81,7 +87,7 @@ object TikModDownloader {
         ranked.forEachIndexed { i, o ->
             XLog.log("Downloader option #$i ${o.label} ${o.width}x${o.height} br=${o.bitrate} h265=${o.isH265} size=${o.sizeBytes} urls=${o.urls.size}")
         }
-        toast(ctx, "⚡ TikMod: מוריד ${best.qualityTag}${if (best.isH265) " (H.265)" else ""} ללא סימן מים…")
+        toast(ctx, L.t(R.string.toast_downloading_video, best.qualityTag, if (best.isH265) " (H.265)" else ""))
 
         executor.execute {
             val job = Job(ctx, Kind.VIDEO, media.authorNickname.ifBlank { "TikTok" })
@@ -105,18 +111,18 @@ object TikModDownloader {
 
     fun downloadImages(context: Context, media: MediaResolver.AwemeMedia) {
         val ctx = context.applicationContext ?: context
-        if (!media.isPhotoPost) return toast(ctx, "⚠️ אין תמונות בפוסט הזה")
+        if (!media.isPhotoPost) return toast(ctx, L.t(R.string.toast_no_photos))
         if (isDuplicate(ctx, Kind.PHOTO, media.awemeId)) return
         copyCaptionIfEnabled(ctx, media)
         val total = media.images.size
-        toast(ctx, "🖼️ TikMod: מוריד $total תמונות באיכות מקורית…")
+        toast(ctx, L.p(R.plurals.toast_downloading_photos, total))
 
         executor.execute {
             val job = Job(ctx, Kind.PHOTO, media.authorNickname.ifBlank { "TikTok" })
             var ok = 0
             var last: Saved? = null
             media.images.forEachIndexed { i, urls ->
-                job.setStep("תמונה ${i + 1} מתוך $total")
+                job.setStep(L.t(R.string.dl_photo_progress, i + 1, total))
                 val name = buildFileName(ctx, media, Kind.PHOTO, String.format(Locale.US, "%02d", i + 1))
                 runCatching { job.fetchAndSave(urls, name, media.authorUniqueId) }
                     .onSuccess { ok++; last = it }
@@ -125,16 +131,16 @@ object TikModDownloader {
             val saved = last
             if (ok > 0 && saved != null) {
                 markDownloaded(ctx, Kind.PHOTO, media.awemeId, saved.uri)
-                job.finish(saved, "$ok/$total תמונות נשמרו")
-                addHistory(ctx, Kind.PHOTO, media, saved, "$ok תמונות")
-            } else job.fail("לא ניתן להוריד את התמונות")
+                job.finish(saved, L.t(R.string.dl_photos_saved, ok, total))
+                addHistory(ctx, Kind.PHOTO, media, saved, L.p(R.plurals.dl_photos_count, ok))
+            } else job.fail(L.t(R.string.err_photos_failed))
         }
     }
 
     fun downloadAudio(context: Context, media: MediaResolver.AwemeMedia) {
         val ctx = context.applicationContext ?: context
         if (isDuplicate(ctx, Kind.AUDIO, media.awemeId)) return
-        toast(ctx, "🎵 TikMod: מוריד שמע…")
+        toast(ctx, L.t(R.string.toast_downloading_audio))
         val preferOriginal = Prefs.getAudioSource(ctx) != Prefs.AUDIO_SOURCE_VIDEO
 
         executor.execute {
@@ -158,7 +164,7 @@ object TikModDownloader {
                 markDownloaded(ctx, Kind.AUDIO, media.awemeId, saved.uri)
                 job.finish(saved, formatSize(saved.bytes))
                 addHistory(ctx, Kind.AUDIO, media, saved, saved.mime.substringAfter('/'))
-            } else job.fail("לא נמצא מקור שמע זמין")
+            } else job.fail(L.t(R.string.err_no_audio))
         }
     }
 
@@ -170,7 +176,7 @@ object TikModDownloader {
     fun downloadCover(context: Context, media: MediaResolver.AwemeMedia) {
         val ctx = context.applicationContext ?: context
         if (!media.hasVideo) return simpleDownload(ctx, Kind.COVER, media, media.coverUrls, "cover")
-        toast(ctx, "🖼️ TikMod: מחלץ קאבר HD מהסרטון…")
+        toast(ctx, L.t(R.string.toast_extracting_cover))
         executor.execute {
             val job = Job(ctx, Kind.COVER, media.authorNickname.ifBlank { "TikTok" })
             val frame = runCatching { job.grabCoverFrame(media) }
@@ -197,7 +203,7 @@ object TikModDownloader {
      */
     fun downloadAvatar(context: Context, media: MediaResolver.AwemeMedia) {
         val ctx = context.applicationContext ?: context
-        toast(ctx, "👤 TikMod: מוריד תמונת פרופיל HD…")
+        toast(ctx, L.t(R.string.toast_downloading_avatar))
         executor.execute {
             val job = Job(ctx, Kind.AVATAR, media.authorNickname.ifBlank { media.authorHandle })
             val fresh = media.authorHandle.takeIf { it.isNotBlank() }?.let { handle ->
@@ -205,7 +211,7 @@ object TikModDownloader {
                     .onFailure { XLog.log("Downloader: profile page lookup failed (${it.message})") }.getOrNull()
             }
             val urls = listOfNotNull(fresh) + media.avatarUrls
-            if (urls.isEmpty()) return@execute job.fail("לא נמצאה תמונת פרופיל")
+            if (urls.isEmpty()) return@execute job.fail(L.t(R.string.err_no_avatar))
             runCatching { job.fetchAndSave(urls, buildFileName(ctx, media, Kind.AVATAR, "avatar"), media.authorUniqueId) }
                 .onSuccess { job.finish(it, (if (fresh != null && it.bytes > 0) "1080p • " else "") + formatSize(it.bytes)); addHistory(ctx, Kind.AVATAR, media, it, "avatar") }
                 .onFailure { job.fail(it.message ?: "error") }
@@ -252,18 +258,18 @@ object TikModDownloader {
                 return onReady(listOf(cached), "video/mp4")
             }
         }
-        toast(ctx, "⏳ מכין את ה${if (photos) "תמונות" else "סרטון"} לשליחה ל-$targetLabel…")
+        toast(ctx, L.t(if (photos) R.string.share_preparing_photos else R.string.share_preparing_video, targetLabel))
         executor.execute {
-            val job = Job(ctx, kind, "שליחה ל-$targetLabel")
+            val job = Job(ctx, kind, L.t(R.string.share_sending_to, targetLabel))
             try {
                 if (photos) {
                     val saved = media.images.mapIndexedNotNull { i, urls ->
-                        job.setStep("תמונה ${i + 1} מתוך ${media.images.size}")
+                        job.setStep(L.t(R.string.dl_photo_progress, i + 1, media.images.size))
                         runCatching { job.fetchAndSave(urls, buildFileName(ctx, media, Kind.PHOTO, String.format(Locale.US, "%02d", i + 1)), media.authorUniqueId) }.getOrNull()
                     }
-                    if (saved.isEmpty()) throw IllegalStateException("לא ניתן להוריד את התמונות")
-                    job.finish(saved.last(), "${saved.size} תמונות • נשלח ל-$targetLabel")
-                    addHistory(ctx, Kind.PHOTO, media, saved.last(), "${saved.size} תמונות")
+                    if (saved.isEmpty()) throw IllegalStateException(L.t(R.string.err_photos_failed))
+                    job.finish(saved.last(), L.t(R.string.share_photos_sent, saved.size, targetLabel))
+                    addHistory(ctx, Kind.PHOTO, media, saved.last(), L.p(R.plurals.dl_photos_count, saved.size))
                     mainHandler.post { onReady(saved.map { it.uri }, if (saved.all { it.mime == saved[0].mime }) saved[0].mime else "image/*") }
                 } else {
                     val ranked = MediaResolver.rankVideoOptions(media.videoOptions, Prefs.getDownloadQuality(ctx), Prefs.getVideoCodec(ctx))
@@ -272,10 +278,10 @@ object TikModDownloader {
                         saved = runCatching { job.fetchAndSave(o.urls, buildFileName(ctx, media, Kind.VIDEO, o.qualityTag), media.authorUniqueId) }.getOrNull()
                         if (saved != null) break
                     }
-                    val s = saved ?: throw IllegalStateException("לא ניתן להוריד את הסרטון")
+                    val s = saved ?: throw IllegalStateException(L.t(R.string.err_video_failed))
                     markDownloaded(ctx, Kind.VIDEO, media.awemeId, s.uri)
-                    job.finish(s, "נשלח ל-$targetLabel")
-                    addHistory(ctx, Kind.VIDEO, media, s, "שיתוף")
+                    job.finish(s, L.t(R.string.share_sent_to, targetLabel))
+                    addHistory(ctx, Kind.VIDEO, media, s, L.t(R.string.share_chooser))
                     mainHandler.post { onReady(listOf(s.uri), s.mime) }
                 }
             } catch (t: Throwable) {
@@ -298,13 +304,13 @@ object TikModDownloader {
             .firstOrNull()?.urls?.firstOrNull()
         val text = direct ?: media.images.firstOrNull()?.firstOrNull() ?: media.webUrl
         setClipboard(ctx, "TikMod link", text)
-        toast(ctx, if (direct != null) "🔗 קישור ישיר ללא סימן מים הועתק" else "🔗 הקישור הועתק")
+        toast(ctx, if (direct != null) L.t(R.string.toast_direct_link_copied) else L.t(R.string.toast_link_copied))
     }
 
     fun copyCaption(context: Context, media: MediaResolver.AwemeMedia) {
         val ctx = context.applicationContext ?: context
         setClipboard(ctx, "TikTok caption", media.desc)
-        toast(ctx, "📝 התיאור הועתק (${media.desc.length} תווים)")
+        toast(ctx, L.t(R.string.toast_caption_copied, media.desc.length))
     }
 
     // ---------------------------------------------------------------- live recording
@@ -380,7 +386,7 @@ object TikModDownloader {
         localRecording = true
         ensureStopReceiver(ctx)
         createChannel(ctx)
-        toast(ctx, "🔴 TikMod: ההקלטה החלה — אפשר לעצור מההתראה")
+        toast(ctx, L.t(R.string.toast_rec_started))
 
         thread(name = "TikMod-LiveRecorder") {
             val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
@@ -390,13 +396,13 @@ object TikModDownloader {
             )
             val builder = NotificationCompat.Builder(ctx, LIVE_CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.presence_video_online)
-                .setContentTitle("🔴 מקליט LIVE • ${live.owner.ifBlank { live.roomId }}")
-                .setContentText("מתחבר לשידור…")
+                .setContentTitle(L.t(R.string.notif_rec_title, live.owner.ifBlank { live.roomId }))
+                .setContentText(L.t(R.string.notif_rec_connecting))
                 .setCategory(NotificationCompat.CATEGORY_PROGRESS)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setUsesChronometer(true).setWhen(System.currentTimeMillis())
                 .setOngoing(true).setOnlyAlertOnce(true).setSilent(true)
-                .addAction(android.R.drawable.ic_media_pause, "⏹ עצור ושמור", stopIntent)
+                .addAction(android.R.drawable.ic_media_pause, L.t(R.string.notif_action_stop), stopIntent)
             runCatching { nm?.notify(LIVE_NOTIF_ID, builder.build()) }
 
             captureLive(
@@ -409,7 +415,7 @@ object TikModDownloader {
                     runCatching { nm?.notify(LIVE_NOTIF_ID, builder.build()) }
                 },
                 onSaving = {
-                    builder.setContentText("מעבד ושומר כ-MP4…").setProgress(0, 0, true)
+                    builder.setContentText(L.t(R.string.notif_rec_processing)).setProgress(0, 0, true)
                     runCatching { nm?.notify(LIVE_NOTIF_ID, builder.build()) }
                 }
             )
@@ -517,7 +523,7 @@ object TikModDownloader {
 
         if (writer == null || durationMs < 500) {
             temp.delete(); File(temp.path + ".json").delete()
-            toast(ctx, "❌ ההקלטה של $owner נכשלה — לא התקבל וידאו מהשידור")
+            toast(ctx, L.t(R.string.toast_rec_failed, owner))
             return null
         }
         return saveLiveFile(ctx, temp, baseName, owner, title, durationMs)
@@ -540,7 +546,7 @@ object TikModDownloader {
                     sanitize("Live_${owner}_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date(f.lastModified())))
                 }
                 XLog.log("LiveRecorder: recovering interrupted recording ${f.name} (${formatSize(f.length())}) for $owner")
-                toast(ctx, "♻️ משחזר הקלטה שנקטעה של $owner…")
+                toast(ctx, L.t(R.string.toast_rec_recovering, owner))
                 activeLiveTemps.add(f.absolutePath)
                 try { saveLiveFile(ctx, f, base, owner, meta?.optString("title").orEmpty(), 0L) }
                 finally { activeLiveTemps.remove(f.absolutePath) }
@@ -560,7 +566,7 @@ object TikModDownloader {
                 val tracks = (0 until ex.trackCount).map { ex.getTrackFormat(it).getString(MediaFormat.KEY_MIME) }
                 ex.release()
                 XLog.log("LiveRecorder[$owner]: MP4 tracks=$tracks duration=${mp4.durationMs}ms")
-                if (tracks.none { it?.startsWith("audio/") == true }) toast(ctx, "⚠️ בשידור הזה לא התקבל ערוץ שמע")
+                if (tracks.none { it?.startsWith("audio/") == true }) toast(ctx, L.t(R.string.toast_no_audio_track))
             }
             try {
                 val ext = if (mp4.hasVideo) "mp4" else "m4a"
@@ -590,7 +596,7 @@ object TikModDownloader {
         if (!localRecording) return
         localRecording = false
         runCatching { liveConn?.disconnect() }
-        toast(context, "⏹️ TikMod: עוצר ושומר את ההקלטה…")
+        toast(context, L.t(R.string.toast_rec_stopping))
     }
 
     // ---------------------------------------------------------------- internals
@@ -610,7 +616,7 @@ object TikModDownloader {
             createChannel(ctx)
             builder = NotificationCompat.Builder(ctx, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.stat_sys_download)
-                .setContentTitle("${kind.emoji} TikMod • מוריד ${kind.label}")
+                .setContentTitle(L.t(R.string.notif_dl_title, kind.emoji, kind.label))
                 .setContentText(subtitle)
                 .setOnlyAlertOnce(true)
                 .setOngoing(true)
@@ -762,7 +768,7 @@ object TikModDownloader {
                 val local = registry(ctx).getString("${Kind.VIDEO.name}_${media.awemeId}", null)?.let { Uri.parse(it) }
                 val usedLocal = local != null && runCatching { r.setDataSource(ctx, local) }.isSuccess
                 if (!usedLocal) {
-                    setStep("מוריד פריים באיכות מלאה")
+                    setStep(L.t(R.string.dl_full_frame))
                     val options = MediaResolver.rankVideoOptions(media.videoOptions, Prefs.DOWNLOAD_QUALITY_MAX, Prefs.VIDEO_CODEC_H264)
                     downloadToTemp(options, temp)
                     r.setDataSource(temp.absolutePath)
@@ -782,16 +788,16 @@ object TikModDownloader {
         }
 
         fun finish(saved: Saved, detail: String) {
-            toast(ctx, "✅ ${kind.label} נשמר • $detail")
+            toast(ctx, L.t(R.string.toast_saved_detail, kind.label, detail))
             if (nm == null) return
             val view = Intent(Intent.ACTION_VIEW).setDataAndType(saved.uri, saved.mime)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
             val share = Intent.createChooser(
                 Intent(Intent.ACTION_SEND).setType(saved.mime).putExtra(Intent.EXTRA_STREAM, saved.uri)
-                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), "שתף"
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), L.t(R.string.action_share)
             ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             val flags = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            builder.setContentTitle("✅ ${kind.label} נשמר")
+            builder.setContentTitle(L.t(R.string.notif_saved, kind.label))
                 .setContentText("${saved.displayName} • $detail")
                 .setSubText(null)
                 .setSmallIcon(android.R.drawable.stat_sys_download_done)
@@ -799,14 +805,14 @@ object TikModDownloader {
                 .setOngoing(false)
                 .setAutoCancel(true)
                 .setContentIntent(PendingIntent.getActivity(ctx, id, view, flags))
-                .addAction(android.R.drawable.ic_menu_share, "שתף", PendingIntent.getActivity(ctx, id + 100000, share, flags))
+                .addAction(android.R.drawable.ic_menu_share, L.t(R.string.action_share), PendingIntent.getActivity(ctx, id + 100000, share, flags))
             runCatching { nm?.notify(id, builder.build()) }
         }
 
         fun fail(reason: String) {
-            toast(ctx, "❌ הורדת ה${kind.label} נכשלה: $reason")
+            toast(ctx, L.t(R.string.toast_dl_failed, kind.label, reason))
             if (nm == null) return
-            builder.setContentTitle("❌ ההורדה נכשלה").setContentText(reason).setProgress(0, 0, false)
+            builder.setContentTitle(L.t(R.string.notif_dl_failed)).setContentText(reason).setProgress(0, 0, false)
                 .setOngoing(false).setAutoCancel(true).setSmallIcon(android.R.drawable.stat_notify_error)
             runCatching { nm?.notify(id, builder.build()) }
         }
@@ -814,8 +820,8 @@ object TikModDownloader {
 
     private fun simpleDownload(context: Context, kind: Kind, media: MediaResolver.AwemeMedia, urls: List<String>, tag: String) {
         val ctx = context.applicationContext ?: context
-        if (urls.isEmpty()) return toast(ctx, "⚠️ לא נמצאה ${kind.label} בפוסט הזה")
-        toast(ctx, "${kind.emoji} TikMod: מוריד ${kind.label} HD…")
+        if (urls.isEmpty()) return toast(ctx, L.t(R.string.toast_kind_missing, kind.label))
+        toast(ctx, L.t(R.string.toast_downloading_kind, kind.emoji, kind.label))
         executor.execute {
             val job = Job(ctx, kind, media.authorNickname.ifBlank { "TikTok" })
             runCatching { job.fetchAndSave(urls, buildFileName(ctx, media, kind, tag), media.authorUniqueId) }
@@ -914,7 +920,7 @@ object TikModDownloader {
             registry(ctx).edit().remove("${kind.name}_$id").apply()
             return false
         }
-        toast(ctx, "♻️ ה${kind.label} הזה כבר הורד — כבה \"דילוג על כפילויות\" כדי להוריד שוב")
+        toast(ctx, L.t(R.string.toast_duplicate, kind.label))
         return true
     }
 
@@ -1071,7 +1077,7 @@ object TikModDownloader {
         if (nm.getNotificationChannel(CHANNEL_ID) == null) {
             nm.createNotificationChannel(
                 NotificationChannel(CHANNEL_ID, "TikMod Downloads", NotificationManager.IMPORTANCE_LOW).apply {
-                    description = "התקדמות הורדות של TikMod"
+                    description = L.t(R.string.channel_downloads_desc)
                 }
             )
         }
@@ -1080,7 +1086,7 @@ object TikModDownloader {
         if (nm.getNotificationChannel(LIVE_CHANNEL_ID) == null) {
             nm.createNotificationChannel(
                 NotificationChannel(LIVE_CHANNEL_ID, "TikMod LIVE Recording", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                    description = "הקלטת שידור חי פעילה, עם כפתור עצירה"
+                    description = L.t(R.string.channel_recording_desc)
                     setSound(null, null)
                     enableVibration(false)
                 }

@@ -1,5 +1,8 @@
 package com.mts.tikmod.hooks
 
+import com.mts.tikmod.R
+import com.mts.tikmod.utils.L
+
 import android.app.Activity
 import android.content.ClipData
 import android.content.Context
@@ -83,14 +86,14 @@ class ShareInterceptHook : BaseHook() {
         val target = send.component?.packageName ?: send.`package`
         val label = target?.let { pkg ->
             runCatching { ctx.packageManager.getApplicationLabel(ctx.packageManager.getApplicationInfo(pkg, 0)).toString() }.getOrNull()
-        } ?: "שיתוף"
+        } ?: L.t(R.string.share_chooser)
         XLog.log("SmartShare: intercept -> target=${send.component ?: target} chooser=$isChooser mode=$mode aweme=${media.awemeId}")
 
         val launcher = WeakReference(ctx)
         TikModDownloader.prepareForShare(ctx, media, label,
             onReady = { uris, mime -> relaunch(launcher.get() ?: ctx.applicationContext, original, send, isChooser, uris, mime, mode, text, media) },
             onFail = { reason ->
-                TikModDownloader.toast(ctx, "⚠️ לא הצלחתי להכין את הקובץ ($reason) — שולח קישור")
+                TikModDownloader.toast(ctx, L.t(R.string.toast_share_prepare_failed, reason))
                 runCatching { (launcher.get() ?: ctx.applicationContext).startActivity(original.putExtra(HANDLED, true).withNewTaskIfNeeded(ctx)) }
             })
         return true
@@ -122,7 +125,7 @@ class ShareInterceptHook : BaseHook() {
             }
         }
         val launch = if (isChooser || (out.component == null && out.`package` == null)) {
-            Intent.createChooser(out, "שליחה").putExtra(HANDLED, true)
+            Intent.createChooser(out, L.t(R.string.share_target_send)).putExtra(HANDLED, true)
         } else out
         launch.withNewTaskIfNeeded(ctx)
         runCatching { ctx.startActivity(launch) }
@@ -130,7 +133,7 @@ class ShareInterceptHook : BaseHook() {
             .onFailure {
                 // The exact activity refused the new type — fall back to the system chooser.
                 XLog.log("SmartShare: direct launch failed (${it.message}), using chooser")
-                runCatching { ctx.startActivity(Intent.createChooser(out.setComponent(null).setPackage(null), "שליחה").putExtra(HANDLED, true).withNewTaskIfNeeded(ctx)) }
+                runCatching { ctx.startActivity(Intent.createChooser(out.setComponent(null).setPackage(null), L.t(R.string.share_target_send)).putExtra(HANDLED, true).withNewTaskIfNeeded(ctx)) }
             }
     }
 

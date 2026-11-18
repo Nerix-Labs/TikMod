@@ -1,5 +1,8 @@
 package com.mts.tikmod.ui
 
+import com.mts.tikmod.R
+import com.mts.tikmod.utils.L
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
@@ -168,7 +171,7 @@ fun IconTile(icon: ImageVector, accent: Color, size: Dp = 40.dp) {
 }
 
 @Composable
-fun Tag(text: String, color: Color = when (text) { "חדש" -> Neon.Lime; "ניסיוני" -> Neon.Amber; else -> Neon.Cyan }) {
+fun Tag(text: String, color: Color = when (text) { L.t(R.string.tag_new) -> Neon.Lime; L.t(R.string.tag_experimental) -> Neon.Amber; else -> Neon.Cyan }) {
     Text(
         text, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Neon.OnAccent,
         modifier = Modifier.clip(CircleShape).background(color).padding(horizontal = 8.dp, vertical = 2.dp)
@@ -350,7 +353,7 @@ fun QuickTile(icon: ImageVector, title: String, key: String, accent: Color, modi
         }
         Spacer(Modifier.height(14.dp))
         Text(title, fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, lineHeight = 17.sp)
-        Text(if (on) "פעיל" else "כבוי", fontSize = 11.sp, color = if (on) accent else Subtle)
+        Text(if (on) L.t(R.string.state_on) else L.t(R.string.state_off), fontSize = 11.sp, color = if (on) accent else Subtle)
     }
 }
 

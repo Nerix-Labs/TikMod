@@ -79,14 +79,23 @@ object DeletedBubble {
     }
 
     /** Chat bubbles: hook the custom view's setTextLayout(Layout) and decorate around the text. */
-    fun installCustom(classLoader: ClassLoader, className: String = "X.19NP") {
+    fun installCustom(classLoader: ClassLoader) {
         runCatching {
-            val cls = XposedHelpers.findClassIfExists(className, classLoader) ?: run {
-                XLog.log("DeletedBubble: $className not found"); return
+            // The layout-drawing text view behind chat bubbles: found by its readable setTextLayout/getTextLayout.
+            // Several view classes draw a pre-built Layout this way; hook each one (the hook only reacts to our marker).
+            val classes = com.mts.tikmod.discovery.Resolver.findClasses("im.bubbleText", classLoader, listOf("X.1JmI")) { b ->
+                b.findClass {
+                    matcher { methods { add { name = "setTextLayout"; paramTypes("android.text.Layout") }; add { name = "getTextLayout" } } }
+                }.map { it.name }.filter { n ->
+                    runCatching { View::class.java.isAssignableFrom(classLoader.loadClass(n)) }.getOrDefault(false)
+                }.take(8)
             }
-            val setters = generateSequence(cls as Class<*>) { it.superclass }
-                .takeWhile { !it.name.startsWith("android.") && !it.name.startsWith("java.") }
-                .flatMap { it.declaredMethods.asSequence() }
+            if (classes.isEmpty()) { XLog.log("DeletedBubble: bubble text view not found"); return }
+            val className = classes.joinToString { it.name }
+            val setters = classes.asSequence().flatMap { cls ->
+                generateSequence(cls as Class<*>) { it.superclass }
+                    .takeWhile { !it.name.startsWith("android.") && !it.name.startsWith("java.") }
+            }.distinct().flatMap { it.declaredMethods.asSequence() }
                 .filter { m -> m.parameterTypes.size == 1 && m.parameterTypes[0] == Layout::class.java && !java.lang.reflect.Modifier.isAbstract(m.modifiers) }
                 .toList()
             setters.forEach { m ->

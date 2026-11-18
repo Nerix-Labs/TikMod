@@ -1,5 +1,8 @@
 package com.mts.tikmod.live
 
+import com.mts.tikmod.R
+import com.mts.tikmod.utils.L
+
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -46,6 +49,26 @@ class LiveWatchService : Service() {
         const val ACTION_STOP_REC = "com.mts.tikmod.action.AUTO_STOP_REC"
         const val ACTION_CHECK_NOW = "com.mts.tikmod.action.AUTO_CHECK_NOW"
         const val ACTION_STOP_SERVICE = "com.mts.tikmod.action.AUTO_STOP_SERVICE"
+        const val ACTION_STOP_ALL = "com.mts.tikmod.action.STOP_ALL_REC"
+        private const val MIN_FREE_TO_START = 1L shl 30        // 1 GB
+        private const val MIN_FREE_WHILE_RECORDING = 300L shl 20 // 300 MB
+
+        /** Record a channel right now (from the TikMod app). The service looks up the stream itself. */
+        fun recordNow(context: Context, handle: String) {
+            val ctx = context.applicationContext
+            runCatching {
+                ContextCompat.startForegroundService(ctx, Intent(ctx, LiveWatchService::class.java)
+                    .setAction(ACTION_RECORD).putExtra(EXTRA_HANDLE, handle))
+            }
+        }
+
+        fun stop(context: Context, handle: String) {
+            runCatching { context.startService(Intent(context, LiveWatchService::class.java).setAction(ACTION_STOP_REC).putExtra(EXTRA_HANDLE, handle)) }
+        }
+
+        fun stopAll(context: Context) {
+            runCatching { context.startService(Intent(context, LiveWatchService::class.java).setAction(ACTION_STOP_ALL)) }
+        }
         const val ACTION_RECORD = "com.mts.tikmod.action.RECORD_LIVE" // manual recording handed over from TikTok
         const val EXTRA_HANDLE = "handle"
         const val EXTRA_TITLE = "title"
@@ -83,6 +106,7 @@ class LiveWatchService : Service() {
     }
 
     private val sessions = ConcurrentHashMap<String, Session>()
+    private val pendingStarts = java.util.concurrent.atomic.AtomicInteger(0)
     private val seenOffline: MutableSet<String> = Collections.synchronizedSet(HashSet())
     private val skipUntilOffline: MutableSet<String> = Collections.synchronizedSet(HashSet())
     private val resumeAllowed: MutableSet<String> = Collections.synchronizedSet(HashSet())
@@ -118,12 +142,29 @@ class LiveWatchService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_STOP_REC -> intent.getStringExtra(EXTRA_HANDLE)?.let { stopRecording(it) }
+            ACTION_STOP_ALL -> sessions.keys.toList().forEach { stopRecording(it) }
             ACTION_RECORD -> {
                 val handle = intent.getStringExtra(EXTRA_HANDLE)?.trim()?.removePrefix("@")?.lowercase().orEmpty()
                 val urls = intent.getStringArrayListExtra(EXTRA_URLS).orEmpty()
-                if (handle.isNotBlank() && urls.isNotEmpty() && !sessions.containsKey(handle)) {
-                    startRecording(handle, handle, intent.getStringExtra(EXTRA_TITLE).orEmpty(), urls, manual = true)
-                    TikModDownloader.toast(this, "🔴 מקליט את @$handle — ממשיך גם אם תסגור את טיקטוק")
+                val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
+                if (handle.isBlank()) return START_STICKY
+                if (sessions.containsKey(handle)) {
+                    TikModDownloader.toast(this, L.t(R.string.toast_already_recording, handle))
+                } else if (urls.isNotEmpty()) {
+                    manualStart(handle, handle, title, urls)
+                } else {
+                    // Started from the TikMod app: look the stream up ourselves.
+                    pendingStarts.incrementAndGet()
+                    thread(name = "TikMod-RecordNow") {
+                        val room = runCatching { LiveApi.fetch(handle, Prefs.string(this, Prefs.KEY_AUTO_LIVE_QUALITY)) }.getOrNull()
+                        when {
+                            room == null -> TikModDownloader.toast(this, L.t(R.string.toast_user_not_found, handle))
+                            !room.live || room.flvUrls.isEmpty() -> TikModDownloader.toast(this, L.t(R.string.toast_not_live, handle))
+                            else -> manualStart(handle, room.nickname, room.title, room.flvUrls)
+                        }
+                        pendingStarts.decrementAndGet()
+                        wake()
+                    }
                 }
                 wake()
             }
@@ -154,7 +195,7 @@ class LiveWatchService : Service() {
         while (alive) {
             val autoOn = Prefs.bool(this, Prefs.KEY_AUTO_LIVE)
             val channels = if (autoOn) Prefs.autoLiveChannels(this) else emptyList()
-            if (channels.isEmpty() && sessions.isEmpty()) { stopSelf(); return }
+            if (channels.isEmpty() && sessions.isEmpty() && pendingStarts.get() == 0) { stopSelf(); return }
             state.keys.retainAll(channels.toSet() + sessions.keys)
             for (h in channels) {
                 if (!alive) return
@@ -187,10 +228,28 @@ class LiveWatchService : Service() {
             st.put("status", if (handle in skipUntilOffline) "skipped" else "live")
             return
         }
+        if (!hasSlot()) { st.put("status", "queued"); return }
+        if (freeSpace() < MIN_FREE_TO_START) { st.put("status", "nospace"); return }
         startRecording(handle, room.nickname, room.title, room.flvUrls, manual = false)
     }
 
     // ------------------------------------------------------------------ recording
+
+    private fun freeSpace() = runCatching { cacheDir.usableSpace }.getOrDefault(Long.MAX_VALUE)
+
+    /** Parallel-recording limit from settings (0 = unlimited). */
+    private fun hasSlot(): Boolean {
+        val max = Prefs.string(this, Prefs.KEY_LIVE_MAX_PARALLEL).toIntOrNull() ?: 0
+        return max <= 0 || sessions.size < max
+    }
+
+    private fun manualStart(handle: String, nickname: String, title: String, urls: List<String>) {
+        if (!hasSlot()) { TikModDownloader.toast(this, L.t(R.string.toast_parallel_limit)); return }
+        if (freeSpace() < MIN_FREE_TO_START) { TikModDownloader.toast(this, L.t(R.string.toast_no_space_start)); return }
+        skipUntilOffline.remove(handle)
+        startRecording(handle, nickname, title, urls, manual = true)
+        TikModDownloader.toast(this, L.t(R.string.toast_recording_started, handle))
+    }
 
     private fun startRecording(handle: String, nickname: String, title: String, initialUrls: List<String>, manual: Boolean) {
         val s = Session(handle, nextNotifId++)
@@ -198,7 +257,8 @@ class LiveWatchService : Service() {
         sessions[handle] = s
         resumeAllowed.add(handle) // a dropped connection while still live may resume
         val st = state.getOrPut(handle) { JSONObject() }
-        st.put("status", "recording").put("since", s.startedAt).put("dur", 0).put("bytes", 0)
+        st.put("status", "recording").put("since", s.startedAt).put("dur", 0).put("bytes", 0).put("manual", manual)
+            .put("nick", nickname).put("title", title)
         writeState()
         acquireWakeLock()
         XLog.log("AutoLive: recording @$handle (${if (manual) "manual" else "auto"})")
@@ -213,16 +273,16 @@ class LiveWatchService : Service() {
         val who = nickname.ifBlank { handle }
         val builder = NotificationCompat.Builder(this, if (progressMode) REC_CHANNEL else EVENTS_CHANNEL)
             .setSmallIcon(android.R.drawable.presence_video_online)
-            .setContentTitle("🔴 $who בשידור חי — מקליט")
+            .setContentTitle(L.t(R.string.notif_live_recording, who))
             .setContentIntent(openAppIntent())
-            .addAction(android.R.drawable.ic_media_pause, "⏹ עצור ושמור", stopPi)
+            .addAction(android.R.drawable.ic_media_pause, L.t(R.string.notif_action_stop), stopPi)
         if (progressMode) {
-            builder.setContentText("מתחבר…").setSubText("@$handle")
+            builder.setContentText(L.t(R.string.notif_connecting)).setSubText("@$handle")
                 .setUsesChronometer(true).setWhen(s.startedAt)
                 .setOngoing(true).setOnlyAlertOnce(true).setSilent(true)
                 .setCategory(NotificationCompat.CATEGORY_PROGRESS)
         } else {
-            builder.setContentText(title.ifBlank { "@$handle" } + " • נשמור לגלריה כשהשידור ייגמר")
+            builder.setContentText(title.ifBlank { "@$handle" } + L.t(R.string.notif_saved_when_ends))
                 .setAutoCancel(true).setCategory(NotificationCompat.CATEGORY_EVENT)
         }
         runCatching { nm.notify(s.notifId, builder.build()) }
@@ -244,7 +304,13 @@ class LiveWatchService : Service() {
                         s.durationMs = d; s.bytes = b
                         st.put("dur", d).put("bytes", b)
                         val now = System.currentTimeMillis()
-                        if (now - lastStateWrite > 2000) { lastStateWrite = now; writeState() }
+                        if (now - lastStateWrite > 2000) {
+                            lastStateWrite = now; writeState()
+                            if (freeSpace() < MIN_FREE_WHILE_RECORDING && !s.stopped) {
+                                s.stopped = true
+                                TikModDownloader.toast(this, L.t(R.string.toast_low_space_stop, handle))
+                            }
+                        }
                         if (progressMode) {
                             builder.setContentText("${TikModDownloader.formatDuration(d)}  •  ${TikModDownloader.formatSize(b)}")
                             runCatching { nm.notify(s.notifId, builder.build()) }
@@ -252,7 +318,7 @@ class LiveWatchService : Service() {
                     },
                     onSaving = {
                         if (progressMode) {
-                            builder.setContentTitle("💾 שומר את השידור של $who…").setContentText("${TikModDownloader.formatDuration(s.durationMs)} • ${TikModDownloader.formatSize(s.bytes)}")
+                            builder.setContentTitle(L.t(R.string.notif_saving_stream, who)).setContentText("${TikModDownloader.formatDuration(s.durationMs)} • ${TikModDownloader.formatSize(s.bytes)}")
                                 .setProgress(0, 0, true).clearActions().setUsesChronometer(false)
                             runCatching { nm.notify(s.notifId, builder.build()) }
                         }
@@ -279,7 +345,7 @@ class LiveWatchService : Service() {
         val s = sessions[handle] ?: return
         s.stopped = true
         runCatching { s.conn?.disconnect() }
-        TikModDownloader.toast(this, "⏹️ עוצר ושומר את השידור של @$handle…")
+        TikModDownloader.toast(this, L.t(R.string.toast_stopping, handle))
     }
 
     // ------------------------------------------------------------------ state & notifications
@@ -304,11 +370,11 @@ class LiveWatchService : Service() {
         )
         return NotificationCompat.Builder(this, WATCH_CHANNEL)
             .setSmallIcon(android.R.drawable.ic_menu_view)
-            .setContentTitle(if (rec.isEmpty()) "TikMod עוקב אחרי $count ערוצים" else "TikMod מקליט ${rec.size} שידורים")
-            .setContentText(if (rec.isEmpty()) "מקליט אוטומטית כשמישהו עולה לשידור חי" else rec.joinToString(" • ") { "@$it" })
+            .setContentTitle(if (rec.isEmpty()) L.p(R.plurals.notif_watching, count) else L.p(R.plurals.notif_recording_count, rec.size))
+            .setContentText(if (rec.isEmpty()) L.t(R.string.notif_watching_text) else rec.joinToString(" • ") { "@$it" })
             .setOngoing(true).setSilent(true).setShowWhen(false)
             .setContentIntent(openAppIntent())
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "כבה מעקב", stopPi)
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, L.t(R.string.notif_action_stop_watch), stopPi)
             .build()
     }
 
@@ -325,15 +391,15 @@ class LiveWatchService : Service() {
     private fun createChannels() {
         val nm = getSystemService(NotificationManager::class.java)
         if (Build.VERSION.SDK_INT < 26) return
-        nm.createNotificationChannel(NotificationChannel(WATCH_CHANNEL, "מעקב שידורים חיים", NotificationManager.IMPORTANCE_MIN).apply {
-            description = "התראה קבועה כשהמעקב האוטומטי פעיל"
+        nm.createNotificationChannel(NotificationChannel(WATCH_CHANNEL, L.t(R.string.channel_watch), NotificationManager.IMPORTANCE_MIN).apply {
+            description = L.t(R.string.channel_watch_desc)
         })
-        nm.createNotificationChannel(NotificationChannel(EVENTS_CHANNEL, "שידור חי התחיל", NotificationManager.IMPORTANCE_HIGH).apply {
-            description = "התראה כשערוץ במעקב עולה לשידור וההקלטה מתחילה"
+        nm.createNotificationChannel(NotificationChannel(EVENTS_CHANNEL, L.t(R.string.channel_events), NotificationManager.IMPORTANCE_HIGH).apply {
+            description = L.t(R.string.channel_events_desc)
         })
         if (nm.getNotificationChannel(REC_CHANNEL) == null) {
             nm.createNotificationChannel(NotificationChannel(REC_CHANNEL, "TikMod LIVE Recording", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                description = "הקלטת שידור חי פעילה, עם כפתור עצירה"
+                description = L.t(R.string.channel_recording_desc)
                 setSound(null, null); enableVibration(false)
             })
         }
