@@ -179,7 +179,7 @@
     <string name="chat_hide_typing">\"Yazıyor…\" gizle</string>
     <string name="chat_hide_typing_desc">Karşı taraf yazdığınızı görmez</string>
     <string name="chat_hide_online">\"Şu an aktif\" gizle</string>
-    <string name="chat_hide_online_desc">Bağlanma ve bağlantı kesmeyi sunucuya bildirmez</string>
+    <string name="chat_hide_online_desc">Başkaları sizi aktif görmez, siz kimin aktif olduğunu görmeye devam edersiniz</string>
     <string name="tag_experimental">Deneysel</string>
     <string name="chat_deleted">Silinen mesajlar</string>
     <string name="chat_deleted_sub">Küçük bir çöp kutusu işaretiyle görünür kalır</string>
@@ -393,4 +393,19 @@
     <string name="action_close">Kapat</string>
     <string name="language_title">Dil</string>
     <string name="language_system">Telefonun dili</string>
+    <string name="chat_hide_views">İzlemeleri bildirme</string>
+    <string name="chat_hide_views_desc">İzlediğiniz videolar bildirilmez: izlenme sayılmaz, geçmiş tutulmaz. Öneriler daha az isabetli olabilir</string>
+    <string name="live_history_title">LIVE geçmişi</string>
+    <string name="live_history_sub">TikTok\'ta girdiğiniz yayınlar</string>
+    <string name="live_history_toggle">LIVE geçmişini tut</string>
+    <string name="live_history_toggle_desc">Yalnızca bu telefonda saklanır. TikTok\'a ek bir şey bildirilmez</string>
+    <string name="live_history_empty">Henüz bir şey yok. TikTok\'ta girdiğiniz yayınlar burada görünür</string>
+    <string name="live_history_clear_q">LIVE geçmişi temizlensin mi?</string>
+    <string name="live_history_follow">Takip edilen kanallara ekle</string>
+    <string name="cl420_history">LIVE geçmişi</string>
+    <string name="cl420_history_desc">TikTok\'ta girdiğiniz yayınların listesi; yalnızca telefonunuzda saklanır. Bir kanalı tek dokunuşla otomatik kayda ekleyin.</string>
+    <string name="cl420_online">\"Şu anda aktif\" gerçekten gizli</string>
+    <string name="cl420_online_desc">Durumunuz artık TikTok\'a bildirilmez, siz kimin aktif olduğunu görmeye devam edersiniz.</string>
+    <string name="cl420_views">İzlemeleri bildirme</string>
+    <string name="cl420_views_desc">İsteğe bağlı: izlediğiniz videolar bildirilmez; izlenme sayılmaz ve geçmişe girmez.</string>
 </resources>

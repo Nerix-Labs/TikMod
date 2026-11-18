@@ -2,6 +2,22 @@
 
 All notable changes to TikMod. Versions follow [semantic versioning](https://semver.org).
 
+## 4.2.0 — 2026-11-18
+
+### Added
+- **LIVE history.** The streams you entered in TikTok, listed in the Live screen and stored on the phone only.
+  A stream counts once the LIVE room screen has been playing it for a few seconds, so previews and preloaded
+  rooms are ignored. Any channel can be added to auto-recording from the list.
+- **Don't report views** (experimental, off by default). Per-video play reports are not sent.
+
+### Changed
+- **"Active now" is hidden at the HTTP layer.** Only your own status report is blocked; other people's status
+  still loads.
+
+### Notes
+- Hiding that you entered a LIVE room was researched and is not possible from Java hooks: the room only opens
+  with a valid answer to the enter request, which is also what registers the viewer.
+
 ## 4.1.0 — 2026-11-18
 
 ### Added

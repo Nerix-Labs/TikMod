@@ -179,7 +179,7 @@
     <string name="chat_hide_typing">Ocultar \"digitando…\"</string>
     <string name="chat_hide_typing_desc">A outra pessoa não vê que você está digitando</string>
     <string name="chat_hide_online">Ocultar \"Ativo agora\"</string>
-    <string name="chat_hide_online_desc">Não informa ao servidor quando você conecta ou desconecta</string>
+    <string name="chat_hide_online_desc">Os outros não veem você ativo, e você continua vendo quem está</string>
     <string name="tag_experimental">Experimental</string>
     <string name="chat_deleted">Mensagens apagadas</string>
     <string name="chat_deleted_sub">Elas continuam visíveis com um pequeno ícone de lixeira</string>
@@ -404,4 +404,19 @@
     <string name="action_close">Fechar</string>
     <string name="language_title">Idioma</string>
     <string name="language_system">Idioma do telefone</string>
+    <string name="chat_hide_views">Não informar visualizações</string>
+    <string name="chat_hide_views_desc">Os vídeos que você assiste não são informados: sem contar a visualização e sem histórico. As recomendações podem ficar menos precisas</string>
+    <string name="live_history_title">Histórico de LIVE</string>
+    <string name="live_history_sub">Lives em que você entrou no TikTok</string>
+    <string name="live_history_toggle">Manter histórico de LIVE</string>
+    <string name="live_history_toggle_desc">Salvo apenas neste telefone. Nada a mais é enviado ao TikTok</string>
+    <string name="live_history_empty">Nada ainda. As lives em que você entrar no TikTok aparecem aqui</string>
+    <string name="live_history_clear_q">Limpar o histórico de LIVE?</string>
+    <string name="live_history_follow">Adicionar aos canais seguidos</string>
+    <string name="cl420_history">Histórico de LIVE</string>
+    <string name="cl420_history_desc">A lista das lives em que você entrou no TikTok, salva só no seu telefone. Adicione um canal à gravação automática com um toque.</string>
+    <string name="cl420_online">\"Ativo agora\" realmente oculto</string>
+    <string name="cl420_online_desc">Seu status não é mais informado ao TikTok, e você continua vendo quem está ativo.</string>
+    <string name="cl420_views">Não informar visualizações</string>
+    <string name="cl420_views_desc">Opcional: os vídeos que você assiste não são informados, então não contam como visualização nem entram no histórico.</string>
 </resources>

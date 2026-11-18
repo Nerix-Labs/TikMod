@@ -179,7 +179,7 @@
     <string name="chat_hide_typing">הסתרת \"מקליד/ה\"</string>
     <string name="chat_hide_typing_desc">הצד השני לא רואה שאתה כותב</string>
     <string name="chat_hide_online">הסתרת \"פעיל/ה עכשיו\"</string>
-    <string name="chat_hide_online_desc">לא מדווח לשרת על התחברות והתנתקות</string>
+    <string name="chat_hide_online_desc">אחרים לא רואים שאתה פעיל, ואתה עדיין רואה מי פעיל</string>
     <string name="tag_experimental">ניסיוני</string>
     <string name="chat_deleted">הודעות שנמחקו</string>
     <string name="chat_deleted_sub">נשארות אצלך עם סימן פח קטן</string>
@@ -415,4 +415,19 @@
     <string name="action_close">סגירה</string>
     <string name="language_title">שפה</string>
     <string name="language_system">לפי הטלפון</string>
+    <string name="chat_hide_views">לא לדווח על צפיות</string>
+    <string name="chat_hide_views_desc">סרטונים שצפית בהם לא מדווחים: בלי ספירת צפייה ובלי היסטוריית צפייה. ההמלצות עלולות להיות פחות מדויקות</string>
+    <string name="live_history_title">היסטוריית לייב</string>
+    <string name="live_history_sub">שידורים שנכנסת אליהם בטיקטוק</string>
+    <string name="live_history_toggle">לשמור היסטוריית לייב</string>
+    <string name="live_history_toggle_desc">נשמרת רק בטלפון הזה. טיקטוק לא מקבל שום דיווח נוסף</string>
+    <string name="live_history_empty">עדיין אין כלום. שידורים שתיכנס אליהם בטיקטוק יופיעו כאן</string>
+    <string name="live_history_clear_q">לנקות את היסטוריית הלייב?</string>
+    <string name="live_history_follow">הוספה לערוצים במעקב</string>
+    <string name="cl420_history">היסטוריית לייב</string>
+    <string name="cl420_history_desc">רשימה של השידורים שנכנסת אליהם בטיקטוק, שנשמרת רק בטלפון. אפשר להוסיף ערוץ להקלטה אוטומטית בלחיצה.</string>
+    <string name="cl420_online">\"פעיל/ה עכשיו\" מוסתר באמת</string>
+    <string name="cl420_online_desc">הסטטוס שלך כבר לא מדווח לטיקטוק, ואתה עדיין רואה מי פעיל.</string>
+    <string name="cl420_views">לא לדווח על צפיות</string>
+    <string name="cl420_views_desc">אופציונלי: סרטונים שצפית בהם לא מדווחים, אז הם לא נספרים כצפייה ולא נכנסים להיסטוריית הצפייה.</string>
 </resources>

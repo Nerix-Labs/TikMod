@@ -660,7 +660,13 @@ private fun LiveScreen() {
         }
     }
 
-    Appear(4) {
+    Appear(4) { LiveHistorySection(channels, onFollow = { h ->
+        channels = (channels + h).distinct()
+        Prefs.setAutoLiveChannels(ctx, channels)
+        LiveWatchService.sync(ctx)
+    }) }
+
+    Appear(5) {
         val pm = ctx.getSystemService(PowerManager::class.java)
         var exempt by remember { mutableStateOf(pm.isIgnoringBatteryOptimizations(ctx.packageName)) }
         Section(Icons.Rounded.BatteryChargingFull, L.t(R.string.live_reliability), accent = Neon.Lime) {
@@ -675,6 +681,54 @@ private fun LiveScreen() {
             }
             Hint(L.t(R.string.live_saved_hint))
         }
+    }
+}
+
+/** LIVE streams I entered in TikTok (recorded by the module, kept on this phone only). */
+@Composable
+private fun LiveHistorySection(followed: List<String>, onFollow: (String) -> Unit) {
+    val ctx = LocalContext.current
+    var list by remember { mutableStateOf(Prefs.readLiveHistory(ctx)) }
+    var showAll by remember { mutableStateOf(false) }
+    var confirmClear by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { while (true) { delay(4000); list = Prefs.readLiveHistory(ctx) } }
+    if (confirmClear) AlertDialog(
+        onDismissRequest = { confirmClear = false },
+        icon = { Icon(Icons.Rounded.DeleteSweep, null) },
+        title = { Text(L.t(R.string.live_history_clear_q)) },
+        confirmButton = { TextButton(onClick = { Prefs.clearLiveHistory(ctx); list = emptyList(); confirmClear = false }) { Text(L.t(R.string.action_clear)) } },
+        dismissButton = { TextButton(onClick = { confirmClear = false }) { Text(L.t(R.string.action_cancel)) } }
+    )
+    Section(Icons.Rounded.History, L.t(R.string.live_history_title), L.t(R.string.live_history_sub), accent = Neon.Pink, collapsible = true, initiallyExpanded = true) {
+        ToggleRow(L.t(R.string.live_history_toggle), L.t(R.string.live_history_toggle_desc), Prefs.KEY_LIVE_HISTORY, Icons.Rounded.ManageHistory, Neon.Pink)
+        if (list.isEmpty()) Hint(L.t(R.string.live_history_empty))
+        (if (showAll) list else list.take(6)).forEach { e ->
+            val handle = e.optString("handle")
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 3.dp).clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+                    .clickable {
+                        runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.tiktok.com/@$handle/live")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                    }.padding(horizontal = 12.dp, vertical = 9.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    Modifier.size(38.dp).clip(CircleShape).background(Brush.linearGradient(listOf(Neon.Pink, Neon.Violet))),
+                    contentAlignment = Alignment.Center
+                ) { Text(handle.take(1).uppercase(), fontWeight = FontWeight.Black, color = Neon.OnAccent) }
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text("@$handle", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    val time = DateUtils.getRelativeTimeSpanString(e.optLong("time"), System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString()
+                    Text(listOf(e.optString("title"), time).filter { it.isNotBlank() }.joinToString(" • "), fontSize = 11.5.sp, color = Subtle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                if (handle.isNotBlank() && handle.lowercase() !in followed) IconButton(onClick = { onFollow(handle.lowercase()) }) {
+                    Icon(Icons.Rounded.PersonAddAlt1, L.t(R.string.live_history_follow), tint = Neon.Pink)
+                }
+            }
+        }
+        if (list.size > 6) TextButton(onClick = { showAll = !showAll }) { Text(if (showAll) L.t(R.string.history_show_less) else L.p(R.plurals.history_show_all, list.size)) }
+        if (list.isNotEmpty()) TextButton(onClick = { confirmClear = true }, modifier = Modifier.align(Alignment.End)) { Text(L.t(R.string.history_clear_button)) }
     }
 }
 
@@ -845,7 +899,8 @@ private fun ChatScreen() {
     Appear(2) {
         Section(Icons.Rounded.VisibilityOff, L.t(R.string.chat_presence), accent = Neon.Violet) {
             ToggleRow(L.t(R.string.chat_hide_typing), L.t(R.string.chat_hide_typing_desc), Prefs.KEY_DISABLE_TYPING_INDICATOR, Icons.Rounded.KeyboardHide, Neon.Violet)
-            ToggleRow(L.t(R.string.chat_hide_online), L.t(R.string.chat_hide_online_desc), Prefs.KEY_HIDE_ONLINE_STATUS, Icons.Rounded.WifiOff, Neon.Violet, badge = L.t(R.string.tag_experimental))
+            ToggleRow(L.t(R.string.chat_hide_online), L.t(R.string.chat_hide_online_desc), Prefs.KEY_HIDE_ONLINE_STATUS, Icons.Rounded.WifiOff, Neon.Violet)
+            ToggleRow(L.t(R.string.chat_hide_views), L.t(R.string.chat_hide_views_desc), Prefs.KEY_HIDE_VIEWS, Icons.Rounded.PlayDisabled, Neon.Violet, badge = L.t(R.string.tag_experimental))
         }
     }
     Appear(3) {

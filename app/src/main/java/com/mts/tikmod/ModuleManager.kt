@@ -24,6 +24,7 @@ object ModuleManager {
             AntiRecallHook(),
             AdsHook(),
             ChatPrivacyHook(),
+            PresenceHook(),
             RegionHook(),
             VideoControlHook(),
             AutoScrollHook(),
@@ -66,6 +67,7 @@ object ModuleManager {
             }
 
             val className = activity.javaClass.name
+            com.mts.tikmod.utils.MediaContext.liveScreenVisible = className.contains("LivePlay")
             if (className.contains("Setting", ignoreCase = true)) {
                 XLog.log("TikMod Settings Activity Detected: $className")
                 (hooks.firstOrNull { it is SettingsHook } as? SettingsHook)?.injectIntoActivity(activity)

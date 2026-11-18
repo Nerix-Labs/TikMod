@@ -179,7 +179,7 @@
     <string name="chat_hide_typing">隐藏\"正在输入…\"</string>
     <string name="chat_hide_typing_desc">对方不会看到你正在输入</string>
     <string name="chat_hide_online">隐藏\"在线\"</string>
-    <string name="chat_hide_online_desc">不向服务器报告上线和离线</string>
+    <string name="chat_hide_online_desc">别人看不到你在线，你仍能看到谁在线</string>
     <string name="tag_experimental">实验性</string>
     <string name="chat_deleted">已撤回消息</string>
     <string name="chat_deleted_sub">保留并显示一个小垃圾桶标记</string>
@@ -382,4 +382,19 @@
     <string name="action_close">关闭</string>
     <string name="language_title">语言</string>
     <string name="language_system">跟随系统</string>
+    <string name="chat_hide_views">不上报观看记录</string>
+    <string name="chat_hide_views_desc">你看过的视频不会被上报：不计入播放量，也不留观看历史。推荐可能会变得不够准确</string>
+    <string name="live_history_title">直播历史</string>
+    <string name="live_history_sub">你在 TikTok 进入过的直播</string>
+    <string name="live_history_toggle">保留直播历史</string>
+    <string name="live_history_toggle_desc">仅保存在本机，不会向 TikTok 额外上报</string>
+    <string name="live_history_empty">还没有记录。你在 TikTok 进入的直播会显示在这里</string>
+    <string name="live_history_clear_q">清除直播历史？</string>
+    <string name="live_history_follow">添加到关注频道</string>
+    <string name="cl420_history">直播历史</string>
+    <string name="cl420_history_desc">记录你在 TikTok 进入过的直播，仅保存在手机上。一键把频道加入自动录制。</string>
+    <string name="cl420_online">真正隐藏“在线”状态</string>
+    <string name="cl420_online_desc">你的在线状态不再上报给 TikTok，而你仍能看到谁在线。</string>
+    <string name="cl420_views">不上报观看记录</string>
+    <string name="cl420_views_desc">可选：你看过的视频不会被上报，不计入播放量，也不进入观看历史。</string>
 </resources>

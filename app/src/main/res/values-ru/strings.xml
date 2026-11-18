@@ -179,7 +179,7 @@
     <string name="chat_hide_typing">Скрыть «печатает…»</string>
     <string name="chat_hide_typing_desc">Собеседник не увидит, что вы печатаете</string>
     <string name="chat_hide_online">Скрыть «В сети»</string>
-    <string name="chat_hide_online_desc">Не сообщает серверу о подключении и отключении</string>
+    <string name="chat_hide_online_desc">Другие не видят, что вы в сети, а вы по-прежнему видите, кто в сети</string>
     <string name="tag_experimental">Экспериментально</string>
     <string name="chat_deleted">Удалённые сообщения</string>
     <string name="chat_deleted_sub">Остаются с небольшой пометкой-корзиной</string>
@@ -415,4 +415,19 @@
     <string name="action_close">Закрыть</string>
     <string name="language_title">Язык</string>
     <string name="language_system">Как на телефоне</string>
+    <string name="chat_hide_views">Не сообщать о просмотрах</string>
+    <string name="chat_hide_views_desc">Просмотренные видео не отправляются: без счётчика просмотров и без истории. Рекомендации могут стать менее точными</string>
+    <string name="live_history_title">История LIVE</string>
+    <string name="live_history_sub">Эфиры, в которые вы заходили в TikTok</string>
+    <string name="live_history_toggle">Вести историю LIVE</string>
+    <string name="live_history_toggle_desc">Хранится только на этом телефоне. В TikTok ничего дополнительно не отправляется</string>
+    <string name="live_history_empty">Пока пусто. Здесь появятся эфиры, в которые вы зайдёте в TikTok</string>
+    <string name="live_history_clear_q">Очистить историю LIVE?</string>
+    <string name="live_history_follow">Добавить в отслеживаемые каналы</string>
+    <string name="cl420_history">История LIVE</string>
+    <string name="cl420_history_desc">Список эфиров, в которые вы заходили в TikTok. Хранится только на телефоне. Канал можно добавить в автозапись одним касанием.</string>
+    <string name="cl420_online">«В сети» скрыто по-настоящему</string>
+    <string name="cl420_online_desc">Ваш статус больше не отправляется в TikTok, а вы по-прежнему видите, кто в сети.</string>
+    <string name="cl420_views">Не сообщать о просмотрах</string>
+    <string name="cl420_views_desc">По желанию: просмотренные видео не отправляются, не засчитываются как просмотр и не попадают в историю.</string>
 </resources>

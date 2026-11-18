@@ -180,7 +180,7 @@
     <string name="chat_hide_typing">Hide \"typing…\"</string>
     <string name="chat_hide_typing_desc">The other side won\'t see that you\'re typing</string>
     <string name="chat_hide_online">Hide \"Active now\"</string>
-    <string name="chat_hide_online_desc">Doesn\'t report connecting and disconnecting to the server</string>
+    <string name="chat_hide_online_desc">Others don\'t see you as active, and you still see who is</string>
     <string name="tag_experimental">Experimental</string>
     <string name="chat_deleted">Deleted messages</string>
     <string name="chat_deleted_sub">They stay with a small trash sign</string>
@@ -394,4 +394,19 @@
     <string name="action_close">Close</string>
     <string name="language_title">Language</string>
     <string name="language_system">Same as the phone</string>
+    <string name="chat_hide_views">Don\'t report views</string>
+    <string name="chat_hide_views_desc">Videos you watch aren\'t reported: no view count and no watch history. Recommendations may get less accurate</string>
+    <string name="live_history_title">LIVE history</string>
+    <string name="live_history_sub">Streams you entered in TikTok</string>
+    <string name="live_history_toggle">Keep LIVE history</string>
+    <string name="live_history_toggle_desc">Saved on this phone only. TikTok isn\'t told anything extra</string>
+    <string name="live_history_empty">Nothing yet. Streams you enter in TikTok will show up here</string>
+    <string name="live_history_clear_q">Clear the LIVE history?</string>
+    <string name="live_history_follow">Add to followed channels</string>
+    <string name="cl420_history">LIVE history</string>
+    <string name="cl420_history_desc">A list of the live streams you entered in TikTok, kept on your phone only. Add a channel to auto-record with one tap.</string>
+    <string name="cl420_online">Truly hidden \"Active now\"</string>
+    <string name="cl420_online_desc">Your active status is no longer reported to TikTok, and you still see who is active.</string>
+    <string name="cl420_views">Don\'t report views</string>
+    <string name="cl420_views_desc">Optional: videos you watch aren\'t reported, so they don\'t count as views or enter your watch history.</string>
 </resources>

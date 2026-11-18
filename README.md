@@ -28,6 +28,7 @@ Made by **Nerix Labs**.
 **LIVE**
 - Record any live stream from the share sheet into a standard MP4 that plays everywhere
 - Record now: start recording any live stream from the app, and record several streams in parallel
+- LIVE history: the streams you entered, kept on the phone only
 - Auto-record: follow channels and recording starts by itself when they go live, even when TikTok is closed
 - Recordings run in TikMod's own foreground service, so they keep going after TikTok is swiped away
 

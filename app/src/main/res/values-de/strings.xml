@@ -179,7 +179,7 @@
     <string name="chat_hide_typing">„Schreibt…“ ausblenden</string>
     <string name="chat_hide_typing_desc">Die andere Seite sieht nicht, dass du schreibst</string>
     <string name="chat_hide_online">„Gerade aktiv“ ausblenden</string>
-    <string name="chat_hide_online_desc">Meldet dem Server kein Verbinden und Trennen</string>
+    <string name="chat_hide_online_desc">Andere sehen dich nicht als aktiv, du siehst weiterhin, wer aktiv ist</string>
     <string name="tag_experimental">Experimentell</string>
     <string name="chat_deleted">Gelöschte Nachrichten</string>
     <string name="chat_deleted_sub">Bleiben mit einem kleinen Papierkorb-Symbol erhalten</string>
@@ -393,4 +393,19 @@
     <string name="action_close">Schließen</string>
     <string name="language_title">Sprache</string>
     <string name="language_system">Wie das Telefon</string>
+    <string name="chat_hide_views">Aufrufe nicht melden</string>
+    <string name="chat_hide_views_desc">Angesehene Videos werden nicht gemeldet: kein gezählter Aufruf, kein Verlauf. Empfehlungen können ungenauer werden</string>
+    <string name="live_history_title">LIVE-Verlauf</string>
+    <string name="live_history_sub">Streams, die du in TikTok geöffnet hast</string>
+    <string name="live_history_toggle">LIVE-Verlauf speichern</string>
+    <string name="live_history_toggle_desc">Nur auf diesem Telefon gespeichert. An TikTok wird nichts zusätzlich gemeldet</string>
+    <string name="live_history_empty">Noch nichts. Streams, die du in TikTok öffnest, erscheinen hier</string>
+    <string name="live_history_clear_q">LIVE-Verlauf löschen?</string>
+    <string name="live_history_follow">Zu beobachteten Kanälen hinzufügen</string>
+    <string name="cl420_history">LIVE-Verlauf</string>
+    <string name="cl420_history_desc">Eine Liste der Streams, die du in TikTok geöffnet hast – nur auf deinem Telefon gespeichert. Kanäle mit einem Tipp zur automatischen Aufnahme hinzufügen.</string>
+    <string name="cl420_online">„Jetzt aktiv“ wirklich verborgen</string>
+    <string name="cl420_online_desc">Dein Status wird nicht mehr an TikTok gemeldet, und du siehst weiterhin, wer aktiv ist.</string>
+    <string name="cl420_views">Aufrufe nicht melden</string>
+    <string name="cl420_views_desc">Optional: Angesehene Videos werden nicht gemeldet, zählen also nicht als Aufruf und landen nicht im Verlauf.</string>
 </resources>

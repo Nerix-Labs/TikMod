@@ -44,6 +44,12 @@ class TikModProvider : ContentProvider() {
                     }
                     Bundle().apply { putBoolean("success", true) }
                 }
+                "add_live_history" -> {
+                    if (!arg.isNullOrBlank() && prefs.getBoolean(Prefs.KEY_LIVE_HISTORY, true)) {
+                        runCatching { Prefs.appendLiveHistory(prefs, JSONObject(arg)) }
+                    }
+                    Bundle().apply { putBoolean("success", true) }
+                }
                 "add_stat" -> {
                     val key = arg
                     if (key != null && key.startsWith("stat_")) Prefs.addStat(prefs, key, extras?.getInt("n", 1) ?: 1)

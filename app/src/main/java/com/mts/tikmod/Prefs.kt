@@ -97,6 +97,9 @@ object Prefs {
     const val AUTO_LIVE_NOTIFY_MINIMAL = "minimal"   // only "started" and "saved"
     const val KEY_AUTO_LIVE_INTERVAL = "key_auto_live_interval" // seconds
     const val KEY_AUTO_LIVE_QUALITY = "key_auto_live_quality"   // origin | uhd | hd | sd
+    const val KEY_HIDE_VIEWS = "key_hide_views"                   // don't report the videos I watch
+    const val KEY_LIVE_HISTORY = "key_live_history"               // keep a list of LIVE streams I entered
+    const val KEY_LIVE_HISTORY_JSON = "live_history_json"         // the list itself (not exported)
     const val KEY_APP_LANGUAGE = "key_app_language"             // "system" or a language tag (see L.LANGUAGES)
     const val KEY_AUTO_UPDATE_CHECK = "key_auto_update_check"
     const val KEY_LIVE_MAX_PARALLEL = "key_live_max_parallel"   // 0 = unlimited
@@ -186,7 +189,9 @@ object Prefs {
         KEY_AUTO_LIVE_QUALITY to "origin",
         KEY_LIVE_MAX_PARALLEL to "0",
         KEY_AUTO_UPDATE_CHECK to true,
-        KEY_APP_LANGUAGE to "system"
+        KEY_APP_LANGUAGE to "system",
+        KEY_LIVE_HISTORY to true,
+        KEY_HIDE_VIEWS to false
     )
 
     @Volatile private var cache: Map<String, Any> = HashMap(SPECS)
@@ -412,6 +417,28 @@ object Prefs {
 
     fun writeAutoLiveState(context: Context, json: JSONObject) {
         getSP(context)?.edit()?.putString(KEY_AUTO_LIVE_STATE, json.toString())?.apply()
+    }
+
+    // ---- LIVE history (streams I entered; stays on this phone) ----
+    fun appendLiveHistory(sp: SharedPreferences, entry: JSONObject) {
+        synchronized(this) {
+            val arr = runCatching { org.json.JSONArray(sp.getString(KEY_LIVE_HISTORY_JSON, "[]")) }.getOrDefault(org.json.JSONArray())
+            val room = entry.optString("room")
+            // The same broadcast is listed once.
+            if ((0 until arr.length()).any { arr.optJSONObject(it)?.optString("room") == room }) return
+            val out = org.json.JSONArray().put(entry)
+            for (i in 0 until minOf(arr.length(), 299)) out.put(arr.get(i))
+            sp.edit().putString(KEY_LIVE_HISTORY_JSON, out.toString()).apply()
+        }
+    }
+
+    fun readLiveHistory(context: Context): List<JSONObject> {
+        val arr = runCatching { org.json.JSONArray(getSP(context)?.getString(KEY_LIVE_HISTORY_JSON, "[]")) }.getOrNull() ?: return emptyList()
+        return (0 until arr.length()).mapNotNull { arr.optJSONObject(it) }
+    }
+
+    fun clearLiveHistory(context: Context) {
+        getSP(context)?.edit()?.putString(KEY_LIVE_HISTORY_JSON, "[]")?.apply()
     }
 
     // ---- Download history (stored in TikMod's own prefs, written via the provider) ----

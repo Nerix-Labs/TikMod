@@ -179,7 +179,7 @@
     <string name="chat_hide_typing">إخفاء \"يكتب…\"</string>
     <string name="chat_hide_typing_desc">لن يرى الطرف الآخر أنك تكتب</string>
     <string name="chat_hide_online">إخفاء \"نشط الآن\"</string>
-    <string name="chat_hide_online_desc">لا يُبلغ الخادم بالاتصال وقطع الاتصال</string>
+    <string name="chat_hide_online_desc">لا يراك الآخرون نشطًا، وتبقى ترى من هو نشط</string>
     <string name="tag_experimental">تجريبي</string>
     <string name="chat_deleted">الرسائل المحذوفة</string>
     <string name="chat_deleted_sub">تبقى مع علامة سلة مهملات صغيرة</string>
@@ -437,4 +437,19 @@
     <string name="action_close">إغلاق</string>
     <string name="language_title">اللغة</string>
     <string name="language_system">لغة الهاتف</string>
+    <string name="chat_hide_views">عدم الإبلاغ عن المشاهدات</string>
+    <string name="chat_hide_views_desc">لا يتم الإبلاغ عن الفيديوهات التي تشاهدها: بلا عدّ للمشاهدة وبلا سجل مشاهدة. قد تصبح التوصيات أقل دقة</string>
+    <string name="live_history_title">سجل البث المباشر</string>
+    <string name="live_history_sub">البثوث التي دخلتها في TikTok</string>
+    <string name="live_history_toggle">حفظ سجل البث</string>
+    <string name="live_history_toggle_desc">يُحفظ على هذا الهاتف فقط. لا يُرسَل أي شيء إضافي إلى TikTok</string>
+    <string name="live_history_empty">لا شيء بعد. ستظهر هنا البثوث التي تدخلها في TikTok</string>
+    <string name="live_history_clear_q">مسح سجل البث؟</string>
+    <string name="live_history_follow">إضافة إلى القنوات المتابَعة</string>
+    <string name="cl420_history">سجل البث المباشر</string>
+    <string name="cl420_history_desc">قائمة بالبثوث التي دخلتها في TikTok، محفوظة على هاتفك فقط. أضف قناة للتسجيل التلقائي بنقرة واحدة.</string>
+    <string name="cl420_online">إخفاء حقيقي لـ\"نشط الآن\"</string>
+    <string name="cl420_online_desc">لم تعد حالتك تُرسَل إلى TikTok، وما زلت ترى من هو نشط.</string>
+    <string name="cl420_views">عدم الإبلاغ عن المشاهدات</string>
+    <string name="cl420_views_desc">اختياري: لا يتم الإبلاغ عن الفيديوهات التي تشاهدها، فلا تُحتسب مشاهدة ولا تدخل سجل المشاهدة.</string>
 </resources>

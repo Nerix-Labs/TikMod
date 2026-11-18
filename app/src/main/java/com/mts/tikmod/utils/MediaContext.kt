@@ -1,5 +1,7 @@
 package com.mts.tikmod.utils
 
+import com.mts.tikmod.Prefs
+
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 
@@ -66,9 +68,42 @@ object MediaContext {
     @Volatile private var lastRoomObj: WeakReference<Any>? = null
     @Volatile private var lastStreamObj: WeakReference<Any>? = null
 
+    // ---- LIVE history: which stream is really being watched
+    /** True while TikTok's LIVE room screen is in front (set from the activity lifecycle). */
+    @Volatile var liveScreenVisible = false
+    private class Watch(var first: Long, var last: Long)
+    private val watching = ConcurrentHashMap<String, Watch>()
+    private val recorded = ConcurrentHashMap<String, Boolean>()
+    @Volatile private var lastPolledId: String? = null
+
+    /**
+     * TikTok also loads rooms it only previews or preloads. A room counts as "entered" when the player keeps
+     * polling it for a few seconds in a row while the LIVE room screen is open.
+     */
+    private fun touch(id: String) {
+        if (!liveScreenVisible) { watching.remove(id); return }
+        val now = System.currentTimeMillis()
+        val w = watching.getOrPut(id) { Watch(now, now) }
+        if (now - w.last > 3000) w.first = now
+        w.last = now
+        if (now - w.first < 6000 || recorded.putIfAbsent(id, true) != null) return
+        val live = rooms[id] ?: run { recorded.remove(id); return }
+        if (watching.size > 32) watching.clear()
+        val ctx = Prefs.hostContext ?: return
+        if (!Prefs.bool(ctx, Prefs.KEY_LIVE_HISTORY)) return
+        Thread({
+            runCatching {
+                val entry = org.json.JSONObject().put("room", id).put("handle", live.owner).put("title", live.title)
+                    .put("time", System.currentTimeMillis())
+                ctx.contentResolver.call(android.net.Uri.parse(Prefs.PROVIDER_URI), "add_live_history", entry.toString(), null)
+                XLog.log("LiveHistory: entered @${live.owner}")
+            }
+        }, "TikMod-LiveHistory").start()
+    }
+
     fun onLiveRoom(room: Any, streamUrl: Any?) {
         // Hot path: the player polls getStreamUrl() constantly on the same objects.
-        if (lastRoomObj?.get() === room && lastStreamObj?.get() === streamUrl) return
+        if (lastRoomObj?.get() === room && lastStreamObj?.get() === streamUrl) { lastPolledId?.let { touch(it) }; return }
         lastRoomObj = WeakReference(room)
         lastStreamObj = streamUrl?.let { WeakReference(it) }
         runCatching {
@@ -86,6 +121,8 @@ object MediaContext {
                 urls = urls
             )
             lastRoomId = id
+            lastPolledId = id
+            touch(id)
             if (rooms.size > 64) rooms.keys.take(rooms.size - 64).forEach { rooms.remove(it) }
         }
     }
