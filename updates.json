@@ -1,6 +1,13 @@
 {
   "releases": [
     {
+      "version": "4.5.1",
+      "date": "2026-11-19",
+      "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.5.1/TikMod-4.5.1.apk",
+      "size": 23206880,
+      "notes": "- Fixed: live chat recording saved nothing; now reliable, one transcript per stream in Download/TikMod"
+    },
+    {
       "version": "4.5.0",
       "date": "2026-11-19",
       "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.5.0/TikMod-4.5.0.apk",

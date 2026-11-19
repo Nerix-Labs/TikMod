@@ -1,0 +1,51 @@
+{
+  "en": {
+    "badge": {
+      "e": "🛠",
+      "id": ""
+    },
+    "title": "TikMod 4.5.1",
+    "summary": "Patch: live chat recording now works.",
+    "bullets": [
+      {
+        "icon": {
+          "e": "💬",
+          "id": ""
+        },
+        "text": "Live chat recording saved nothing before — fixed"
+      },
+      {
+        "icon": {
+          "e": "📄",
+          "id": ""
+        },
+        "text": "One transcript per stream, saved to Download/TikMod when you leave the live"
+      }
+    ]
+  },
+  "he": {
+    "badge": {
+      "e": "🛠",
+      "id": ""
+    },
+    "title": "TikMod 4.5.1",
+    "summary": "תיקון: הקלטת צ'אט השידור עובדת עכשיו.",
+    "bullets": [
+      {
+        "icon": {
+          "e": "💬",
+          "id": ""
+        },
+        "text": "קודם לא נשמר כלום — תוקן"
+      },
+      {
+        "icon": {
+          "e": "📄",
+          "id": ""
+        },
+        "text": "קובץ אחד לכל שידור, נשמר ב-Download/TikMod כשיוצאים"
+      }
+    ]
+  },
+  "footer": "Works on TikTok 47.9.1 · עובד על טיקטוק 47.9.1"
+}
