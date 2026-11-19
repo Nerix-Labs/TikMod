@@ -555,7 +555,7 @@
     <string name="gifts_in_video_desc">Animés = cadeaux avec un effet plein écran, pas les petits comme la rose. Affichés en bannières au-dessus du chat, une par combo avec son total.</string>
     <string name="notif_watching_text">L\'enregistrement démarrera quand l\'un d\'eux passera en direct</string>
     <string name="cl460_gifts">Les cadeaux dans vos enregistrements</string>
-    <string name="cl460_gifts_desc">Les cadeaux apparaissent en bannières au-dessus du chat, avec l\'image et le nombre du combo. Au choix : tous, animés seulement, ou aucun.</string>
+    <string name="cl460_gifts_desc">Les cadeaux apparaissent en bannières au-dessus du chat, et leurs animations plein écran sont jouées dans la vidéo comme sur TikTok. Au choix : tous, animés seulement, ou aucun.</string>
     <string name="cl460_notifs">Notifications claires et synchronisées</string>
     <string name="cl460_notifs_desc">Une notification par enregistrement, du début à la sauvegarde. Un enregistrement arrêté reste arrêté, même après un redémarrage de TikMod.</string>
 </resources>

@@ -9,6 +9,7 @@ import com.mts.tikmod.utils.MediaContext
 import com.mts.tikmod.utils.TikModDownloader
 import com.mts.tikmod.utils.XLog
 import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import org.json.JSONArray
 import org.json.JSONObject
@@ -52,6 +53,10 @@ class LiveChatHook : BaseHook() {
     private val saveRunnable = Runnable { synchronized(lock) { buffers.values.forEach { saveLocked(it) }; buffers.clear() } }
     private val flushRunnable = Runnable { flush() }
     @Volatile private var sent = 0
+    private var assetsModelClass: Class<*>? = null
+    private val resourceTypes = HashMap<Int, String>()
+    private val assetsSeen = HashSet<Long>()
+    private val pendingAssets = JSONArray()
 
     override fun apply(classLoader: ClassLoader, context: Context?) {
         tryHook {
@@ -73,7 +78,70 @@ class LiveChatHook : BaseHook() {
                 for (m in listOf("supportDisplayText", "canText")) hooked += hookAllMethodsSafely(gm, m, onGift)
             }
             XLog.log("LiveChat: hooked $hooked chat/gift render method(s)")
+            hookGiftAssets(classLoader)
         }
+    }
+
+    /**
+     * Gift animations are "assets" (id = the gift's primaryEffectId) that TikTok downloads and plays over the
+     * stream. We note each asset's type and download URLs as TikTok decodes them, so the recorder can fetch
+     * the same animation and put it into the recording.
+     */
+    private fun hookGiftAssets(cl: ClassLoader) {
+        val am = XposedHelpers.findClassIfExists("com.bytedance.android.livesdk.gift.assets.AssetsModel", cl) ?: run {
+            XLog.log("LiveChat: AssetsModel not found"); return
+        }
+        assetsModelClass = am
+        runCatching {
+            listOf("MP4", "WEBP", "LOTTIE", "ANIMAX", "EFFECT_LOKI", "LYNX", "STICKER", "PREFAB_TEMPLATE", "EFFECT_STREAM_EXTRA")
+                .forEach { n -> resourceTypes[XposedHelpers.getStaticIntField(am, "RESOURCE_TYPE_$n")] = n.lowercase() }
+        }
+        val onAsset = object : XC_MethodHook() {
+            override fun afterHookedMethod(param: MethodHookParam) {
+                runCatching { onAsset(param.result?.takeIf { am.isInstance(it) } ?: param.thisObject) }
+            }
+        }
+        var n = 0
+        // The proto decoder's method that returns an AssetsModel (its name is obfuscated; its type isn't).
+        XposedHelpers.findClassIfExists("com.bytedance.android.livesdk.gift.assets._AssetsModel_ProtoDecoder", cl)
+            ?.declaredMethods?.filter { it.returnType == am }?.forEach { XposedBridge.hookMethod(it, onAsset); n++ }
+        // And the moment TikTok picks how to play one.
+        for (m in listOf("getResourceFormat", "getDowngradeResType")) n += hookAllMethodsSafely(am, m, onAsset)
+        XLog.log("LiveChat: watching gift assets ($n hooks, types $resourceTypes)")
+    }
+
+    private fun onAsset(a: Any?) {
+        a ?: return
+        if (assetsModelClass?.isInstance(a) != true) return
+        val id = runCatching { XposedHelpers.getLongField(a, "id") }.getOrDefault(0L)
+        if (id == 0L) return
+        val type = runCatching { XposedHelpers.getIntField(a, "resourceType") }.getOrDefault(-1)
+        fun urls(field: String) = runCatching {
+            val rm = XposedHelpers.getObjectField(a, field) ?: return@runCatching emptyList<String>()
+            (XposedHelpers.getObjectField(rm, "urlList") as? List<*>).orEmpty().mapNotNull { it as? String }
+        }.getOrDefault(emptyList())
+        val list = urls("resourceModel")
+        if (list.isEmpty()) return
+        synchronized(lock) {
+            if (!assetsSeen.add(id)) return
+            if (assetsSeen.size <= 6) XLog.log("LiveChat: asset $id ${resourceTypes[type] ?: type} ${list.first().take(110)}")
+            pendingAssets.put(JSONObject().put("id", id).put("type", resourceTypes[type] ?: "t$type")
+                .put("urls", JSONArray(list)).put("hevc", JSONArray(urls("resourceByteVC1Model")))
+                .put("md5", runCatching { XposedHelpers.getObjectField(a, "md5") as? String }.getOrNull().orEmpty()))
+        }
+        main.removeCallbacks(flushAssets)
+        main.postDelayed(flushAssets, 3000)
+    }
+
+    private val flushAssets = Runnable {
+        val ctx = Prefs.hostContext ?: return@Runnable
+        val batch: String
+        synchronized(lock) {
+            if (pendingAssets.length() == 0) return@Runnable
+            batch = pendingAssets.toString()
+            while (pendingAssets.length() > 0) pendingAssets.remove(pendingAssets.length() - 1)
+        }
+        Thread({ runCatching { ctx.contentResolver.call(Uri.parse(Prefs.PROVIDER_URI), "gift_assets", batch, null) } }, "TikMod-GiftAssets").start()
     }
 
     /** A chat message TikTok is showing (called several times per message; deduplicated by id). */
@@ -127,7 +195,8 @@ class LiveChatHook : BaseHook() {
         val id = base?.let { runCatching { XposedHelpers.getLongField(it, "messageId") }.getOrNull() }?.takeIf { it != 0L } ?: return
         val count = runCatching { XposedHelpers.getIntField(msg, "repeatCount") }.getOrDefault(1).coerceAtLeast(1)
         val diamonds = runCatching { XposedHelpers.getIntField(gift, "diamondCount") }.getOrDefault(0)
-        val effect = runCatching { XposedHelpers.getLongField(gift, "primaryEffectId") }.getOrDefault(0L) > 0
+        val effectId = runCatching { XposedHelpers.getLongField(gift, "primaryEffectId") }.getOrDefault(0L)
+        val effect = effectId > 0
         val giftId = runCatching { XposedHelpers.getLongField(gift, "id") }.getOrDefault(0L)
         val groupId = runCatching { XposedHelpers.getLongField(msg, "groupId") }.getOrDefault(0L)
         val from = runCatching { XposedHelpers.getObjectField(msg, "fromUser") }.getOrNull()
@@ -158,7 +227,7 @@ class LiveChatHook : BaseHook() {
                 b.count++
             }
             pending.put(JSONObject().put("r", roomId).put("t", now).put("k", "g").put("n", nick).put("x", name)
-                .put("c", count).put("d", diamonds).put("e", effect).put("u", url).put("g", group).put("i", id))
+                .put("c", count).put("d", diamonds).put("e", effect).put("u", url).put("g", group).put("i", id).put("p", effectId))
         }
         main.removeCallbacks(flushRunnable)
         main.postDelayed(flushRunnable, 1500)

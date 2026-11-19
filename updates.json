@@ -4,8 +4,8 @@
       "version": "4.6.0",
       "date": "2026-11-19",
       "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.6.0/TikMod-4.6.0.apk",
-      "size": 23236832,
-      "notes": "- The live chat burned into your LIVE recordings, timed like in TikTok\n- Chat matched to the exact stream by room id"
+      "size": 24232144,
+      "notes": "- The live chat burned into your LIVE recordings, timed like in TikTok\n- Gifts as banners, and their full-screen animations played in the video\n- One synced notification per recording; a stopped recording stays stopped"
     },
     {
       "version": "4.5.1",

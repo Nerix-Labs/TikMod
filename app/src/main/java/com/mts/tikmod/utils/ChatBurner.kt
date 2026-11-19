@@ -53,12 +53,20 @@ object ChatBurner {
     class Line(val ms: Long, val nick: String, val text: String)
 
     /** A gift (a whole combo: [count] is its final count) shown as a banner from [ms]. [label] is e.g. "sent Rose". */
-    class Gift(val ms: Long, val nick: String, val label: String, val count: Int, val icon: Bitmap?)
+    class Gift(val ms: Long, val nick: String, val label: String, val count: Int, val icon: Bitmap?, val anim: Anim? = null)
+
+    /**
+     * A gift's full-screen animation: a video with the colour picture and its transparency mask side by side.
+     * [rgb] / [alpha] are their rectangles ([x, y, w, h], in a [frameW]x[frameH] frame; 0 = the decoded size);
+     * null = mask on the left half, colour on the right (TikTok's AlphaPlayer default).
+     */
+    class Anim(val file: File, val rgb: IntArray?, val alpha: IntArray?, val frameW: Int = 0, val frameH: Int = 0)
 
     private const val VISIBLE_MS = 30_000L   // a comment stays this long…
     private const val MAX_VISIBLE = 7        // …among the newest few
     private const val GIFT_MS = 5_000L       // a gift banner stays this long…
     private const val MAX_GIFTS = 2          // …at most this many at once
+    private const val ANIM_LATE_MS = 12_000L // an animation that would start later than this (queue) is skipped
 
     fun burn(input: File, lines: List<Line>, gifts: List<Gift>, output: File, onProgress: (Int) -> Unit = {}): Boolean =
         try {
@@ -134,6 +142,11 @@ object ChatBurner {
                 var vMux = -1
                 var aMux = -1
                 val overlay = Overlay(w, h, lines, gifts)
+                // Gift animations play one at a time, like in TikTok: each starts when it was sent, or after the
+                // one before it ends.
+                val animQueue = ArrayDeque(gifts.mapNotNull { g -> g.anim?.let { g.ms to it } })
+                var player: AnimPlayer? = null
+                var animsPlayed = 0
                 val mtx = FloatArray(16)
                 val info = MediaCodec.BufferInfo()
                 val eInfo = MediaCodec.BufferInfo()
@@ -203,7 +216,19 @@ object ChatBurner {
                             awaitFrame()
                             tex.updateTexImage()
                             tex.getTransformMatrix(mtx)
-                            gl.draw(mtx, overlay, info.presentationTimeUs / 1000)
+                            val nowMs = info.presentationTimeUs / 1000
+                            if (player == null) {
+                                while (animQueue.isNotEmpty() && nowMs - animQueue.first().first > ANIM_LATE_MS) animQueue.removeFirst()
+                                if (animQueue.isNotEmpty() && animQueue.first().first <= nowMs) {
+                                    val a = animQueue.removeFirst().second
+                                    player = runCatching { AnimPlayer(a, gl.animTex, Handler(stThread.looper), nowMs) }
+                                        .onFailure { XLog.log("ChatBurner: animation ${a.file.name} failed to start (${it.message})") }.getOrNull()
+                                }
+                            }
+                            val p = player
+                            val showAnim = p != null && runCatching { p.advance(nowMs) }.getOrDefault(false)
+                            if (p != null && !showAnim) { XLog.log("ChatBurner: animation done: ${p.frames} frames, ${nowMs - p.startMs}ms ${p.why}"); p.release(); player = null; animsPlayed++ }
+                            gl.draw(mtx, overlay, nowMs, if (showAnim) p else null)
                             EGLExt.eglPresentationTimeANDROID(dpy, surf, info.presentationTimeUs * 1000)
                             EGL14.eglSwapBuffers(dpy, surf)
                             drainEncoder(false)
@@ -220,6 +245,8 @@ object ChatBurner {
                         }
                     }
                 }
+                player?.release()
+                if (animsPlayed > 0) XLog.log("ChatBurner: played $animsPlayed gift animation(s)")
                 writeAudioUpTo(Long.MAX_VALUE)
                 if (!muxStarted) error("encoder produced no output")
                 mux.stop()
@@ -276,9 +303,93 @@ object ChatBurner {
         }
     }
 
-    /** The two shader programs: the decoded frame (external texture) and the chat layer (2D texture). */
+    /** Decodes one gift animation in step with the recording, onto its own texture. */
+    private class AnimPlayer(val anim: Anim, texId: Int, handler: Handler, val startMs: Long) {
+        private val ex = MediaExtractor().apply { setDataSource(anim.file.path) }
+        private val codec: MediaCodec
+        private val st = SurfaceTexture(texId)
+        private val surface: Surface
+        private val lock = Object()
+        private var ready = false
+        private val info = MediaCodec.BufferInfo()
+        private var held = -1
+        private var heldPts = 0L
+        private var heldEos = false
+        private var inDone = false
+        private var outDone = false
+        var hasFrame = false; private set
+        var frames = 0; private set
+        var why = ""
+        val mtx = FloatArray(16)
+        val videoW: Int
+        val videoH: Int
+
+        init {
+            val track = (0 until ex.trackCount).first { ex.getTrackFormat(it).getString(MediaFormat.KEY_MIME)!!.startsWith("video/") }
+            ex.selectTrack(track)
+            val fmt = ex.getTrackFormat(track)
+            videoW = fmt.getInteger(MediaFormat.KEY_WIDTH); videoH = fmt.getInteger(MediaFormat.KEY_HEIGHT)
+            st.setDefaultBufferSize(videoW, videoH)
+            st.setOnFrameAvailableListener({ synchronized(lock) { ready = true; lock.notifyAll() } }, handler)
+            surface = Surface(st)
+            codec = MediaCodec.createDecoderByType(fmt.getString(MediaFormat.KEY_MIME)!!)
+            codec.configure(fmt, surface, null, 0)
+            codec.start()
+        }
+
+        /** Moves to the animation frame for recording time [ms]; false once the animation is over. */
+        fun advance(ms: Long): Boolean {
+            val relUs = (ms - startMs) * 1000
+            var idle = 0
+            while (true) {
+                if (held < 0) {
+                    if (outDone) return false
+                    feed()
+                    val oi = codec.dequeueOutputBuffer(info, 5_000)
+                    if (oi == MediaCodec.INFO_TRY_AGAIN_LATER) { if (++idle > 400) { why = "decoder idle"; return false }; continue }
+                    if (oi < 0) continue
+                    idle = 0
+                    val eos = info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0
+                    if (info.size <= 0) { codec.releaseOutputBuffer(oi, false); if (eos) { outDone = true; return false }; continue }
+                    held = oi; heldPts = info.presentationTimeUs; heldEos = eos
+                }
+                if (heldPts > relUs) return hasFrame
+                codec.releaseOutputBuffer(held, true)
+                held = -1
+                synchronized(lock) {
+                    val until = System.currentTimeMillis() + 1500
+                    while (!ready) { val left = until - System.currentTimeMillis(); if (left <= 0) { why = "frame timeout"; return false }; lock.wait(left) }
+                    ready = false
+                }
+                st.updateTexImage()
+                st.getTransformMatrix(mtx)
+                hasFrame = true; frames++
+                if (heldEos) outDone = true
+            }
+        }
+
+        private fun feed() {
+            while (!inDone) {
+                val ii = codec.dequeueInputBuffer(0)
+                if (ii < 0) return
+                val n = ex.readSampleData(codec.getInputBuffer(ii)!!, 0)
+                if (n < 0) { codec.queueInputBuffer(ii, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM); inDone = true }
+                else { codec.queueInputBuffer(ii, 0, n, ex.sampleTime, 0); ex.advance() }
+            }
+        }
+
+        fun release() {
+            runCatching { codec.stop() }; runCatching { codec.release() }
+            runCatching { surface.release() }; runCatching { st.release() }
+            runCatching { ex.release() }
+        }
+    }
+
+    /** The shader programs: the decoded frame (external texture), gift animations, and the chat layer (2D texture). */
     private class Gl(val w: Int, val h: Int) {
         val oesTex: Int
+        val animTex: Int
+        private val animProg: Int
         private val chatTex: Int
         private val videoProg: Int
         private val chatProg: Int
@@ -289,9 +400,11 @@ object ChatBurner {
         private var chatUploaded = false
 
         init {
-            val t = IntArray(2)
-            GLES20.glGenTextures(2, t, 0)
-            oesTex = t[0]; chatTex = t[1]
+            val t = IntArray(3)
+            GLES20.glGenTextures(3, t, 0)
+            oesTex = t[0]; chatTex = t[1]; animTex = t[2]
+            GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, animTex)
+            texParams(GLES11Ext.GL_TEXTURE_EXTERNAL_OES)
             GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, oesTex)
             texParams(GLES11Ext.GL_TEXTURE_EXTERNAL_OES)
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, chatTex)
@@ -301,6 +414,15 @@ object ChatBurner {
                     "void main(){ gl_Position = aPos; vUv = (uTex * aUv).xy; }",
                 "#extension GL_OES_EGL_image_external : require\nprecision mediump float; varying vec2 vUv;" +
                     "uniform samplerExternalOES sTex; void main(){ gl_FragColor = texture2D(sTex, vUv); }"
+            )
+            // Colour from one rectangle of the frame, transparency (grey level) from another.
+            animProg = program(
+                "attribute vec4 aPos; attribute vec2 aUv; varying vec2 vUv; void main(){ gl_Position = aPos; vUv = aUv; }",
+                "#extension GL_OES_EGL_image_external : require\nprecision mediump float; varying vec2 vUv;" +
+                    "uniform samplerExternalOES sTex; uniform mat4 uTex; uniform vec4 uRgb; uniform vec4 uA;" +
+                    "void main(){ vec2 c = (uTex * vec4(uRgb.xy + vUv * uRgb.zw, 0.0, 1.0)).xy;" +
+                    " vec2 m = (uTex * vec4(uA.xy + vUv * uA.zw, 0.0, 1.0)).xy;" +
+                    " float a = texture2D(sTex, m).r; gl_FragColor = vec4(texture2D(sTex, c).rgb * a, a); }"
             )
             chatProg = program(
                 "attribute vec4 aPos; attribute vec2 aUv; varying vec2 vUv; void main(){ gl_Position = aPos; vUv = aUv; }",
@@ -314,7 +436,7 @@ object ChatBurner {
             chatPos = floats(nx(x0), ny(y0), nx(x1), ny(y0), nx(x0), ny(y1), nx(x1), ny(y1))
         }
 
-        fun draw(texMatrix: FloatArray, overlay: Overlay, ms: Long) {
+        fun draw(texMatrix: FloatArray, overlay: Overlay, ms: Long, anim: AnimPlayer? = null) {
             GLES20.glViewport(0, 0, w, h)
             GLES20.glClearColor(0f, 0f, 0f, 1f)
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
@@ -324,6 +446,8 @@ object ChatBurner {
             GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, oesTex)
             GLES20.glUniformMatrix4fv(GLES20.glGetUniformLocation(videoProg, "uTex"), 1, false, texMatrix, 0)
             drawQuad(videoProg, quad, quadUv)
+
+            if (anim != null && anim.hasFrame) drawAnim(anim)
 
             val changed = overlay.update(ms)
             if (!overlay.empty) {
@@ -339,6 +463,33 @@ object ChatBurner {
                 drawQuad(chatProg, chatPos, chatUv)
                 GLES20.glDisable(GLES20.GL_BLEND)
             }
+        }
+
+        /** The animation, as large as fits the frame, centred (TikTok plays them full screen). */
+        private fun drawAnim(p: AnimPlayer) {
+            val a = p.anim
+            val fw = (if (a.frameW > 0) a.frameW else p.videoW).toFloat()
+            val fh = (if (a.frameH > 0) a.frameH else p.videoH).toFloat()
+            val rgb = a.rgb ?: intArrayOf((fw / 2).toInt(), 0, (fw / 2).toInt(), fh.toInt())
+            val al = a.alpha ?: intArrayOf(0, 0, (fw / 2).toInt(), fh.toInt())
+            // Rectangles are top-left based; texture space starts bottom-left.
+            fun uv(r: IntArray) = floatArrayOf(r[0] / fw, 1f - (r[1] + r[3]) / fh, r[2] / fw, r[3] / fh)
+            val c = uv(rgb); val m = uv(al)
+            val aspect = rgb[2].toFloat() / rgb[3].coerceAtLeast(1)
+            var dw = w.toFloat(); var dh = dw / aspect
+            if (dh > h) { dh = h.toFloat(); dw = dh * aspect }
+            val x0 = (w - dw) / 2 * 2f / w - 1f; val x1 = -x0
+            val y0 = (h - dh) / 2 * 2f / h - 1f; val y1 = -y0
+            GLES20.glEnable(GLES20.GL_BLEND)
+            GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+            GLES20.glUseProgram(animProg)
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+            GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, animTex)
+            GLES20.glUniformMatrix4fv(GLES20.glGetUniformLocation(animProg, "uTex"), 1, false, p.mtx, 0)
+            GLES20.glUniform4f(GLES20.glGetUniformLocation(animProg, "uRgb"), c[0], c[1], c[2], c[3])
+            GLES20.glUniform4f(GLES20.glGetUniformLocation(animProg, "uA"), m[0], m[1], m[2], m[3])
+            drawQuad(animProg, floats(x0, y0, x1, y0, x0, y1, x1, y1), quadUv)
+            GLES20.glDisable(GLES20.GL_BLEND)
         }
 
         private fun drawQuad(prog: Int, pos: FloatBuffer, uv: FloatBuffer) {

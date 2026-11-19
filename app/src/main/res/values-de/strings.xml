@@ -544,7 +544,7 @@
     <string name="gifts_in_video_desc">Animierte = Geschenke mit Vollbild-Effekt, nicht kleine wie die Rose. Als Banner über dem Chat, eins pro Combo mit Endzahl.</string>
     <string name="notif_watching_text">Startet die Aufnahme, sobald einer von ihnen live geht</string>
     <string name="cl460_gifts">Geschenke in deinen Aufnahmen</string>
-    <string name="cl460_gifts_desc">Geschenke erscheinen als Banner über dem Chat, mit Bild und Combo-Zahl. Wähle: alle, nur animierte oder keine.</string>
+    <string name="cl460_gifts_desc">Geschenke erscheinen als Banner über dem Chat, und ihre Vollbild-Animationen laufen im Video wie in TikTok. Wähle: alle, nur animierte oder keine.</string>
     <string name="cl460_notifs">Klare, synchrone Benachrichtigungen</string>
     <string name="cl460_notifs_desc">Eine Benachrichtigung pro Aufnahme, von der Aufnahme bis zum Speichern. Eine gestoppte Aufnahme bleibt gestoppt, auch nach einem Neustart von TikMod.</string>
 </resources>

@@ -555,7 +555,7 @@
     <string name="gifts_in_video_desc">Animados = regalos con efecto a pantalla completa, no los pequeños como la rosa. Se muestran como banners sobre el chat, uno por combo con su total.</string>
     <string name="notif_watching_text">Empezará a grabar cuando uno de ellos entre en directo</string>
     <string name="cl460_gifts">Regalos en tus grabaciones</string>
-    <string name="cl460_gifts_desc">Los regalos aparecen como banners sobre el chat, con la imagen y el combo. Elige: todos, solo animados o ninguno.</string>
+    <string name="cl460_gifts_desc">Los regalos aparecen como banners sobre el chat y sus animaciones a pantalla completa se reproducen en el vídeo como en TikTok. Elige: todos, solo animados o ninguno.</string>
     <string name="cl460_notifs">Notificaciones claras y sincronizadas</string>
     <string name="cl460_notifs_desc">Una notificación por grabación, de la grabación al guardado. Una grabación que detienes sigue detenida, incluso si TikMod se reinicia.</string>
 </resources>

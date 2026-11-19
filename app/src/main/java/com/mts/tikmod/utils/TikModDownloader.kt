@@ -672,10 +672,16 @@ object TikModDownloader {
             .map { g -> g.minBy { it.t } to g.maxOf { it.count } }
         val icons = HashMap<String, android.graphics.Bitmap?>()
         for ((e, _) in giftGroups) if (e.url.isNotBlank() && e.url !in icons && icons.size < 40) icons[e.url] = giftIcon(e.url)
-        val gifts = giftGroups.mapNotNull { (e, count) ->
-            videoMs(e.t).takeIf { it >= 0 }?.let { ChatBurner.Gift(it, e.nick, L.t(R.string.gift_sent, e.text), count, icons[e.url]) }
+        // Full-screen gift animations: the same files TikTok plays, noted by the hook as TikTok loaded them.
+        val anims = HashMap<Long, ChatBurner.Anim?>()
+        for ((e, _) in giftGroups) {
+            if (e.effectId == 0L || e.effectId in anims || anims.size >= 30) continue
+            anims[e.effectId] = ChatLog.asset(ctx, e.effectId)?.let { GiftEffects.prepare(ctx, it, portrait = true) }
         }
-        XLog.log("LiveRecorder[$owner]: ${lines.size} comments, ${gifts.size} gifts ($giftLevel) for room $roomId")
+        val gifts = giftGroups.mapNotNull { (e, count) ->
+            videoMs(e.t).takeIf { it >= 0 }?.let { ChatBurner.Gift(it, e.nick, L.t(R.string.gift_sent, e.text), count, icons[e.url], anims[e.effectId]) }
+        }
+        XLog.log("LiveRecorder[$owner]: ${lines.size} comments, ${gifts.size} gifts ($giftLevel, ${gifts.count { it.anim != null }} animated of ${anims.size} effects) for room $roomId")
         if (lines.isEmpty() && gifts.isEmpty()) return null
         job.setStep(L.t(R.string.notif_adding_chat, 0))
         val out = File(ctx.cacheDir, "tikmod_chat_${System.nanoTime()}.mp4")

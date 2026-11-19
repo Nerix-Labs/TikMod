@@ -545,7 +545,7 @@
     <string name="gifts_in_video_desc">Animated = gifts with a full-screen effect, not small ones like Rose. Shown as banners above the chat, one per combo with its final count.</string>
     <string name="notif_watching_text">Will start recording when one of them goes live</string>
     <string name="cl460_gifts">Gifts in your recordings</string>
-    <string name="cl460_gifts_desc">Gifts appear as banners above the chat, with the gift\'s picture and combo count. Choose all, animated only, or none.</string>
+    <string name="cl460_gifts_desc">Gifts appear as banners above the chat, and their full-screen animations play in the video like in TikTok. Choose all, animated only, or none.</string>
     <string name="cl460_notifs">Clear, synced notifications</string>
     <string name="cl460_notifs_desc">One notification per recording, from recording to saved. A recording you stop stays stopped, even after TikMod restarts.</string>
 </resources>

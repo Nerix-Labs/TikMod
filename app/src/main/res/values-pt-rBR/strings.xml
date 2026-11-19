@@ -555,7 +555,7 @@
     <string name="gifts_in_video_desc">Animados = presentes com efeito em tela cheia, não os pequenos como a rosa. Aparecem como faixas acima do chat, uma por combo com o total.</string>
     <string name="notif_watching_text">Começará a gravar quando um deles entrar ao vivo</string>
     <string name="cl460_gifts">Presentes nas suas gravações</string>
-    <string name="cl460_gifts_desc">Os presentes aparecem como faixas acima do chat, com a imagem e o combo. Escolha: todos, só animados ou nenhum.</string>
+    <string name="cl460_gifts_desc">Os presentes aparecem como faixas acima do chat, e as animações em tela cheia tocam no vídeo como no TikTok. Escolha: todos, só animados ou nenhum.</string>
     <string name="cl460_notifs">Notificações claras e sincronizadas</string>
     <string name="cl460_notifs_desc">Uma notificação por gravação, da gravação ao salvamento. Uma gravação parada continua parada, mesmo após reiniciar o TikMod.</string>
 </resources>

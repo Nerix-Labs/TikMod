@@ -533,7 +533,7 @@
     <string name="gifts_in_video_desc">带特效 = 有全屏特效的礼物，不含玫瑰等小礼物。以横幅显示在聊天上方，每个连击一条并显示最终数量。</string>
     <string name="notif_watching_text">其中有人开播时将开始录制</string>
     <string name="cl460_gifts">录像中的礼物</string>
-    <string name="cl460_gifts_desc">礼物以横幅形式显示在聊天上方，带礼物图片和连击数。可选：全部、仅带特效、不显示。</string>
+    <string name="cl460_gifts_desc">礼物以横幅显示在聊天上方，全屏礼物动画也会像 TikTok 一样在视频中播放。可选：全部、仅带特效、不显示。</string>
     <string name="cl460_notifs">清晰同步的通知</string>
     <string name="cl460_notifs_desc">每个录制只有一个通知，从录制到保存。你停止的录制会保持停止，即使 TikMod 重启。</string>
 </resources>

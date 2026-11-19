@@ -544,7 +544,7 @@
     <string name="gifts_in_video_desc">Animasyonlu = tam ekran efektli hediyeler, gül gibi küçükler değil. Sohbetin üstünde, her kombo için son sayıyla bir afiş olarak gösterilir.</string>
     <string name="notif_watching_text">Biri canlı yayına başladığında kayda başlar</string>
     <string name="cl460_gifts">Kayıtlarında hediyeler</string>
-    <string name="cl460_gifts_desc">Hediyeler sohbetin üstünde, resmi ve kombo sayısıyla afiş olarak görünür. Seç: hepsi, sadece animasyonlu ya da hiçbiri.</string>
+    <string name="cl460_gifts_desc">Hediyeler sohbetin üstünde afiş olarak görünür, tam ekran animasyonları da TikTok\'taki gibi videoda oynar. Seç: hepsi, sadece animasyonlu ya da hiçbiri.</string>
     <string name="cl460_notifs">Net ve eşzamanlı bildirimler</string>
     <string name="cl460_notifs_desc">Her kayıt için baştan kaydedilene kadar tek bildirim. Durdurduğun kayıt, TikMod yeniden başlasa bile durmuş kalır.</string>
 </resources>

@@ -20,8 +20,12 @@ object ChatLog {
      */
     class Entry(
         val t: Long, val nick: String, val text: String, val kind: String = "c", val count: Int = 1,
-        val diamonds: Int = 0, val effect: Boolean = false, val url: String = "", val group: String = ""
+        val diamonds: Int = 0, val effect: Boolean = false, val url: String = "", val group: String = "",
+        val effectId: Long = 0L
     )
+
+    /** A gift's full-screen animation as TikTok describes it: [type] mp4/webp/lottie/…, download [urls]. */
+    class Asset(val id: Long, val type: String, val urls: List<String>, val hevc: List<String>, val md5: String)
 
     private val lock = Any()
     private const val MAX_AGE = 24 * 3600_000L
@@ -73,11 +77,37 @@ object ChatLog {
                 if (!seen.add(key)) return@forEachLine
                 out += Entry(
                     t, o.optString("n"), text, o.optString("k", "c"), o.optInt("c", 1).coerceAtLeast(1),
-                    o.optInt("d"), o.optBoolean("e"), o.optString("u"), o.optString("g")
+                    o.optInt("d"), o.optBoolean("e"), o.optString("u"), o.optString("g"), o.optLong("p")
                 )
             }
         }
         out.sortBy { it.t }
         return out
+    }
+
+    private fun assetsFile(ctx: Context) = File(dir(ctx), "assets.json")
+
+    /** [json]: `[{"id":effectId,"type":"mp4","urls":[…],"hevc":[…],"md5":…}, …]` from the TikTok process. */
+    fun addAssets(ctx: Context, json: String) {
+        val arr = runCatching { JSONArray(json) }.getOrNull() ?: return
+        synchronized(lock) {
+            val f = assetsFile(ctx)
+            val all = runCatching { JSONObject(f.readText()) }.getOrDefault(JSONObject())
+            for (i in 0 until arr.length()) {
+                val o = arr.optJSONObject(i) ?: continue
+                val id = o.optLong("id"); if (id == 0L) continue
+                all.put(id.toString(), o.put("seen", System.currentTimeMillis()))
+            }
+            runCatching { f.writeText(all.toString()) }
+        }
+    }
+
+    fun asset(ctx: Context, id: Long): Asset? {
+        if (id == 0L) return null
+        val o = synchronized(lock) {
+            runCatching { JSONObject(assetsFile(ctx).readText()).optJSONObject(id.toString()) }.getOrNull()
+        } ?: return null
+        fun list(k: String) = o.optJSONArray(k)?.let { a -> (0 until a.length()).map { a.optString(it) }.filter { it.isNotBlank() } }.orEmpty()
+        return Asset(id, o.optString("type"), list("urls"), list("hevc"), o.optString("md5"))
     }
 }

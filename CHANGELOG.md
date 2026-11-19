@@ -15,6 +15,10 @@ All notable changes to TikMod. Versions follow [semantic versioning](https://sem
   chat — the sender, "sent X", the gift's picture and the combo count (a whole combo is one banner with its
   final count). Three levels under "Gifts in recordings": all, animated only (gifts with a full-screen effect,
   not small ones like Rose), or none.
+- **Gift animations in your recordings.** A gift's full-screen animation plays in the recording at the moment
+  it was sent, with its transparency, one after another like in TikTok. TikMod uses the same animation file
+  TikTok plays (downloaded once and kept). Gifts that TikTok renders as live 3D / face effects can't be
+  reproduced and appear as a banner only.
 
 ### Fixed
 - **Notifications that contradicted each other.** A recording now has one notification from start to finish:
