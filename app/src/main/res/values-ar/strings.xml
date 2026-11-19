@@ -574,4 +574,6 @@
     <string name="cl450_more_desc">إيقاف اهتزاز التطبيق، وفتح الروابط الخارجية في متصفحك الحقيقي بدل متصفح تيك توك. في الرئيسية ← تعديلات عامة.</string>
     <string name="feed_seekbar">شريط التقدم في كل فيديو</string>
     <string name="feed_seekbar_desc">إظهار شريط تقدم في كل الفيديوهات للتنقل داخلها. مفعّل افتراضيًا.</string>
+    <string name="cl451_chat">إصلاح تسجيل دردشة البث</string>
+    <string name="cl451_chat_desc">لم يكن يحفظ شيئًا من قبل. الآن تُلتقط الدردشة بموثوقية وتُحفظ كملف واحد لكل بث في Download/TikMod عند مغادرة البث.</string>
 </resources>

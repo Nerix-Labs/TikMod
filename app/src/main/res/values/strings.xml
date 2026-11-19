@@ -531,4 +531,6 @@
     <string name="cl450_more_desc">Turn off the app\'s haptic vibration, and open outside links in your real browser instead of TikTok\'s in-app one. In Home → General tweaks.</string>
     <string name="feed_seekbar">Progress bar on every video</string>
     <string name="feed_seekbar_desc">Show a seek bar on all videos so you can scrub them. On by default.</string>
+    <string name="cl451_chat">Live chat recording fixed</string>
+    <string name="cl451_chat_desc">It saved nothing before. Now the chat is captured reliably and saved as one transcript per stream in Download/TikMod when you leave the live.</string>
 </resources>

@@ -530,4 +530,6 @@
     <string name="cl450_more_desc">Schalte die Vibration der App aus und öffne externe Links im echten Browser. Unter Start → Allgemeine Optimierungen.</string>
     <string name="feed_seekbar">Fortschrittsleiste bei jedem Video</string>
     <string name="feed_seekbar_desc">Zeigt bei allen Videos eine Fortschrittsleiste zum Spulen. Standardmäßig an.</string>
+    <string name="cl451_chat">Live-Chat-Aufnahme behoben</string>
+    <string name="cl451_chat_desc">Vorher wurde nichts gespeichert. Jetzt wird der Chat zuverlässig erfasst und beim Verlassen als eine Datei pro Stream in Download/TikMod gespeichert.</string>
 </resources>

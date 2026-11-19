@@ -1,6 +1,8 @@
 package com.mts.tikmod.hooks
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import com.mts.tikmod.Prefs
 import com.mts.tikmod.utils.MediaContext
 import com.mts.tikmod.utils.TikModDownloader
@@ -44,49 +46,64 @@ class LiveChatHook : BaseHook() {
 
     @Volatile private var buffer: Buffer? = null
     private val lock = Any()
+    private val main = Handler(Looper.getMainLooper())
+    private val saveRunnable = Runnable { synchronized(lock) { val b = buffer; buffer = null; saveLocked(b) } }
 
     override fun apply(classLoader: ClassLoader, context: Context?) {
         tryHook {
-            val factory = XposedHelpers.findClassIfExists("com.ss.ugc.live.sdk.message.MessageManagerFactory", classLoader)
-            chatMessageClass = XposedHelpers.findClassIfExists("com.bytedance.android.livesdk.model.message.ChatMessage", classLoader)
-            status = status.copy(foundClass = factory?.name ?: "message factory not found")
-            if (factory == null || chatMessageClass == null) { XLog.log("LiveChat: message classes not found"); return@tryHook }
-            // The chat message type number, from a throwaway instance (the type is intrinsic to the class).
-            chatTypeInt = runCatching { (XposedHelpers.callMethod(chatMessageClass!!.newInstance(), "getIntType") as? Int) ?: -1 }.getOrDefault(-1)
-            XLog.log("LiveChat: chat type = $chatTypeInt")
+            val cm = XposedHelpers.findClassIfExists("com.bytedance.android.livesdk.model.message.ChatMessage", classLoader)
+            chatMessageClass = cm
+            status = status.copy(foundClass = cm?.name ?: "ChatMessage not found")
+            if (cm == null) { XLog.log("LiveChat: ChatMessage class not found"); return@tryHook }
 
-            XposedBridge.hookAllMethods(factory, "get", object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam) {
-                    val manager = param.result ?: return
-                    runCatching { registerOn(manager, classLoader) }.onFailure { XLog.log("LiveChat: register failed: ${it.message}") }
-                }
-            })
-            XLog.log("LiveChat: watching ${factory.name}.get()")
+            // Primary, manager-independent: TikTok calls these on a fully-built ChatMessage when it shows the
+            // comment on the public screen. Robust across how the room's message pipeline was set up.
+            val onRender = object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) { runCatching { onIncoming(param.thisObject) } }
+            }
+            var hooked = 0
+            for (name in listOf("supportDisplayText", "canText")) hooked += hookAllMethodsSafely(cm, name, onRender)
+            XLog.log("LiveChat: hooked $hooked ChatMessage render method(s)")
+
+            // Secondary: also tap the room's message pipeline when we can capture its manager.
+            chatTypeInt = runCatching { (XposedHelpers.callMethod(cm.newInstance(), "getIntType") as? Int) ?: -1 }.getOrDefault(-1)
+            XposedHelpers.findClassIfExists("com.ss.ugc.live.sdk.message.MessageManagerFactory", classLoader)?.let { factory ->
+                XposedBridge.hookAllMethods(factory, "get", object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        val manager = param.result ?: return
+                        runCatching { registerOn(manager, classLoader) }.onFailure { XLog.log("LiveChat: register failed: ${it.message}") }
+                    }
+                })
+            }
         }
     }
 
     private fun registerOn(manager: Any, classLoader: ClassLoader) {
         synchronized(handledManagers) { if (!handledManagers.add(manager)) return }
-        val onMessage = XposedHelpers.findClassIfExists("com.ss.ugc.live.sdk.message.interfaces.OnMessageListener", classLoader)
-        if (onMessage != null && chatTypeInt > 0) {
-            val listener = Proxy.newProxyInstance(classLoader, arrayOf(onMessage)) { _, method, args ->
-                if (method.name == "onMessage") runCatching { onIncoming(args?.getOrNull(0)) }
-                null
+        // An interceptor sees every message of the room and, returning false, never consumes any — so the
+        // user's own chat is unaffected. (Subscribing by message type didn't deliver on this build.)
+        val interceptor = XposedHelpers.findClassIfExists("com.ss.ugc.live.sdk.message.interfaces.IInterceptor", classLoader)
+        if (interceptor != null) {
+            val proxy = Proxy.newProxyInstance(classLoader, arrayOf(interceptor)) { _, method, args ->
+                if (method.name == "onMessage") { runCatching { onIncoming(args?.getOrNull(0)) }; return@newProxyInstance false }
+                if (method.returnType == java.lang.Boolean.TYPE) false else null
             }
-            runCatching { XposedHelpers.callMethod(manager, "addMessageListener", chatTypeInt, listener) }
-                .onFailure { XLog.log("LiveChat: addMessageListener failed: ${it.message}") }
-                .onSuccess { XLog.log("LiveChat: listening on a room's chat") }
+            runCatching { XposedHelpers.callMethod(manager, "addInterceptor", proxy) }
+                .onFailure { XLog.log("LiveChat: addInterceptor failed: ${it.message}") }
+                .onSuccess { XLog.log("LiveChat: intercepting a room's chat") }
             return
         }
-        // Fallback only: a pass-through interceptor (returns false = don't consume) when the type is unknown.
-        val interceptor = XposedHelpers.findClassIfExists("com.ss.ugc.live.sdk.message.interfaces.IInterceptor", classLoader) ?: return
-        val proxy = Proxy.newProxyInstance(classLoader, arrayOf(interceptor)) { _, method, args ->
-            if (method.name == "onMessage") { runCatching { onIncoming(args?.getOrNull(0)) }; return@newProxyInstance false }
-            if (method.returnType == java.lang.Boolean.TYPE) false else null
+        // Fallback: subscribe to the chat message type with a listener.
+        val onMessage = XposedHelpers.findClassIfExists("com.ss.ugc.live.sdk.message.interfaces.OnMessageListener", classLoader) ?: return
+        if (chatTypeInt <= 0) return
+        val listener = Proxy.newProxyInstance(classLoader, arrayOf(onMessage)) { _, method, args ->
+            if (method.name == "onMessage") runCatching { onIncoming(args?.getOrNull(0)) }
+            null
         }
-        runCatching { XposedHelpers.callMethod(manager, "addInterceptor", proxy) }
-            .onSuccess { XLog.log("LiveChat: intercepting a room's chat (fallback)") }
+        runCatching { XposedHelpers.callMethod(manager, "addMessageListener", chatTypeInt, listener) }
+            .onSuccess { XLog.log("LiveChat: listening on a room's chat") }
     }
+
 
     /** Called on the message pipeline thread for every incoming message. */
     private fun onIncoming(msg: Any?) {
@@ -101,13 +118,13 @@ class LiveChatHook : BaseHook() {
         val nick = nickOf(msg)
 
         synchronized(lock) {
+            // One buffer per viewing session. A multi-guest / music live reports many preloaded rooms, so the
+            // "room on screen" flaps; keying by it would shatter the transcript into fragments. Instead we keep
+            // all the chat shown on screen in one file, saved when the viewer leaves.
             var b = buffer
-            if (b == null || b.roomId != live.roomId) {
-                saveLocked(b)
-                b = Buffer(live.roomId, live.owner, live.title).also { buffer = it }
-            }
+            if (b == null) { b = Buffer(live.roomId, live.owner, live.title); buffer = b }
             if (!b.seen.add(id)) return
-            if (b.seen.size > 8000) { saveLocked(b); b = Buffer(live.roomId, live.owner, live.title).also { buffer = it } }
+            if (b.seen.size > 20000) { saveLocked(b); b = Buffer(live.roomId, live.owner, live.title); buffer = b }
             b.sb.append('[').append(time.format(Date())).append("] ")
             if (nick.isNotBlank()) b.sb.append(nick).append(": ")
             b.sb.append(content).append('\n')
@@ -121,15 +138,20 @@ class LiveChatHook : BaseHook() {
             ?: (XposedHelpers.callMethod(user, "getDisplayId") as? String).orEmpty()
     }.getOrDefault("")
 
-    /** The LIVE screen left the foreground: save what was collected. */
+    /**
+     * The LIVE screen came to the front or left it. A live opens overlay activities (gift panel, comment box)
+     * that briefly leave "LivePlay", so saving is debounced: only after the screen stays gone for a few
+     * seconds — a real exit — is the transcript saved. A transient overlay cancels the pending save.
+     */
     fun onScreen(visible: Boolean) {
-        if (visible) return
-        synchronized(lock) { val b = buffer; buffer = null; saveLocked(b) }
+        main.removeCallbacks(saveRunnable)
+        if (!visible) main.postDelayed(saveRunnable, 6000)
     }
 
     /** Must hold [lock]. Saves a buffer on a background thread if it has anything. */
     private fun saveLocked(b: Buffer?) {
         if (b == null || b.count == 0) return
+        XLog.log("LiveChat: saving @${b.owner} (${b.count} messages)")
         val ctx = Prefs.hostContext ?: return
         val header = "TikMod — LIVE chat @${b.owner}\n${b.title}\n${SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).format(Date())}\n${b.count} messages\n\n"
         val text = header + b.sb.toString()

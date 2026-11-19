@@ -18,6 +18,11 @@ object Changelog {
 
     val versions: List<Version> = listOf(
         Version(
+            "4.5.1", "2026-11-19", listOf(
+                Item(Icons.Rounded.Forum, R.string.cl451_chat, R.string.cl451_chat_desc) { Neon.Pink },
+            )
+        ),
+        Version(
             "4.5.0", "2026-11-19", listOf(
                 Item(Icons.Rounded.FilterList, R.string.cl450_feed, R.string.cl450_feed_desc) { Neon.Amber },
                 Item(Icons.Rounded.Speed, R.string.cl450_play, R.string.cl450_play_desc) { Neon.Cyan },

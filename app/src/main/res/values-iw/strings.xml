@@ -552,4 +552,6 @@
     <string name="cl450_more_desc">כיבוי רטט המשוב של האפליקציה, ופתיחת קישורים חיצוניים בדפדפן האמיתי שלך במקום זה של טיקטוק. בבית ← כיוונונים כלליים.</string>
     <string name="feed_seekbar">קו התקדמות בכל סרטון</string>
     <string name="feed_seekbar_desc">הצגת קו התקדמות בכל הסרטונים כדי שאפשר יהיה לדלג בהם. דלוק כברירת מחדל.</string>
+    <string name="cl451_chat">תוקנה הקלטת צ\'אט השידור</string>
+    <string name="cl451_chat_desc">קודם לא נשמר כלום. עכשיו הצ\'אט נתפס באמינות ונשמר כקובץ אחד לכל שידור בתיקייה Download/TikMod כשיוצאים מהשידור.</string>
 </resources>

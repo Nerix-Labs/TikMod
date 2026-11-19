@@ -541,4 +541,6 @@
     <string name="cl450_more_desc">Desative a vibração do app e abra links externos no seu navegador real. Em Início → Ajustes gerais.</string>
     <string name="feed_seekbar">Barra de progresso em todo vídeo</string>
     <string name="feed_seekbar_desc">Mostra uma barra de progresso em todos os vídeos para navegar. Ativado por padrão.</string>
+    <string name="cl451_chat">Gravação do chat corrigida</string>
+    <string name="cl451_chat_desc">Antes não salvava nada. Agora o chat é capturado de forma confiável e salvo como uma transcrição por live em Download/TikMod ao sair.</string>
 </resources>

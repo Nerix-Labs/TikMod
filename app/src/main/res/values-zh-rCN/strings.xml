@@ -519,4 +519,6 @@
     <string name="cl450_more_desc">关闭应用的触感震动，并在你的真实浏览器中打开外部链接而非 TikTok 内置浏览器。在主页 → 通用调整。</string>
     <string name="feed_seekbar">每个视频都显示进度条</string>
     <string name="feed_seekbar_desc">在所有视频上显示进度条以便拖动。默认开启。</string>
+    <string name="cl451_chat">修复直播聊天录制</string>
+    <string name="cl451_chat_desc">之前什么都没保存。现在能可靠地捕获聊天，并在离开直播时将每个直播保存为一个文件到 Download/TikMod。</string>
 </resources>

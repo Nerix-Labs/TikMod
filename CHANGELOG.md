@@ -2,6 +2,15 @@
 
 All notable changes to TikMod. Versions follow [semantic versioning](https://semver.org).
 
+## 4.5.1 — 2026-11-19
+
+### Fixed
+- **Live chat recording saved nothing.** The chat was captured through the message pipeline's typed listener,
+  which didn't deliver on recent TikTok builds, so no transcript was ever written. It now taps the chat
+  reliably (through the live SDK's message interceptor and the chat view itself) and writes one transcript per
+  stream to **Download/TikMod/** when you leave the live. Multi-guest / music lives no longer produce a pile of
+  fragment files.
+
 ## 4.5.0 — 2026-11-19
 
 Tested and working on TikTok 47.9.1 (the obfuscated hooks re-resolve themselves on each TikTok update).
