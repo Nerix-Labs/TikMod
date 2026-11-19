@@ -509,7 +509,6 @@
     <string name="chat_rec_sub">שמירת הצ\'אט של שידורים שאתם צופים בהם לקובץ טקסט</string>
     <string name="chat_rec_toggle">הקלטת צ\'אט חי</string>
     <string name="chat_rec_toggle_desc">בזמן הצפייה בשידור, הצ\'אט נאסף ונשמר כשיוצאים ממנו</string>
-    <string name="chat_rec_hint">נשמר בהורדות כקובץ טקסט. הצ\'אט זמין רק כשטיקטוק פתוח על השידור, ולכן המקליט האוטומטי שברקע לא כולל אותו.</string>
     <string name="captions_hint_use">בשידור: גררו את הכתוביות לכל מקום, צבטו לשינוי הגודל, הקשה כפולה מקפיאה שורה, הקשה בודדת פותחת תפריט מהיר, ולחיצה ארוכה מסתירה.</string>
     <string name="cl440_chat">הקלטת צ\'אט השידור</string>
     <string name="cl440_chat_desc">הצ\'אט של שידור שאתם צופים בו נשמר לקובץ טקסט כשיוצאים ממנו. מפעילים במסך לייב.</string>
@@ -554,4 +553,10 @@
     <string name="feed_seekbar_desc">הצגת קו התקדמות בכל הסרטונים כדי שאפשר יהיה לדלג בהם. דלוק כברירת מחדל.</string>
     <string name="cl451_chat">תוקנה הקלטת צ\'אט השידור</string>
     <string name="cl451_chat_desc">קודם לא נשמר כלום. עכשיו הצ\'אט נתפס באמינות ונשמר כקובץ אחד לכל שידור בתיקייה Download/TikMod כשיוצאים מהשידור.</string>
+    <string name="notif_adding_chat">מוסיף את הצ\'אט לסרטון… %1$d%%</string>
+    <string name="chat_in_video">הצ\'אט בתוך ההקלטה</string>
+    <string name="chat_in_video_desc">כשמקליטים שידור שצופים בו, התגובות מופיעות בתוך הסרטון, בתזמון שבו נכתבו</string>
+    <string name="chat_rec_hint">השאירו את טיקטוק פתוח על השידור בזמן ההקלטה — הצ\'אט קיים רק שם. בסוף ההקלטה TikMod מוסיף את הצ\'אט לסרטון (לוקח רגע). עותק טקסט נשמר גם ב-Download/TikMod.</string>
+    <string name="cl460_chat">הצ\'אט בתוך ההקלטות</string>
+    <string name="cl460_chat_desc">מקליטים שידור בזמן שצופים בו — והתגובות מופיעות בתוך הסרטון, כמו בטיקטוק, כל אחת ברגע שבו נכתבה.</string>
 </resources>

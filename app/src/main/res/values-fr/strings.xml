@@ -498,7 +498,6 @@
     <string name="chat_rec_sub">Enregistre le chat des directs regardés dans un fichier texte</string>
     <string name="chat_rec_toggle">Enregistrer le chat en direct</string>
     <string name="chat_rec_toggle_desc">Pendant que vous regardez, le chat est collecté et enregistré au départ</string>
-    <string name="chat_rec_hint">Enregistré dans Téléchargements en fichier texte. Le chat n\'est accessible que lorsque TikTok est ouvert sur le direct, donc l\'enregistreur auto en arrière-plan ne peut pas l\'inclure.</string>
     <string name="captions_hint_use">Sur le direct : déplacez les sous-titres où vous voulez, pincez pour redimensionner, double-tap pour figer une ligne, tap pour le menu rapide, appui long pour masquer.</string>
     <string name="cl440_chat">Enregistrer le chat du direct</string>
     <string name="cl440_chat_desc">Le chat d\'un direct que vous regardez est enregistré dans un fichier texte au départ. À activer dans l\'écran Live.</string>
@@ -543,4 +542,10 @@
     <string name="feed_seekbar_desc">Affiche une barre de progression sur toutes les vidéos pour les parcourir. Activé par défaut.</string>
     <string name="cl451_chat">Enregistrement du chat corrigé</string>
     <string name="cl451_chat_desc">Il n\'enregistrait rien. Le chat est désormais capturé de façon fiable et enregistré en une transcription par direct dans Download/TikMod à la sortie.</string>
+    <string name="notif_adding_chat">Ajout du chat à la vidéo… %1$d%%</string>
+    <string name="chat_in_video">Afficher le chat dans les enregistrements</string>
+    <string name="chat_in_video_desc">Quand vous enregistrez un direct que vous regardez, ses commentaires apparaissent dans la vidéo, au moment où ils ont été écrits</string>
+    <string name="chat_rec_hint">Gardez TikTok ouvert sur le direct pendant l\'enregistrement — le chat n\'existe que là. À la fin, TikMod ajoute le chat à la vidéo (cela prend un instant). Une copie texte est aussi enregistrée dans Download/TikMod.</string>
+    <string name="cl460_chat">Le chat dans vos enregistrements</string>
+    <string name="cl460_chat_desc">Enregistrez un direct pendant que vous le regardez : les commentaires apparaissent dans la vidéo, comme dans TikTok, au moment où ils ont été écrits.</string>
 </resources>

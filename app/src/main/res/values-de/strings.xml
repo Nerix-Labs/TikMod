@@ -487,7 +487,6 @@
     <string name="chat_rec_sub">Speichert den Chat angesehener Streams als Textdatei</string>
     <string name="chat_rec_toggle">Live-Chat aufzeichnen</string>
     <string name="chat_rec_toggle_desc">Während du zusiehst, wird der Chat gesammelt und beim Verlassen gespeichert</string>
-    <string name="chat_rec_hint">Wird als Textdatei in Downloads gespeichert. Der Chat ist nur verfügbar, während TikTok auf dem Stream offen ist, daher kann der Hintergrund-Recorder ihn nicht einschließen.</string>
     <string name="captions_hint_use">Im Stream: Untertitel beliebig ziehen, mit zwei Fingern skalieren, Doppeltippen pausiert eine Zeile, Tippen öffnet das Schnellmenü, Gedrückthalten blendet aus.</string>
     <string name="cl440_chat">Live-Chat aufzeichnen</string>
     <string name="cl440_chat_desc">Der Chat eines Streams, den du ansiehst, wird beim Verlassen als Textdatei gespeichert. Im Live-Bildschirm einschalten.</string>
@@ -532,4 +531,10 @@
     <string name="feed_seekbar_desc">Zeigt bei allen Videos eine Fortschrittsleiste zum Spulen. Standardmäßig an.</string>
     <string name="cl451_chat">Live-Chat-Aufnahme behoben</string>
     <string name="cl451_chat_desc">Vorher wurde nichts gespeichert. Jetzt wird der Chat zuverlässig erfasst und beim Verlassen als eine Datei pro Stream in Download/TikMod gespeichert.</string>
+    <string name="notif_adding_chat">Chat wird ins Video eingefügt… %1$d%%</string>
+    <string name="chat_in_video">Chat in Aufnahmen zeigen</string>
+    <string name="chat_in_video_desc">Wenn du einen Stream aufnimmst, den du ansiehst, erscheinen seine Kommentare im Video – zeitlich passend</string>
+    <string name="chat_rec_hint">Lass TikTok während der Aufnahme auf dem Stream offen – der Chat existiert nur dort. Nach der Aufnahme fügt TikMod den Chat ins Video ein (dauert einen Moment). Eine Textkopie liegt außerdem in Download/TikMod.</string>
+    <string name="cl460_chat">Der Chat in deinen Aufnahmen</string>
+    <string name="cl460_chat_desc">Nimm einen Stream auf, während du zusiehst – die Kommentare erscheinen im Video wie in TikTok, jeweils im Moment ihres Schreibens.</string>
 </resources>

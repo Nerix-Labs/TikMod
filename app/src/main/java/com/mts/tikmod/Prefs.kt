@@ -113,6 +113,7 @@ object Prefs {
     const val KEY_CAPTION_OUTLINE = "key_caption_outline"       // heavy outline for bright streams
     const val KEY_CAPTION_ALWAYS = "key_caption_always"         // keep the bubble on screen (no auto-hide)
     const val KEY_RECORD_CHAT = "key_record_chat"               // save the live chat of streams you watch
+    const val KEY_CHAT_IN_VIDEO = "key_chat_in_video"           // burn that chat into LIVE recordings
     const val KEY_AUTO_LIVE_STATE = "auto_live_state_json"      // runtime status for the UI (not exported)
 
     // App look
@@ -231,7 +232,8 @@ object Prefs {
         KEY_CAPTION_LINES to "2",
         KEY_CAPTION_OUTLINE to false,
         KEY_CAPTION_ALWAYS to false,
-        KEY_RECORD_CHAT to false
+        KEY_RECORD_CHAT to false,
+        KEY_CHAT_IN_VIDEO to true
     )
 
     @Volatile private var cache: Map<String, Any> = HashMap(SPECS)

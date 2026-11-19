@@ -531,7 +531,6 @@
     <string name="chat_rec_sub">حفظ دردشة البث الذي تشاهده في ملف نصي</string>
     <string name="chat_rec_toggle">تسجيل الدردشة المباشرة</string>
     <string name="chat_rec_toggle_desc">أثناء مشاهدة البث، تُجمع الدردشة وتُحفظ عند مغادرته</string>
-    <string name="chat_rec_hint">يُحفظ في التنزيلات كملف نصي. الدردشة متاحة فقط عندما يكون تيك توك مفتوحًا على البث، لذا لا يتضمنها المسجّل التلقائي في الخلفية.</string>
     <string name="captions_hint_use">في البث: اسحب الترجمة إلى أي مكان، اقرص لتغيير الحجم، انقر نقرًا مزدوجًا لإيقاف سطر، انقر للقائمة السريعة، واضغط مطوّلًا للإخفاء.</string>
     <string name="cl440_chat">تسجيل دردشة البث</string>
     <string name="cl440_chat_desc">تُحفظ دردشة البث الذي تشاهده في ملف نصي عند مغادرته. فعّلها من شاشة البث.</string>
@@ -576,4 +575,10 @@
     <string name="feed_seekbar_desc">إظهار شريط تقدم في كل الفيديوهات للتنقل داخلها. مفعّل افتراضيًا.</string>
     <string name="cl451_chat">إصلاح تسجيل دردشة البث</string>
     <string name="cl451_chat_desc">لم يكن يحفظ شيئًا من قبل. الآن تُلتقط الدردشة بموثوقية وتُحفظ كملف واحد لكل بث في Download/TikMod عند مغادرة البث.</string>
+    <string name="notif_adding_chat">إضافة الدردشة إلى الفيديو… %1$d%%</string>
+    <string name="chat_in_video">إظهار الدردشة في التسجيلات</string>
+    <string name="chat_in_video_desc">عند تسجيل بث تشاهده، تظهر تعليقاته في الفيديو في توقيت كتابتها</string>
+    <string name="chat_rec_hint">أبقِ تيك توك مفتوحًا على البث أثناء التسجيل — الدردشة موجودة هناك فقط. بعد انتهاء التسجيل يضيف TikMod الدردشة إلى الفيديو (يستغرق لحظة). تُحفظ نسخة نصية أيضًا في Download/TikMod.</string>
+    <string name="cl460_chat">الدردشة داخل تسجيلاتك</string>
+    <string name="cl460_chat_desc">سجّل بثًا أثناء مشاهدته وستظهر التعليقات في الفيديو كما في تيك توك، كل منها في لحظة كتابتها.</string>
 </resources>

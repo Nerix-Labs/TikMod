@@ -1,0 +1,79 @@
+{
+  "en": {
+    "badge": {
+      "e": "🎬",
+      "id": ""
+    },
+    "title": "TikMod 4.6.0 — the chat inside your LIVE recordings",
+    "summary": "Record a stream while you watch it — the comments are burned into the video.",
+    "bullets": [
+      {
+        "icon": {
+          "e": "💬",
+          "id": ""
+        },
+        "text": "Comments appear in the recording like in TikTok, each at the moment it was written"
+      },
+      {
+        "icon": {
+          "e": "🌍",
+          "id": ""
+        },
+        "text": "Names in colour, emoji, Hebrew and Arabic right-to-left"
+      },
+      {
+        "icon": {
+          "e": "🎯",
+          "id": ""
+        },
+        "text": "Matched to the exact stream, even on multi-guest lives"
+      },
+      {
+        "icon": {
+          "e": "📄",
+          "id": ""
+        },
+        "text": "Plus a text transcript in Download/TikMod"
+      }
+    ]
+  },
+  "he": {
+    "badge": {
+      "e": "🎬",
+      "id": ""
+    },
+    "title": "TikMod 4.6.0 — הצ'אט בתוך הקלטות הלייב",
+    "summary": "מקליטים שידור בזמן שצופים בו — והתגובות נצרבות לתוך הסרטון.",
+    "bullets": [
+      {
+        "icon": {
+          "e": "💬",
+          "id": ""
+        },
+        "text": "התגובות מופיעות בהקלטה כמו בטיקטוק, כל אחת ברגע שבו נכתבה"
+      },
+      {
+        "icon": {
+          "e": "🌍",
+          "id": ""
+        },
+        "text": "שמות בצבע, אימוג'י, עברית וערבית מימין לשמאל"
+      },
+      {
+        "icon": {
+          "e": "🎯",
+          "id": ""
+        },
+        "text": "מותאם לשידור המדויק, גם בשידורים מרובי משתתפים"
+      },
+      {
+        "icon": {
+          "e": "📄",
+          "id": ""
+        },
+        "text": "וגם תמלול טקסט ב-Download/TikMod"
+      }
+    ]
+  },
+  "footer": "Works on TikTok 47.9.1 · עובד על טיקטוק 47.9.1"
+}

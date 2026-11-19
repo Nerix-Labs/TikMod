@@ -476,7 +476,6 @@
     <string name="chat_rec_sub">将你观看的直播聊天保存为文本文件</string>
     <string name="chat_rec_toggle">录制直播聊天</string>
     <string name="chat_rec_toggle_desc">观看直播时收集聊天内容，离开时保存</string>
-    <string name="chat_rec_hint">以文本文件保存到下载目录。仅当 TikTok 打开该直播时才能获取聊天，因此后台自动录制不包含聊天。</string>
     <string name="captions_hint_use">在直播中：可将字幕拖到任意位置，双指捏合缩放，双击暂停某行，点按打开快捷菜单，长按隐藏。</string>
     <string name="cl440_chat">录制直播聊天</string>
     <string name="cl440_chat_desc">你观看的直播聊天会在离开时保存为文本文件。在“直播”页面开启。</string>
@@ -521,4 +520,10 @@
     <string name="feed_seekbar_desc">在所有视频上显示进度条以便拖动。默认开启。</string>
     <string name="cl451_chat">修复直播聊天录制</string>
     <string name="cl451_chat_desc">之前什么都没保存。现在能可靠地捕获聊天，并在离开直播时将每个直播保存为一个文件到 Download/TikMod。</string>
+    <string name="notif_adding_chat">正在将聊天加入视频… %1$d%%</string>
+    <string name="chat_in_video">在录像中显示聊天</string>
+    <string name="chat_in_video_desc">录制正在观看的直播时，评论会按发送时间出现在视频中</string>
+    <string name="chat_rec_hint">录制时请让 TikTok 保持在该直播页面——聊天只存在于那里。录制结束后，TikMod 会把聊天加入视频（需要片刻）。文本副本也会保存在 Download/TikMod。</string>
+    <string name="cl460_chat">录像中的直播聊天</string>
+    <string name="cl460_chat_desc">边看边录直播，评论会像在 TikTok 中一样出现在视频里，每条都在发送的那一刻出现。</string>
 </resources>

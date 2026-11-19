@@ -488,7 +488,6 @@
     <string name="chat_rec_sub">Save the chat of streams you watch to a text file</string>
     <string name="chat_rec_toggle">Record live chat</string>
     <string name="chat_rec_toggle_desc">While you watch a stream, its chat is collected and saved when you leave</string>
-    <string name="chat_rec_hint">Saved to Downloads as a text file. The chat is only available while TikTok is open on the stream, so the background auto-recorder can\'t include it.</string>
     <string name="captions_hint_use">On the stream: drag the captions anywhere, pinch to resize, double-tap to pause a line, tap for the quick menu, hold to hide them.</string>
     <string name="cl440_chat">Record the live chat</string>
     <string name="cl440_chat_desc">The chat of a stream you watch is saved to a text file when you leave. Turn it on in the Live screen.</string>
@@ -533,4 +532,10 @@
     <string name="feed_seekbar_desc">Show a seek bar on all videos so you can scrub them. On by default.</string>
     <string name="cl451_chat">Live chat recording fixed</string>
     <string name="cl451_chat_desc">It saved nothing before. Now the chat is captured reliably and saved as one transcript per stream in Download/TikMod when you leave the live.</string>
+    <string name="notif_adding_chat">Adding the chat to the video… %1$d%%</string>
+    <string name="chat_in_video">Show the chat in recordings</string>
+    <string name="chat_in_video_desc">When you record a stream you\'re watching, its comments appear in the video, timed as they were written</string>
+    <string name="chat_rec_hint">Keep TikTok open on the stream while it records — the chat only exists there. After the recording ends, TikMod adds the chat to the video (it takes a moment). A text copy is also saved in Download/TikMod.</string>
+    <string name="cl460_chat">The chat inside your recordings</string>
+    <string name="cl460_chat_desc">Record a stream while you watch it and the comments appear in the video, like in TikTok, each at the moment it was written.</string>
 </resources>

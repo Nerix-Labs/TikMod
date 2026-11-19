@@ -498,7 +498,6 @@
     <string name="chat_rec_sub">Guarda el chat de los directos que ves en un archivo de texto</string>
     <string name="chat_rec_toggle">Grabar el chat en directo</string>
     <string name="chat_rec_toggle_desc">Mientras ves un directo, su chat se recopila y se guarda al salir</string>
-    <string name="chat_rec_hint">Se guarda en Descargas como archivo de texto. El chat solo está disponible con TikTok abierto en el directo, así que la grabación automática en segundo plano no puede incluirlo.</string>
     <string name="captions_hint_use">En el directo: arrastra los subtítulos a cualquier parte, pellizca para redimensionar, doble toque para pausar una línea, toca para el menú rápido, mantén pulsado para ocultar.</string>
     <string name="cl440_chat">Grabar el chat del directo</string>
     <string name="cl440_chat_desc">El chat de un directo que ves se guarda en un archivo de texto al salir. Actívalo en la pantalla Live.</string>
@@ -543,4 +542,10 @@
     <string name="feed_seekbar_desc">Muestra una barra de progreso en todos los vídeos para desplazarte. Activado por defecto.</string>
     <string name="cl451_chat">Grabación del chat corregida</string>
     <string name="cl451_chat_desc">Antes no guardaba nada. Ahora el chat se captura de forma fiable y se guarda como una transcripción por directo en Download/TikMod al salir.</string>
+    <string name="notif_adding_chat">Añadiendo el chat al vídeo… %1$d%%</string>
+    <string name="chat_in_video">Mostrar el chat en las grabaciones</string>
+    <string name="chat_in_video_desc">Al grabar un directo que estás viendo, sus comentarios aparecen en el vídeo en el momento en que se escribieron</string>
+    <string name="chat_rec_hint">Mantén TikTok abierto en el directo mientras graba: el chat solo existe ahí. Al terminar, TikMod añade el chat al vídeo (tarda un momento). También se guarda una copia de texto en Download/TikMod.</string>
+    <string name="cl460_chat">El chat dentro de tus grabaciones</string>
+    <string name="cl460_chat_desc">Graba un directo mientras lo ves y los comentarios aparecen en el vídeo, como en TikTok, en el momento en que se escribieron.</string>
 </resources>

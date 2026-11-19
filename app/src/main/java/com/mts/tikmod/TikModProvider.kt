@@ -108,6 +108,10 @@ class TikModProvider : ContentProvider() {
                     }
                     Bundle().apply { putBoolean("success", key != null && key in allowed) }
                 }
+                "chat_lines" -> {
+                    if (!arg.isNullOrBlank()) runCatching { com.mts.tikmod.utils.ChatLog.append(ctx, arg) }
+                    Bundle().apply { putBoolean("success", true) }
+                }
                 "captions_transcript" -> Bundle().apply { putString("text", com.mts.tikmod.captions.CaptionService.transcript()) }
                 "captions_stop" -> {
                     com.mts.tikmod.captions.CaptionService.command(ctx, com.mts.tikmod.captions.CaptionService.ACTION_STOP, null)

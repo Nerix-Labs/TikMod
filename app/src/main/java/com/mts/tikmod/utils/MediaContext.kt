@@ -107,6 +107,9 @@ object MediaContext {
         }, "TikMod-LiveHistory").start()
     }
 
+    /** A LIVE room TikTok has loaded (its owner, title and stream addresses), by room id. */
+    fun room(id: String): LiveStream? = rooms[id]
+
     /** The LIVE room that is on screen right now, or null (also until its stream addresses are known). */
     fun watchingNow(): LiveStream? = if (liveScreenVisible) enteredId?.let { rooms[it] } else null
 

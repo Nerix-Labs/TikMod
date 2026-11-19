@@ -157,6 +157,7 @@ fun CaptionsSection() {
 fun ChatRecordingSection() {
     Section(Icons.Rounded.Forum, L.t(R.string.chat_rec_title), L.t(R.string.chat_rec_sub), accent = Neon.Pink, badge = L.t(R.string.tag_new), collapsible = true) {
         ToggleRow(L.t(R.string.chat_rec_toggle), L.t(R.string.chat_rec_toggle_desc), Prefs.KEY_RECORD_CHAT, Icons.Rounded.Forum, Neon.Pink)
+        ToggleRow(L.t(R.string.chat_in_video), L.t(R.string.chat_in_video_desc), Prefs.KEY_CHAT_IN_VIDEO, Icons.Rounded.Subtitles, Neon.Pink)
         Hint(L.t(R.string.chat_rec_hint))
     }
 }

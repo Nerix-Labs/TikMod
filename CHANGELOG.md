@@ -2,6 +2,21 @@
 
 All notable changes to TikMod. Versions follow [semantic versioning](https://semver.org).
 
+## 4.6.0 — 2026-11-19
+
+### Added
+- **The chat inside your LIVE recordings.** Record a stream while you watch it in TikTok and the comments are
+  burned into the video, the way TikTok shows them — newest at the bottom-left, names in colour, emoji,
+  Hebrew and Arabic right-to-left — each appearing at the moment it was written. After the recording ends
+  TikMod re-renders it once (about 2–3× faster than real time on a recent phone); if anything fails the
+  recording is saved without the chat, exactly as before. Setting: Live → Record the live chat → "Show the
+  chat in recordings" (on by default).
+
+### Changed
+- Chat is matched to the exact stream by its room id, so multi-guest and music lives no longer mix rooms.
+- The text transcript is saved once when you leave the live (not every time you open the gift panel or start
+  a recording).
+
 ## 4.5.1 — 2026-11-19
 
 ### Fixed

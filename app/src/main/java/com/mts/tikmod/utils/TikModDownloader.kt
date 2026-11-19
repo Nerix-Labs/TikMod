@@ -348,6 +348,7 @@ object TikModDownloader {
             putString("handle", handle)
             putString("title", live.title)
             putStringArrayList("urls", ArrayList(live.urls))
+            putString("room", live.roomId)
         }
         val intent = Intent("com.mts.tikmod.action.RECORD_LIVE")
             .setComponent(android.content.ComponentName("com.mts.tikmod", "com.mts.tikmod.live.LiveWatchService"))
@@ -448,7 +449,8 @@ object TikModDownloader {
         onSaving: () -> Unit = {},
         maxFailures: Int = 6,
         maxEmptySegments: Int = 5,
-        resume: Interrupted? = null
+        resume: Interrupted? = null,
+        roomId: String? = null
     ): LiveResult? {
         val ctx = context.applicationContext ?: context
         // Continuing an interrupted recording: same temp file, same final name, the clock goes on.
@@ -462,7 +464,7 @@ object TikModDownloader {
             File(temp.path + ".json").writeText(JSONObject().put("owner", owner).put("title", title).put("base", baseName).toString())
         }
         try {
-            return recordAndSave(ctx, temp, baseName, owner, title, urls, isRunning, onConn, onProgress, onSaving, maxFailures, maxEmptySegments, existing)
+            return recordAndSave(ctx, temp, baseName, owner, title, urls, isRunning, onConn, onProgress, onSaving, maxFailures, maxEmptySegments, existing, roomId)
         } finally {
             activeLiveTemps.remove(temp.absolutePath)
         }
@@ -474,9 +476,12 @@ object TikModDownloader {
         ctx: Context, temp: File, baseName: String, owner: String, title: String,
         urls: () -> List<String>, isRunning: () -> Boolean, onConn: (HttpURLConnection?) -> Unit,
         onProgress: (Long, Long) -> Unit, onSaving: () -> Unit, maxFailures: Int, maxEmptySegments: Int,
-        existing: FlvRemuxer.Existing? = null
+        existing: FlvRemuxer.Existing? = null,
+        roomId: String? = null
     ): LiveResult? {
         var writer: FlvRemuxer.Writer? = null
+        // Wall clock -> video time, about once a second: lines the chat (timed by wall clock in TikTok) up with the video.
+        val anchors = ArrayList<LongArray>()
         var failures = 0
         var emptySegments = 0
         var urlIndex = 0
@@ -505,7 +510,7 @@ object TikModDownloader {
                             tagsThisSegment++
                             failures = 0
                             val now = System.currentTimeMillis()
-                            if (now - lastUi > 1000) { lastUi = now; onProgress(w.durationMs, w.bytes) }
+                            if (now - lastUi > 1000) { lastUi = now; onProgress(w.durationMs, w.bytes); anchors.add(longArrayOf(now, w.durationMs)) }
                         }
                     }
                 } catch (t: Throwable) {
@@ -532,7 +537,7 @@ object TikModDownloader {
             toast(ctx, L.t(R.string.toast_rec_failed, owner))
             return null
         }
-        return saveLiveFile(ctx, temp, baseName, owner, title, durationMs)
+        return saveLiveFile(ctx, temp, baseName, owner, title, durationMs, roomId, anchors)
     }
 
     /** A recording that was cut off (process killed, module updated) and is still in the cache. */
@@ -589,7 +594,10 @@ object TikModDownloader {
         }
     }
 
-    private fun saveLiveFile(ctx: Context, temp: File, baseName: String, owner: String, title: String, durationMs: Long): LiveResult? {
+    private fun saveLiveFile(
+        ctx: Context, temp: File, baseName: String, owner: String, title: String, durationMs: Long,
+        roomId: String? = null, anchors: List<LongArray>? = null
+    ): LiveResult? {
         val job = Job(ctx, Kind.LIVE, owner.ifBlank { "LIVE" })
         val label = title.ifBlank { "LIVE @$owner" }
         try {
@@ -603,14 +611,18 @@ object TikModDownloader {
                 XLog.log("LiveRecorder[$owner]: MP4 tracks=$tracks duration=${mp4.durationMs}ms")
                 if (tracks.none { it?.startsWith("audio/") == true }) toast(ctx, L.t(R.string.toast_no_audio_track))
             }
+            // The chat of the stream, burned into the picture when it was watched in TikTok while recording.
+            val withChat = runCatching { burnChat(ctx, mp4, owner, roomId, anchors, job) }.getOrNull()
+            val file = withChat ?: mp4.file
             try {
                 val ext = if (mp4.hasVideo) "mp4" else "m4a"
-                val saved = mp4.file.inputStream().use { job.saveStream(it, "$baseName.$ext", mp4.mime, mp4.file.length(), owner) }
+                val saved = file.inputStream().use { job.saveStream(it, "$baseName.$ext", mp4.mime, file.length(), owner) }
                 job.finish(saved, "${formatDuration(mp4.durationMs)} • ${formatSize(saved.bytes)}")
                 addHistoryRaw(ctx, Kind.LIVE, label, owner, saved, "MP4 • ${formatDuration(mp4.durationMs)}")
                 return LiveResult(saved, mp4.durationMs)
             } finally {
                 mp4.file.delete()
+                withChat?.delete()
             }
         } catch (t: Throwable) {
             // Fallback: the cleaned FLV still has a correct duration.
@@ -625,6 +637,33 @@ object TikModDownloader {
             temp.delete()
             File(temp.path + ".json").delete()
         }
+    }
+
+    /**
+     * Re-renders a finished recording with its live chat drawn over the picture. Only in TikMod's own process
+     * (where the chat log lives), only when chat recording and "chat in recordings" are on, and only if chat
+     * lines of this room were captured during the recording. Returns the new file, or null to keep the original.
+     */
+    private fun burnChat(ctx: Context, mp4: FlvRemuxer.Result, owner: String, roomId: String?, anchors: List<LongArray>?, job: Job): File? {
+        if (!mp4.hasVideo || roomId.isNullOrBlank() || anchors == null || anchors.size < 2) return null
+        if (ctx.packageName != com.mts.tikmod.BuildConfig.APPLICATION_ID) return null
+        if (!Prefs.bool(ctx, Prefs.KEY_RECORD_CHAT) || !Prefs.bool(ctx, Prefs.KEY_CHAT_IN_VIDEO)) return null
+        val first = anchors.first()[0]
+        val last = anchors.last()[0]
+        val lines = ChatLog.lines(ctx, roomId, first - 2000, last + 2000).mapNotNull { e ->
+            var a = anchors[0]
+            for (an in anchors) { if (an[0] <= e.t) a = an else break }
+            val v = a[1] + (e.t - a[0])
+            if (v < 0) null else ChatBurner.Line(v, e.nick, e.text)
+        }
+        XLog.log("LiveRecorder[$owner]: ${lines.size} chat lines for room $roomId")
+        if (lines.isEmpty()) return null
+        job.setStep(L.t(R.string.notif_adding_chat, 0))
+        val out = File(ctx.cacheDir, "tikmod_chat_${System.nanoTime()}.mp4")
+        val started = System.currentTimeMillis()
+        val ok = ChatBurner.burn(mp4.file, lines, out) { pct -> job.setStep(L.t(R.string.notif_adding_chat, pct)) }
+        XLog.log("LiveRecorder[$owner]: chat burned=$ok in ${(System.currentTimeMillis() - started) / 1000}s (${formatSize(out.length())})")
+        return if (ok) out else { out.delete(); null }
     }
 
     /** Saves a live-chat transcript as a UTF-8 text file in Downloads, and adds it to the history. */

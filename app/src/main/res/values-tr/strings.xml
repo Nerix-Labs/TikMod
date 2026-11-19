@@ -487,7 +487,6 @@
     <string name="chat_rec_sub">İzlediğin yayınların sohbetini metin dosyasına kaydeder</string>
     <string name="chat_rec_toggle">Canlı sohbeti kaydet</string>
     <string name="chat_rec_toggle_desc">Yayını izlerken sohbet toplanır ve çıkınca kaydedilir</string>
-    <string name="chat_rec_hint">İndirilenler\'e metin dosyası olarak kaydedilir. Sohbet yalnızca TikTok yayında açıkken erişilebilir; bu yüzden arka plandaki otomatik kaydedici onu içeremez.</string>
     <string name="captions_hint_use">Yayında: altyazıları istediğin yere sürükle, boyutlandırmak için sıkıştır, bir satırı duraklatmak için çift dokun, hızlı menü için dokun, gizlemek için basılı tut.</string>
     <string name="cl440_chat">Canlı sohbeti kaydet</string>
     <string name="cl440_chat_desc">İzlediğin yayının sohbeti çıkınca metin dosyasına kaydedilir. Canlı ekranından aç.</string>
@@ -532,4 +531,10 @@
     <string name="feed_seekbar_desc">Tüm videolarda ilerleme çubuğu gösterir. Varsayılan olarak açık.</string>
     <string name="cl451_chat">Canlı sohbet kaydı düzeltildi</string>
     <string name="cl451_chat_desc">Önceden hiçbir şey kaydetmiyordu. Artık sohbet güvenilir şekilde yakalanıp yayından çıkınca Download/TikMod\'a yayın başına tek dosya olarak kaydedilir.</string>
+    <string name="notif_adding_chat">Sohbet videoya ekleniyor… %1$d%%</string>
+    <string name="chat_in_video">Kayıtlarda sohbeti göster</string>
+    <string name="chat_in_video_desc">İzlediğin bir yayını kaydederken yorumlar, yazıldıkları anda videoda görünür</string>
+    <string name="chat_rec_hint">Kayıt sırasında TikTok\'u yayında açık tut — sohbet yalnızca orada var. Kayıt bitince TikMod sohbeti videoya ekler (biraz sürer). Metin kopyası da Download/TikMod\'a kaydedilir.</string>
+    <string name="cl460_chat">Kayıtlarının içinde sohbet</string>
+    <string name="cl460_chat_desc">Bir yayını izlerken kaydet; yorumlar TikTok\'taki gibi, yazıldıkları anda videoda görünür.</string>
 </resources>

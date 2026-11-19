@@ -498,7 +498,6 @@
     <string name="chat_rec_sub">Salva o chat das lives que você assiste num arquivo de texto</string>
     <string name="chat_rec_toggle">Gravar o chat ao vivo</string>
     <string name="chat_rec_toggle_desc">Enquanto você assiste, o chat é coletado e salvo ao sair</string>
-    <string name="chat_rec_hint">Salvo em Downloads como arquivo de texto. O chat só está disponível com o TikTok aberto na live, então o gravador automático em segundo plano não o inclui.</string>
     <string name="captions_hint_use">Na live: arraste as legendas para qualquer lugar, pince para redimensionar, toque duplo para pausar uma linha, toque para o menu rápido, segure para ocultar.</string>
     <string name="cl440_chat">Gravar o chat da live</string>
     <string name="cl440_chat_desc">O chat de uma live que você assiste é salvo num arquivo de texto ao sair. Ative na tela Live.</string>
@@ -543,4 +542,10 @@
     <string name="feed_seekbar_desc">Mostra uma barra de progresso em todos os vídeos para navegar. Ativado por padrão.</string>
     <string name="cl451_chat">Gravação do chat corrigida</string>
     <string name="cl451_chat_desc">Antes não salvava nada. Agora o chat é capturado de forma confiável e salvo como uma transcrição por live em Download/TikMod ao sair.</string>
+    <string name="notif_adding_chat">Adicionando o chat ao vídeo… %1$d%%</string>
+    <string name="chat_in_video">Mostrar o chat nas gravações</string>
+    <string name="chat_in_video_desc">Ao gravar uma live que você assiste, os comentários aparecem no vídeo no momento em que foram escritos</string>
+    <string name="chat_rec_hint">Mantenha o TikTok aberto na live enquanto grava — o chat só existe lá. Ao terminar, o TikMod adiciona o chat ao vídeo (leva um momento). Uma cópia em texto também é salva em Download/TikMod.</string>
+    <string name="cl460_chat">O chat dentro das suas gravações</string>
+    <string name="cl460_chat_desc">Grave uma live enquanto assiste e os comentários aparecem no vídeo, como no TikTok, no momento em que foram escritos.</string>
 </resources>

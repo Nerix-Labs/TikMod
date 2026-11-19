@@ -149,11 +149,12 @@ class LiveWatchService : Service() {
                 val handle = intent.getStringExtra(EXTRA_HANDLE)?.trim()?.removePrefix("@")?.lowercase().orEmpty()
                 val urls = intent.getStringArrayListExtra(EXTRA_URLS).orEmpty()
                 val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
+                val roomId = intent.getStringExtra("room")
                 if (handle.isBlank()) return START_STICKY
                 if (sessions.containsKey(handle)) {
                     TikModDownloader.toast(this, L.t(R.string.toast_already_recording, handle))
                 } else if (urls.isNotEmpty()) {
-                    manualStart(handle, handle, title, urls)
+                    manualStart(handle, handle, title, urls, roomId)
                 } else {
                     // Started from the TikMod app: look the stream up ourselves.
                     pendingStarts.incrementAndGet()
@@ -162,7 +163,7 @@ class LiveWatchService : Service() {
                         when {
                             room == null -> TikModDownloader.toast(this, L.t(R.string.toast_user_not_found, handle))
                             !room.live || room.flvUrls.isEmpty() -> TikModDownloader.toast(this, L.t(R.string.toast_not_live, handle))
-                            else -> manualStart(handle, room.nickname, room.title, room.flvUrls)
+                            else -> manualStart(handle, room.nickname, room.title, room.flvUrls, room.roomId)
                         }
                         pendingStarts.decrementAndGet()
                         wake()
@@ -206,7 +207,7 @@ class LiveWatchService : Service() {
             if (room != null && room.live && room.flvUrls.isNotEmpty() && !sessions.containsKey(handle)) {
                 XLog.log("AutoLive: @$handle is still live — continuing the interrupted recording")
                 TikModDownloader.toast(this, L.t(R.string.toast_rec_resuming, handle))
-                startRecording(handle, room.nickname, rec.title.ifBlank { room.title }, room.flvUrls, manual = handle !in auto, resume = rec)
+                startRecording(handle, room.nickname, rec.title.ifBlank { room.title }, room.flvUrls, manual = handle !in auto, resume = rec, roomId = room.roomId)
             } else {
                 thread(name = "TikMod-LiveSalvage") { runCatching { TikModDownloader.saveInterrupted(this, rec) } }
             }
@@ -252,7 +253,7 @@ class LiveWatchService : Service() {
         }
         if (!hasSlot()) { st.put("status", "queued"); return }
         if (freeSpace() < MIN_FREE_TO_START) { st.put("status", "nospace"); return }
-        startRecording(handle, room.nickname, room.title, room.flvUrls, manual = false)
+        startRecording(handle, room.nickname, room.title, room.flvUrls, manual = false, roomId = room.roomId)
     }
 
     // ------------------------------------------------------------------ recording
@@ -265,17 +266,18 @@ class LiveWatchService : Service() {
         return max <= 0 || sessions.size < max
     }
 
-    private fun manualStart(handle: String, nickname: String, title: String, urls: List<String>) {
+    private fun manualStart(handle: String, nickname: String, title: String, urls: List<String>, roomId: String? = null) {
         if (!hasSlot()) { TikModDownloader.toast(this, L.t(R.string.toast_parallel_limit)); return }
         if (freeSpace() < MIN_FREE_TO_START) { TikModDownloader.toast(this, L.t(R.string.toast_no_space_start)); return }
         skipUntilOffline.remove(handle)
-        startRecording(handle, nickname, title, urls, manual = true)
+        startRecording(handle, nickname, title, urls, manual = true, roomId = roomId)
         TikModDownloader.toast(this, L.t(R.string.toast_recording_started, handle))
     }
 
     private fun startRecording(
         handle: String, nickname: String, title: String, initialUrls: List<String>, manual: Boolean,
-        resume: TikModDownloader.Interrupted? = null
+        resume: TikModDownloader.Interrupted? = null,
+        roomId: String? = null
     ) {
         val s = Session(handle, nextNotifId++)
         s.title = title
@@ -325,6 +327,7 @@ class LiveWatchService : Service() {
                     },
                     isRunning = { alive && !s.stopped },
                     resume = resume,
+                    roomId = roomId,
                     onConn = { s.conn = it },
                     onProgress = { d, b ->
                         s.durationMs = d; s.bytes = b
