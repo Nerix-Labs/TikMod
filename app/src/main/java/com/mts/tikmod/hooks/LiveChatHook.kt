@@ -34,11 +34,13 @@ class LiveChatHook : BaseHook() {
     override val name: String = "LIVE Chat Recording"
 
     private var chatMessageClass: Class<*>? = null
+    private var giftMessageClass: Class<*>? = null
     private val time = SimpleDateFormat("HH:mm:ss", Locale.US)
 
     /** One room's running transcript. */
     private class Buffer(val roomId: String, var owner: String, var title: String) {
         val seen = HashSet<Long>()
+        val giftGroups = HashSet<String>()
         val sb = StringBuilder()
         var count = 0
     }
@@ -62,7 +64,15 @@ class LiveChatHook : BaseHook() {
             }
             var hooked = 0
             for (m in listOf("supportDisplayText", "canText")) hooked += hookAllMethodsSafely(cm, m, onRender)
-            XLog.log("LiveChat: hooked $hooked ChatMessage render method(s)")
+            // Gifts: GiftMessage shares the same base and render calls.
+            XposedHelpers.findClassIfExists("com.bytedance.android.livesdk.model.message.GiftMessage", classLoader)?.let { gm ->
+                giftMessageClass = gm
+                val onGift = object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) { runCatching { onGiftShown(param.thisObject) } }
+                }
+                for (m in listOf("supportDisplayText", "canText")) hooked += hookAllMethodsSafely(gm, m, onGift)
+            }
+            XLog.log("LiveChat: hooked $hooked chat/gift render method(s)")
         }
     }
 
@@ -96,6 +106,59 @@ class LiveChatHook : BaseHook() {
             b.sb.append(content).append('\n')
             b.count++
             pending.put(JSONObject().put("r", roomId).put("t", now).put("n", nick).put("x", content).put("i", id))
+        }
+        main.removeCallbacks(flushRunnable)
+        main.postDelayed(flushRunnable, 1500)
+    }
+
+    /** A gift TikTok is showing. Each step of a combo is its own message (repeatCount grows); grouped later. */
+    private fun onGiftShown(msg: Any?) {
+        msg ?: return
+        if (!MediaContext.liveScreenVisible) return
+        val ctx = Prefs.hostContext ?: return
+        if (!Prefs.bool(ctx, Prefs.KEY_RECORD_CHAT)) return
+        if (giftMessageClass?.isInstance(msg) != true) return
+        val gift = runCatching { XposedHelpers.getObjectField(msg, "mGift") }.getOrNull() ?: return
+        val name = (runCatching { XposedHelpers.getObjectField(gift, "name") }.getOrNull() as? String)?.trim()
+        if (name.isNullOrBlank()) return
+        val base = runCatching { XposedHelpers.callMethod(msg, "getBaseMessage") }.getOrNull()
+        val roomId = base?.let { runCatching { XposedHelpers.getLongField(it, "roomId") }.getOrNull() }
+            ?.takeIf { it > 0 }?.toString() ?: MediaContext.watchingNow()?.roomId ?: return
+        val id = base?.let { runCatching { XposedHelpers.getLongField(it, "messageId") }.getOrNull() }?.takeIf { it != 0L } ?: return
+        val count = runCatching { XposedHelpers.getIntField(msg, "repeatCount") }.getOrDefault(1).coerceAtLeast(1)
+        val diamonds = runCatching { XposedHelpers.getIntField(gift, "diamondCount") }.getOrDefault(0)
+        val effect = runCatching { XposedHelpers.getLongField(gift, "primaryEffectId") }.getOrDefault(0L) > 0
+        val giftId = runCatching { XposedHelpers.getLongField(gift, "id") }.getOrDefault(0L)
+        val groupId = runCatching { XposedHelpers.getLongField(msg, "groupId") }.getOrDefault(0L)
+        val from = runCatching { XposedHelpers.getObjectField(msg, "fromUser") }.getOrNull()
+        val nick = from?.let { u ->
+            (runCatching { XposedHelpers.callMethod(u, "getNickName") }.getOrNull() as? String)?.takeIf { it.isNotBlank() }
+                ?: (runCatching { XposedHelpers.callMethod(u, "getDisplayId") }.getOrNull() as? String)
+        }.orEmpty()
+        val uid = from?.let { runCatching { XposedHelpers.callMethod(it, "getId") }.getOrNull() }?.toString().orEmpty()
+        val url = listOf("image", "icon").firstNotNullOfOrNull { f ->
+            val img = runCatching { XposedHelpers.getObjectField(gift, f) }.getOrNull() ?: return@firstNotNullOfOrNull null
+            (runCatching { XposedHelpers.callMethod(img, "getUrls") }.getOrNull() as? List<*>)
+                ?.firstNotNullOfOrNull { (it as? String)?.takeIf { s -> s.startsWith("http") } }
+        }.orEmpty()
+        // A combo keeps its group id; a gift sent on its own still needs a unique group.
+        val group = if (groupId != 0L) "$uid|$giftId|$groupId" else "m$id"
+        val now = System.currentTimeMillis()
+
+        synchronized(lock) {
+            val b = buffers.getOrPut(roomId) {
+                val live = MediaContext.room(roomId)
+                Buffer(roomId, live?.owner.orEmpty(), live?.title.orEmpty())
+            }
+            if (!b.seen.add(id)) return
+            if (b.giftGroups.add(group)) {
+                b.sb.append('[').append(time.format(Date(now))).append("] 🎁 ")
+                if (nick.isNotBlank()) b.sb.append(nick).append(": ")
+                b.sb.append(name).append(if (count > 1) " ×$count" else "").append('\n')
+                b.count++
+            }
+            pending.put(JSONObject().put("r", roomId).put("t", now).put("k", "g").put("n", nick).put("x", name)
+                .put("c", count).put("d", diamonds).put("e", effect).put("u", url).put("g", group).put("i", id))
         }
         main.removeCallbacks(flushRunnable)
         main.postDelayed(flushRunnable, 1500)

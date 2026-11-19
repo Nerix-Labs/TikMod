@@ -243,7 +243,6 @@
     <string name="toast_low_space_stop">مساحة التخزين شبه ممتلئة — جارٍ إيقاف تسجيل ‎@%1$s وحفظه</string>
     <string name="notif_saving_stream">💾 جارٍ حفظ بث %1$s…</string>
     <string name="toast_stopping">⏹️ جارٍ إيقاف بث ‎@%1$s وحفظه…</string>
-    <string name="notif_watching_text">يسجّل تلقائيًا عندما يبدأ أحدهم بثًا مباشرًا</string>
     <string name="notif_action_stop_watch">إيقاف المراقبة</string>
     <string name="channel_watch">مراقبة البث المباشر</string>
     <string name="channel_watch_desc">إشعار دائم أثناء تفعيل المراقبة التلقائية</string>
@@ -581,4 +580,15 @@
     <string name="chat_rec_hint">أبقِ تيك توك مفتوحًا على البث أثناء التسجيل — الدردشة موجودة هناك فقط. بعد انتهاء التسجيل يضيف TikMod الدردشة إلى الفيديو (يستغرق لحظة). تُحفظ نسخة نصية أيضًا في Download/TikMod.</string>
     <string name="cl460_chat">الدردشة داخل تسجيلاتك</string>
     <string name="cl460_chat_desc">سجّل بثًا أثناء مشاهدته وستظهر التعليقات في الفيديو كما في تيك توك، كل منها في لحظة كتابتها.</string>
+    <string name="gift_sent">أرسل %1$s</string>
+    <string name="gifts_in_video">الهدايا في التسجيلات</string>
+    <string name="gifts_all">الكل</string>
+    <string name="gifts_animated">المتحركة</string>
+    <string name="gifts_none">بدون</string>
+    <string name="gifts_in_video_desc">المتحركة = هدايا بتأثير على كامل الشاشة، وليست الصغيرة مثل الوردة. تظهر كلافتة فوق الدردشة، واحدة لكل سلسلة مع العدد النهائي.</string>
+    <string name="notif_watching_text">سيبدأ التسجيل عندما يبدأ أحدهم بثًا مباشرًا</string>
+    <string name="cl460_gifts">الهدايا في تسجيلاتك</string>
+    <string name="cl460_gifts_desc">تظهر الهدايا كلافتات فوق الدردشة مع صورة الهدية وعدد السلسلة. اختر: الكل، المتحركة فقط، أو بدون.</string>
+    <string name="cl460_notifs">إشعارات واضحة ومتزامنة</string>
+    <string name="cl460_notifs_desc">إشعار واحد لكل تسجيل، من التسجيل حتى الحفظ. التسجيل الذي توقفه يبقى متوقفًا حتى بعد إعادة تشغيل TikMod.</string>
 </resources>

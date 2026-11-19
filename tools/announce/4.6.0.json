@@ -4,7 +4,7 @@
       "e": "🎬",
       "id": ""
     },
-    "title": "TikMod 4.6.0 — the chat inside your LIVE recordings",
+    "title": "TikMod 4.6.0 — chat & gifts inside your LIVE recordings",
     "summary": "Record a stream while you watch it — the comments are burned into the video.",
     "bullets": [
       {
@@ -30,6 +30,20 @@
       },
       {
         "icon": {
+          "e": "🎁",
+          "id": ""
+        },
+        "text": "Gifts as banners above the chat: all, animated only, or none"
+      },
+      {
+        "icon": {
+          "e": "🔔",
+          "id": ""
+        },
+        "text": "One synced notification per recording; a stopped recording stays stopped"
+      },
+      {
+        "icon": {
           "e": "📄",
           "id": ""
         },
@@ -42,7 +56,7 @@
       "e": "🎬",
       "id": ""
     },
-    "title": "TikMod 4.6.0 — הצ'אט בתוך הקלטות הלייב",
+    "title": "TikMod 4.6.0 — צ'אט ומתנות בתוך הקלטות הלייב",
     "summary": "מקליטים שידור בזמן שצופים בו — והתגובות נצרבות לתוך הסרטון.",
     "bullets": [
       {
@@ -65,6 +79,20 @@
           "id": ""
         },
         "text": "מותאם לשידור המדויק, גם בשידורים מרובי משתתפים"
+      },
+      {
+        "icon": {
+          "e": "🎁",
+          "id": ""
+        },
+        "text": "מתנות כבאנרים מעל הצ'אט: הכל, רק עם אנימציה, או בלי"
+      },
+      {
+        "icon": {
+          "e": "🔔",
+          "id": ""
+        },
+        "text": "התראה אחת מסונכרנת לכל הקלטה; הקלטה שעצרתם נשארת עצורה"
       },
       {
         "icon": {

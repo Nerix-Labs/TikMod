@@ -244,7 +244,6 @@
     <string name="toast_low_space_stop">Storage almost full — stopping and saving @%1$s</string>
     <string name="notif_saving_stream">💾 Saving %1$s\'s stream…</string>
     <string name="toast_stopping">⏹️ Stopping and saving @%1$s\'s stream…</string>
-    <string name="notif_watching_text">Records automatically when someone goes live</string>
     <string name="notif_action_stop_watch">Stop watching</string>
     <string name="channel_watch">Live stream watching</string>
     <string name="channel_watch_desc">Persistent notification while auto watching is on</string>
@@ -538,4 +537,15 @@
     <string name="chat_rec_hint">Keep TikTok open on the stream while it records — the chat only exists there. After the recording ends, TikMod adds the chat to the video (it takes a moment). A text copy is also saved in Download/TikMod.</string>
     <string name="cl460_chat">The chat inside your recordings</string>
     <string name="cl460_chat_desc">Record a stream while you watch it and the comments appear in the video, like in TikTok, each at the moment it was written.</string>
+    <string name="gift_sent">sent %1$s</string>
+    <string name="gifts_in_video">Gifts in recordings</string>
+    <string name="gifts_all">All</string>
+    <string name="gifts_animated">Animated</string>
+    <string name="gifts_none">None</string>
+    <string name="gifts_in_video_desc">Animated = gifts with a full-screen effect, not small ones like Rose. Shown as banners above the chat, one per combo with its final count.</string>
+    <string name="notif_watching_text">Will start recording when one of them goes live</string>
+    <string name="cl460_gifts">Gifts in your recordings</string>
+    <string name="cl460_gifts_desc">Gifts appear as banners above the chat, with the gift\'s picture and combo count. Choose all, animated only, or none.</string>
+    <string name="cl460_notifs">Clear, synced notifications</string>
+    <string name="cl460_notifs_desc">One notification per recording, from recording to saved. A recording you stop stays stopped, even after TikMod restarts.</string>
 </resources>

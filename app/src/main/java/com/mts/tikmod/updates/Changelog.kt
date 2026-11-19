@@ -20,6 +20,8 @@ object Changelog {
         Version(
             "4.6.0", "2026-11-19", listOf(
                 Item(Icons.Rounded.Subtitles, R.string.cl460_chat, R.string.cl460_chat_desc) { Neon.Pink },
+                Item(Icons.Rounded.Redeem, R.string.cl460_gifts, R.string.cl460_gifts_desc) { Neon.Amber },
+                Item(Icons.Rounded.NotificationsActive, R.string.cl460_notifs, R.string.cl460_notifs_desc) { Neon.Lime },
             )
         ),
         Version(

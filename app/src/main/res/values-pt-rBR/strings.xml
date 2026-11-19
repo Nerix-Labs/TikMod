@@ -243,7 +243,6 @@
     <string name="toast_low_space_stop">Armazenamento quase cheio — parando e salvando @%1$s</string>
     <string name="notif_saving_stream">💾 Salvando a transmissão de %1$s…</string>
     <string name="toast_stopping">⏹️ Parando e salvando a transmissão de @%1$s…</string>
-    <string name="notif_watching_text">Grava automaticamente quando alguém entra ao vivo</string>
     <string name="notif_action_stop_watch">Parar monitoramento</string>
     <string name="channel_watch">Monitoramento de LIVEs</string>
     <string name="channel_watch_desc">Notificação fixa enquanto o monitoramento automático está ativo</string>
@@ -548,4 +547,15 @@
     <string name="chat_rec_hint">Mantenha o TikTok aberto na live enquanto grava — o chat só existe lá. Ao terminar, o TikMod adiciona o chat ao vídeo (leva um momento). Uma cópia em texto também é salva em Download/TikMod.</string>
     <string name="cl460_chat">O chat dentro das suas gravações</string>
     <string name="cl460_chat_desc">Grave uma live enquanto assiste e os comentários aparecem no vídeo, como no TikTok, no momento em que foram escritos.</string>
+    <string name="gift_sent">enviou %1$s</string>
+    <string name="gifts_in_video">Presentes nas gravações</string>
+    <string name="gifts_all">Todos</string>
+    <string name="gifts_animated">Animados</string>
+    <string name="gifts_none">Nenhum</string>
+    <string name="gifts_in_video_desc">Animados = presentes com efeito em tela cheia, não os pequenos como a rosa. Aparecem como faixas acima do chat, uma por combo com o total.</string>
+    <string name="notif_watching_text">Começará a gravar quando um deles entrar ao vivo</string>
+    <string name="cl460_gifts">Presentes nas suas gravações</string>
+    <string name="cl460_gifts_desc">Os presentes aparecem como faixas acima do chat, com a imagem e o combo. Escolha: todos, só animados ou nenhum.</string>
+    <string name="cl460_notifs">Notificações claras e sincronizadas</string>
+    <string name="cl460_notifs_desc">Uma notificação por gravação, da gravação ao salvamento. Uma gravação parada continua parada, mesmo após reiniciar o TikMod.</string>
 </resources>

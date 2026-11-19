@@ -243,7 +243,6 @@
     <string name="toast_low_space_stop">Depolama neredeyse dolu — @%1$s durduruluyor ve kaydediliyor</string>
     <string name="notif_saving_stream">💾 Yayın kaydediliyor: %1$s…</string>
     <string name="toast_stopping">⏹️ Yayın durduruluyor ve kaydediliyor: @%1$s…</string>
-    <string name="notif_watching_text">Biri canlı yayına başladığında otomatik kaydeder</string>
     <string name="notif_action_stop_watch">İzlemeyi durdur</string>
     <string name="channel_watch">Canlı yayın izleme</string>
     <string name="channel_watch_desc">Otomatik izleme açıkken kalıcı bildirim</string>
@@ -537,4 +536,15 @@
     <string name="chat_rec_hint">Kayıt sırasında TikTok\'u yayında açık tut — sohbet yalnızca orada var. Kayıt bitince TikMod sohbeti videoya ekler (biraz sürer). Metin kopyası da Download/TikMod\'a kaydedilir.</string>
     <string name="cl460_chat">Kayıtlarının içinde sohbet</string>
     <string name="cl460_chat_desc">Bir yayını izlerken kaydet; yorumlar TikTok\'taki gibi, yazıldıkları anda videoda görünür.</string>
+    <string name="gift_sent">%1$s gönderdi</string>
+    <string name="gifts_in_video">Kayıtlarda hediyeler</string>
+    <string name="gifts_all">Hepsi</string>
+    <string name="gifts_animated">Animasyonlu</string>
+    <string name="gifts_none">Yok</string>
+    <string name="gifts_in_video_desc">Animasyonlu = tam ekran efektli hediyeler, gül gibi küçükler değil. Sohbetin üstünde, her kombo için son sayıyla bir afiş olarak gösterilir.</string>
+    <string name="notif_watching_text">Biri canlı yayına başladığında kayda başlar</string>
+    <string name="cl460_gifts">Kayıtlarında hediyeler</string>
+    <string name="cl460_gifts_desc">Hediyeler sohbetin üstünde, resmi ve kombo sayısıyla afiş olarak görünür. Seç: hepsi, sadece animasyonlu ya da hiçbiri.</string>
+    <string name="cl460_notifs">Net ve eşzamanlı bildirimler</string>
+    <string name="cl460_notifs_desc">Her kayıt için baştan kaydedilene kadar tek bildirim. Durdurduğun kayıt, TikMod yeniden başlasa bile durmuş kalır.</string>
 </resources>

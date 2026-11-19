@@ -11,6 +11,20 @@ All notable changes to TikMod. Versions follow [semantic versioning](https://sem
   TikMod re-renders it once (about 2–3× faster than real time on a recent phone); if anything fails the
   recording is saved without the chat, exactly as before. Setting: Live → Record the live chat → "Show the
   chat in recordings" (on by default).
+- **Gifts in your recordings.** Gifts sent during the stream appear as TikTok-style banners right above the
+  chat — the sender, "sent X", the gift's picture and the combo count (a whole combo is one banner with its
+  final count). Three levels under "Gifts in recordings": all, animated only (gifts with a full-screen effect,
+  not small ones like Rose), or none.
+
+### Fixed
+- **Notifications that contradicted each other.** A recording now has one notification from start to finish:
+  recording → saving / adding the chat → saved. Previously the save added a second notification, the
+  "recording" notification of minimal mode was never removed, and the chat transcript posted its own
+  "LIVE saved • 1 KB" notification and toast from TikTok. The transcript is now saved quietly.
+- **A recording you stopped started again by itself.** Stopping an auto-recorded channel keeps it stopped
+  until that stream ends — it was only remembered in memory, so any restart of TikMod (an update, the system
+  closing it) started recording it again. The watcher's notification also says plainly that it *will* record
+  when a channel goes live, instead of reading as if it were recording.
 
 ### Changed
 - Chat is matched to the exact stream by its room id, so multi-guest and music lives no longer mix rooms.

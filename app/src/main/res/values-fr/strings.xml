@@ -243,7 +243,6 @@
     <string name="toast_low_space_stop">Stockage presque plein — arrêt et sauvegarde de @%1$s</string>
     <string name="notif_saving_stream">💾 Sauvegarde du live de %1$s…</string>
     <string name="toast_stopping">⏹️ Arrêt et sauvegarde du live de @%1$s…</string>
-    <string name="notif_watching_text">Enregistre automatiquement quand quelqu\'un passe en live</string>
     <string name="notif_action_stop_watch">Arrêter la surveillance</string>
     <string name="channel_watch">Surveillance des lives</string>
     <string name="channel_watch_desc">Notification permanente tant que la surveillance auto est active</string>
@@ -548,4 +547,15 @@
     <string name="chat_rec_hint">Gardez TikTok ouvert sur le direct pendant l\'enregistrement — le chat n\'existe que là. À la fin, TikMod ajoute le chat à la vidéo (cela prend un instant). Une copie texte est aussi enregistrée dans Download/TikMod.</string>
     <string name="cl460_chat">Le chat dans vos enregistrements</string>
     <string name="cl460_chat_desc">Enregistrez un direct pendant que vous le regardez : les commentaires apparaissent dans la vidéo, comme dans TikTok, au moment où ils ont été écrits.</string>
+    <string name="gift_sent">a envoyé %1$s</string>
+    <string name="gifts_in_video">Cadeaux dans les enregistrements</string>
+    <string name="gifts_all">Tous</string>
+    <string name="gifts_animated">Animés</string>
+    <string name="gifts_none">Aucun</string>
+    <string name="gifts_in_video_desc">Animés = cadeaux avec un effet plein écran, pas les petits comme la rose. Affichés en bannières au-dessus du chat, une par combo avec son total.</string>
+    <string name="notif_watching_text">L\'enregistrement démarrera quand l\'un d\'eux passera en direct</string>
+    <string name="cl460_gifts">Les cadeaux dans vos enregistrements</string>
+    <string name="cl460_gifts_desc">Les cadeaux apparaissent en bannières au-dessus du chat, avec l\'image et le nombre du combo. Au choix : tous, animés seulement, ou aucun.</string>
+    <string name="cl460_notifs">Notifications claires et synchronisées</string>
+    <string name="cl460_notifs_desc">Une notification par enregistrement, du début à la sauvegarde. Un enregistrement arrêté reste arrêté, même après un redémarrage de TikMod.</string>
 </resources>

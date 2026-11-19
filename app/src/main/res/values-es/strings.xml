@@ -243,7 +243,6 @@
     <string name="toast_low_space_stop">Almacenamiento casi lleno — deteniendo y guardando a @%1$s</string>
     <string name="notif_saving_stream">💾 Guardando la transmisión de %1$s…</string>
     <string name="toast_stopping">⏹️ Deteniendo y guardando la transmisión de @%1$s…</string>
-    <string name="notif_watching_text">Graba automáticamente cuando alguien empieza un directo</string>
     <string name="notif_action_stop_watch">Dejar de vigilar</string>
     <string name="channel_watch">Vigilancia de directos</string>
     <string name="channel_watch_desc">Notificación persistente mientras la vigilancia automática esté activa</string>
@@ -548,4 +547,15 @@
     <string name="chat_rec_hint">Mantén TikTok abierto en el directo mientras graba: el chat solo existe ahí. Al terminar, TikMod añade el chat al vídeo (tarda un momento). También se guarda una copia de texto en Download/TikMod.</string>
     <string name="cl460_chat">El chat dentro de tus grabaciones</string>
     <string name="cl460_chat_desc">Graba un directo mientras lo ves y los comentarios aparecen en el vídeo, como en TikTok, en el momento en que se escribieron.</string>
+    <string name="gift_sent">envió %1$s</string>
+    <string name="gifts_in_video">Regalos en las grabaciones</string>
+    <string name="gifts_all">Todos</string>
+    <string name="gifts_animated">Animados</string>
+    <string name="gifts_none">Ninguno</string>
+    <string name="gifts_in_video_desc">Animados = regalos con efecto a pantalla completa, no los pequeños como la rosa. Se muestran como banners sobre el chat, uno por combo con su total.</string>
+    <string name="notif_watching_text">Empezará a grabar cuando uno de ellos entre en directo</string>
+    <string name="cl460_gifts">Regalos en tus grabaciones</string>
+    <string name="cl460_gifts_desc">Los regalos aparecen como banners sobre el chat, con la imagen y el combo. Elige: todos, solo animados o ninguno.</string>
+    <string name="cl460_notifs">Notificaciones claras y sincronizadas</string>
+    <string name="cl460_notifs_desc">Una notificación por grabación, de la grabación al guardado. Una grabación que detienes sigue detenida, incluso si TikMod se reinicia.</string>
 </resources>

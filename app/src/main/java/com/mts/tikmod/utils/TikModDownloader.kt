@@ -450,7 +450,8 @@ object TikModDownloader {
         maxFailures: Int = 6,
         maxEmptySegments: Int = 5,
         resume: Interrupted? = null,
-        roomId: String? = null
+        roomId: String? = null,
+        notifId: Int? = null
     ): LiveResult? {
         val ctx = context.applicationContext ?: context
         // Continuing an interrupted recording: same temp file, same final name, the clock goes on.
@@ -464,7 +465,7 @@ object TikModDownloader {
             File(temp.path + ".json").writeText(JSONObject().put("owner", owner).put("title", title).put("base", baseName).toString())
         }
         try {
-            return recordAndSave(ctx, temp, baseName, owner, title, urls, isRunning, onConn, onProgress, onSaving, maxFailures, maxEmptySegments, existing, roomId)
+            return recordAndSave(ctx, temp, baseName, owner, title, urls, isRunning, onConn, onProgress, onSaving, maxFailures, maxEmptySegments, existing, roomId, notifId)
         } finally {
             activeLiveTemps.remove(temp.absolutePath)
         }
@@ -477,7 +478,8 @@ object TikModDownloader {
         urls: () -> List<String>, isRunning: () -> Boolean, onConn: (HttpURLConnection?) -> Unit,
         onProgress: (Long, Long) -> Unit, onSaving: () -> Unit, maxFailures: Int, maxEmptySegments: Int,
         existing: FlvRemuxer.Existing? = null,
-        roomId: String? = null
+        roomId: String? = null,
+        notifId: Int? = null
     ): LiveResult? {
         var writer: FlvRemuxer.Writer? = null
         // Wall clock -> video time, about once a second: lines the chat (timed by wall clock in TikTok) up with the video.
@@ -537,7 +539,7 @@ object TikModDownloader {
             toast(ctx, L.t(R.string.toast_rec_failed, owner))
             return null
         }
-        return saveLiveFile(ctx, temp, baseName, owner, title, durationMs, roomId, anchors)
+        return saveLiveFile(ctx, temp, baseName, owner, title, durationMs, roomId, anchors, notifId)
     }
 
     /** A recording that was cut off (process killed, module updated) and is still in the cache. */
@@ -596,9 +598,10 @@ object TikModDownloader {
 
     private fun saveLiveFile(
         ctx: Context, temp: File, baseName: String, owner: String, title: String, durationMs: Long,
-        roomId: String? = null, anchors: List<LongArray>? = null
+        roomId: String? = null, anchors: List<LongArray>? = null, notifId: Int? = null
     ): LiveResult? {
-        val job = Job(ctx, Kind.LIVE, owner.ifBlank { "LIVE" })
+        val job = Job(ctx, Kind.LIVE, owner.ifBlank { "LIVE" }, fixedId = notifId,
+            title = L.t(R.string.notif_saving_stream, owner.ifBlank { "LIVE" }))
         val label = title.ifBlank { "LIVE @$owner" }
         try {
             // Standard MP4 (no re-encode): plays in every player, correct duration, seekable.
@@ -647,30 +650,58 @@ object TikModDownloader {
     private fun burnChat(ctx: Context, mp4: FlvRemuxer.Result, owner: String, roomId: String?, anchors: List<LongArray>?, job: Job): File? {
         if (!mp4.hasVideo || roomId.isNullOrBlank() || anchors == null || anchors.size < 2) return null
         if (ctx.packageName != com.mts.tikmod.BuildConfig.APPLICATION_ID) return null
-        if (!Prefs.bool(ctx, Prefs.KEY_RECORD_CHAT) || !Prefs.bool(ctx, Prefs.KEY_CHAT_IN_VIDEO)) return null
+        if (!Prefs.bool(ctx, Prefs.KEY_RECORD_CHAT)) return null
+        val chatOn = Prefs.bool(ctx, Prefs.KEY_CHAT_IN_VIDEO)
+        val giftLevel = Prefs.string(ctx, Prefs.KEY_GIFTS_IN_VIDEO).ifBlank { Prefs.GIFTS_ALL }
+        if (!chatOn && giftLevel == Prefs.GIFTS_NONE) return null
         val first = anchors.first()[0]
         val last = anchors.last()[0]
-        val lines = ChatLog.lines(ctx, roomId, first - 2000, last + 2000).mapNotNull { e ->
+        fun videoMs(t: Long): Long {
             var a = anchors[0]
-            for (an in anchors) { if (an[0] <= e.t) a = an else break }
-            val v = a[1] + (e.t - a[0])
-            if (v < 0) null else ChatBurner.Line(v, e.nick, e.text)
+            for (an in anchors) { if (an[0] <= t) a = an else break }
+            return a[1] + (t - a[0])
         }
-        XLog.log("LiveRecorder[$owner]: ${lines.size} chat lines for room $roomId")
-        if (lines.isEmpty()) return null
+        val entries = ChatLog.lines(ctx, roomId, first - 2000, last + 2000)
+        val lines = if (!chatOn) emptyList() else entries.filter { it.kind == "c" }.mapNotNull { e ->
+            videoMs(e.t).takeIf { it >= 0 }?.let { ChatBurner.Line(it, e.nick, e.text) }
+        }
+        // A combo arrives as several messages: one banner per combo, at its first moment, with its final count.
+        val giftGroups = if (giftLevel == Prefs.GIFTS_NONE) emptyList() else entries
+            .filter { it.kind == "g" && (giftLevel == Prefs.GIFTS_ALL || it.effect || it.diamonds >= 199) }
+            .groupBy { it.group.ifBlank { "${it.t}" } }.values
+            .map { g -> g.minBy { it.t } to g.maxOf { it.count } }
+        val icons = HashMap<String, android.graphics.Bitmap?>()
+        for ((e, _) in giftGroups) if (e.url.isNotBlank() && e.url !in icons && icons.size < 40) icons[e.url] = giftIcon(e.url)
+        val gifts = giftGroups.mapNotNull { (e, count) ->
+            videoMs(e.t).takeIf { it >= 0 }?.let { ChatBurner.Gift(it, e.nick, L.t(R.string.gift_sent, e.text), count, icons[e.url]) }
+        }
+        XLog.log("LiveRecorder[$owner]: ${lines.size} comments, ${gifts.size} gifts ($giftLevel) for room $roomId")
+        if (lines.isEmpty() && gifts.isEmpty()) return null
         job.setStep(L.t(R.string.notif_adding_chat, 0))
         val out = File(ctx.cacheDir, "tikmod_chat_${System.nanoTime()}.mp4")
         val started = System.currentTimeMillis()
-        val ok = ChatBurner.burn(mp4.file, lines, out) { pct -> job.setStep(L.t(R.string.notif_adding_chat, pct)) }
+        val ok = ChatBurner.burn(mp4.file, lines, gifts, out) { pct -> job.setStep(L.t(R.string.notif_adding_chat, pct)) }
         XLog.log("LiveRecorder[$owner]: chat burned=$ok in ${(System.currentTimeMillis() - started) / 1000}s (${formatSize(out.length())})")
         return if (ok) out else { out.delete(); null }
     }
+
+    /** A gift's picture for its banner (small, decoded once per recording); null on any failure. */
+    private fun giftIcon(url: String): android.graphics.Bitmap? = runCatching {
+        val conn = open(url, readTimeoutMs = 6000)
+        try {
+            if (conn.responseCode !in 200..299) return@runCatching null
+            val bmp = conn.inputStream.use { android.graphics.BitmapFactory.decodeStream(it) } ?: return@runCatching null
+            val max = 160
+            if (bmp.width <= max && bmp.height <= max) bmp
+            else android.graphics.Bitmap.createScaledBitmap(bmp, max, max * bmp.height / bmp.width.coerceAtLeast(1), true)
+        } finally { runCatching { conn.disconnect() } }
+    }.getOrNull()
 
     /** Saves a live-chat transcript as a UTF-8 text file in Downloads, and adds it to the history. */
     fun saveChat(context: Context, owner: String, title: String, text: String): Boolean {
         val ctx = context.applicationContext ?: context
         if (text.isBlank()) return false
-        val job = Job(ctx, Kind.LIVE, owner.ifBlank { "LIVE" })
+        val job = Job(ctx, Kind.LIVE, owner.ifBlank { "LIVE" }, silent = true)
         return try {
             val bytes = text.toByteArray(Charsets.UTF_8)
             val base = sanitize("Live_${owner.ifBlank { "chat" }}_${timestamp()}_chat")
@@ -696,9 +727,16 @@ object TikModDownloader {
     data class Saved(val uri: Uri, val mime: String, val bytes: Long, val displayName: String)
 
     /** One download job = one notification. */
-    private class Job(val ctx: Context, val kind: Kind, val subtitle: String) {
+    /**
+     * One save, one notification. [fixedId] reuses an existing notification (a LIVE recording's own one, so the
+     * same notification goes recording -> saving -> saved). [silent] posts nothing and shows no toast.
+     */
+    private class Job(
+        val ctx: Context, val kind: Kind, val subtitle: String,
+        fixedId: Int? = null, val silent: Boolean = false, title: String? = null
+    ) {
         val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
-        val id = notifIds.incrementAndGet()
+        val id = fixedId ?: notifIds.incrementAndGet()
         val showProgress = Prefs.isNotificationProgress(ctx)
         private var step = ""
         private var lastNotify = 0L
@@ -708,7 +746,7 @@ object TikModDownloader {
             createChannel(ctx)
             builder = NotificationCompat.Builder(ctx, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.stat_sys_download)
-                .setContentTitle(L.t(R.string.notif_dl_title, kind.emoji, kind.label))
+                .setContentTitle(title ?: L.t(R.string.notif_dl_title, kind.emoji, kind.label))
                 .setContentText(subtitle)
                 .setOnlyAlertOnce(true)
                 .setOngoing(true)
@@ -725,7 +763,7 @@ object TikModDownloader {
         }
 
         private fun notify(force: Boolean = false) {
-            if (!showProgress || nm == null) return
+            if (silent || !showProgress || nm == null) return
             val now = System.currentTimeMillis()
             if (!force && now - lastNotify < 400) return
             lastNotify = now
@@ -880,6 +918,7 @@ object TikModDownloader {
         }
 
         fun finish(saved: Saved, detail: String) {
+            if (silent) return
             toast(ctx, L.t(R.string.toast_saved_detail, kind.label, detail))
             if (nm == null) return
             val view = Intent(Intent.ACTION_VIEW).setDataAndType(saved.uri, saved.mime)
@@ -902,6 +941,7 @@ object TikModDownloader {
         }
 
         fun fail(reason: String) {
+            if (silent) return
             toast(ctx, L.t(R.string.toast_dl_failed, kind.label, reason))
             if (nm == null) return
             builder.setContentTitle(L.t(R.string.notif_dl_failed)).setContentText(reason).setProgress(0, 0, false)

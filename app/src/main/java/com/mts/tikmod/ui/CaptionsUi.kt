@@ -158,6 +158,10 @@ fun ChatRecordingSection() {
     Section(Icons.Rounded.Forum, L.t(R.string.chat_rec_title), L.t(R.string.chat_rec_sub), accent = Neon.Pink, badge = L.t(R.string.tag_new), collapsible = true) {
         ToggleRow(L.t(R.string.chat_rec_toggle), L.t(R.string.chat_rec_toggle_desc), Prefs.KEY_RECORD_CHAT, Icons.Rounded.Forum, Neon.Pink)
         ToggleRow(L.t(R.string.chat_in_video), L.t(R.string.chat_in_video_desc), Prefs.KEY_CHAT_IN_VIDEO, Icons.Rounded.Subtitles, Neon.Pink)
+        SegmentedPref(L.t(R.string.gifts_in_video), Prefs.KEY_GIFTS_IN_VIDEO, listOf(
+            Opt(Prefs.GIFTS_ALL, L.t(R.string.gifts_all)), Opt(Prefs.GIFTS_ANIMATED, L.t(R.string.gifts_animated)),
+            Opt(Prefs.GIFTS_NONE, L.t(R.string.gifts_none))
+        ), description = L.t(R.string.gifts_in_video_desc), accent = Neon.Pink)
         Hint(L.t(R.string.chat_rec_hint))
     }
 }

@@ -13,7 +13,15 @@ import java.io.File
  * TikMod's process, reads the lines of the room it recorded ([lines]).
  */
 object ChatLog {
-    class Entry(val t: Long, val nick: String, val text: String)
+    /**
+     * [kind] "c" = a comment ([text] is the comment), "g" = a gift ([text] is the gift's name, [count] its combo
+     * count, [diamonds] its price, [effect] whether it has a full-screen animation, [url] its picture, [group]
+     * the combo it belongs to).
+     */
+    class Entry(
+        val t: Long, val nick: String, val text: String, val kind: String = "c", val count: Int = 1,
+        val diamonds: Int = 0, val effect: Boolean = false, val url: String = "", val group: String = ""
+    )
 
     private val lock = Any()
     private const val MAX_AGE = 24 * 3600_000L
@@ -63,7 +71,10 @@ object ChatLog {
                 val text = o.optString("x")
                 val key = o.optString("i").ifBlank { "$t|$text" }
                 if (!seen.add(key)) return@forEachLine
-                out += Entry(t, o.optString("n"), text)
+                out += Entry(
+                    t, o.optString("n"), text, o.optString("k", "c"), o.optInt("c", 1).coerceAtLeast(1),
+                    o.optInt("d"), o.optBoolean("e"), o.optString("u"), o.optString("g")
+                )
             }
         }
         out.sortBy { it.t }

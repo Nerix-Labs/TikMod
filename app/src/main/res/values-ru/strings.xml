@@ -243,7 +243,6 @@
     <string name="toast_low_space_stop">Память почти заполнена — остановка и сохранение @%1$s</string>
     <string name="notif_saving_stream">💾 Сохранение эфира %1$s…</string>
     <string name="toast_stopping">⏹️ Остановка и сохранение эфира @%1$s…</string>
-    <string name="notif_watching_text">Автоматически записывает, когда кто-то выходит в эфир</string>
     <string name="notif_action_stop_watch">Остановить отслеживание</string>
     <string name="channel_watch">Отслеживание эфиров</string>
     <string name="channel_watch_desc">Постоянное уведомление, пока включено автоотслеживание</string>
@@ -559,4 +558,15 @@
     <string name="chat_rec_hint">Держите TikTok открытым на эфире во время записи — чат есть только там. После записи TikMod добавит чат в видео (это займёт немного времени). Текстовая копия также сохраняется в Download/TikMod.</string>
     <string name="cl460_chat">Чат внутри ваших записей</string>
     <string name="cl460_chat_desc">Записывайте эфир во время просмотра — комментарии появятся в видео, как в TikTok, в момент их написания.</string>
+    <string name="gift_sent">отправил(а) %1$s</string>
+    <string name="gifts_in_video">Подарки в записях</string>
+    <string name="gifts_all">Все</string>
+    <string name="gifts_animated">С анимацией</string>
+    <string name="gifts_none">Нет</string>
+    <string name="gifts_in_video_desc">С анимацией = подарки с полноэкранным эффектом, без мелких вроде розы. Показываются баннерами над чатом, по одному на комбо с итоговым числом.</string>
+    <string name="notif_watching_text">Начнёт запись, когда кто-то из них выйдет в эфир</string>
+    <string name="cl460_gifts">Подарки в ваших записях</string>
+    <string name="cl460_gifts_desc">Подарки появляются баннерами над чатом с картинкой и счётчиком комбо. На выбор: все, только с анимацией или никакие.</string>
+    <string name="cl460_notifs">Понятные синхронные уведомления</string>
+    <string name="cl460_notifs_desc">Одно уведомление на запись — от записи до сохранения. Остановленная запись не возобновится даже после перезапуска TikMod.</string>
 </resources>

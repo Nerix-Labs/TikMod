@@ -131,6 +131,8 @@ class LiveWatchService : Service() {
             prev.keys().forEach { k ->
                 val st = prev.optJSONObject(k)?.optString("status")
                 if (st == "recording" || st == "saving") resumeAllowed.add(k)
+                // Stopped by the user: stays stopped until that stream ends, also across restarts and updates.
+                if (st == "skipped") skipUntilOffline.add(k)
             }
         }
         // Save whatever an interrupted recording left behind, then start watching.
@@ -317,8 +319,9 @@ class LiveWatchService : Service() {
         var firstUrls = true
         var lastStateWrite = 0L
         thread(name = "TikMod-AutoRec-$handle") {
+            var saved = false
             try {
-                TikModDownloader.captureLive(
+                saved = null != TikModDownloader.captureLive(
                     this, owner = handle, title = title.ifBlank { "LIVE @$handle" },
                     urls = {
                         if (firstUrls) { firstUrls = false; initialUrls }
@@ -328,6 +331,7 @@ class LiveWatchService : Service() {
                     isRunning = { alive && !s.stopped },
                     resume = resume,
                     roomId = roomId,
+                    notifId = s.notifId,
                     onConn = { s.conn = it },
                     onProgress = { d, b ->
                         s.durationMs = d; s.bytes = b
@@ -357,7 +361,8 @@ class LiveWatchService : Service() {
             } catch (t: Throwable) {
                 XLog.log("AutoLive: @$handle recording crashed: ${t.message}")
             } finally {
-                if (progressMode) runCatching { nm.cancel(s.notifId) }
+                // On success the same notification now reads "saved" (the save took it over): keep it.
+                if (!saved) runCatching { nm.cancel(s.notifId) }
                 sessions.remove(handle)
                 if (s.stopped) { skipUntilOffline.add(handle); resumeAllowed.remove(handle) }
                 st.put("status", if (s.stopped) "skipped" else "offline").put("last", System.currentTimeMillis())
@@ -392,7 +397,9 @@ class LiveWatchService : Service() {
     )
 
     private fun watchNotification(count: Int): Notification {
-        val rec = sessions.keys.toList()
+        // Each recording has its own notification (recording -> saving -> saved). This one only says what the
+        // watcher does; it lists recordings only when nothing is being watched (manual recordings alone).
+        val rec = if (count > 0) emptyList() else sessions.keys.toList()
         val stopPi = PendingIntent.getService(
             this, 1, Intent(this, LiveWatchService::class.java).setAction(ACTION_STOP_SERVICE),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT

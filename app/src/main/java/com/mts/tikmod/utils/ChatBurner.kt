@@ -52,12 +52,17 @@ object ChatBurner {
     /** A comment and the moment (video time, ms) it appears. */
     class Line(val ms: Long, val nick: String, val text: String)
 
+    /** A gift (a whole combo: [count] is its final count) shown as a banner from [ms]. [label] is e.g. "sent Rose". */
+    class Gift(val ms: Long, val nick: String, val label: String, val count: Int, val icon: Bitmap?)
+
     private const val VISIBLE_MS = 30_000L   // a comment stays this long…
     private const val MAX_VISIBLE = 7        // …among the newest few
+    private const val GIFT_MS = 5_000L       // a gift banner stays this long…
+    private const val MAX_GIFTS = 2          // …at most this many at once
 
-    fun burn(input: File, lines: List<Line>, output: File, onProgress: (Int) -> Unit = {}): Boolean =
+    fun burn(input: File, lines: List<Line>, gifts: List<Gift>, output: File, onProgress: (Int) -> Unit = {}): Boolean =
         try {
-            Job(input, lines.sortedBy { it.ms }, output, onProgress).run()
+            Job(input, lines.sortedBy { it.ms }, gifts.sortedBy { it.ms }, output, onProgress).run()
             output.length() > 0
         } catch (t: Throwable) {
             XLog.log("ChatBurner: failed (${t.javaClass.simpleName}: ${t.message})")
@@ -65,7 +70,7 @@ object ChatBurner {
             false
         }
 
-    private class Job(val input: File, val lines: List<Line>, val output: File, val onProgress: (Int) -> Unit) {
+    private class Job(val input: File, val lines: List<Line>, val gifts: List<Gift>, val output: File, val onProgress: (Int) -> Unit) {
         private var dpy: EGLDisplay = EGL14.EGL_NO_DISPLAY
         private var ctx: EGLContext = EGL14.EGL_NO_CONTEXT
         private var surf: EGLSurface = EGL14.EGL_NO_SURFACE
@@ -128,7 +133,7 @@ object ChatBurner {
                 muxer = mux
                 var vMux = -1
                 var aMux = -1
-                val overlay = Overlay(w, h, lines)
+                val overlay = Overlay(w, h, lines, gifts)
                 val mtx = FloatArray(16)
                 val info = MediaCodec.BufferInfo()
                 val eInfo = MediaCodec.BufferInfo()
@@ -377,20 +382,26 @@ object ChatBurner {
             ByteBuffer.allocateDirect(v.size * 4).order(ByteOrder.nativeOrder()).asFloatBuffer().apply { put(v); position(0) }
     }
 
-    /** The chat layer: redrawn only when the set of visible comments changes. */
-    private class Overlay(w: Int, h: Int, val lines: List<Line>) {
+    /**
+     * The chat layer, redrawn only when what is visible changes: gift banners on top (newest lowest), the
+     * comments under them (newest at the bottom), like TikTok.
+     */
+    private class Overlay(w: Int, h: Int, val lines: List<Line>, val gifts: List<Gift>) {
         companion object {
             // Portrait (most lives): a wide column low on the left. Landscape: a narrower, taller column.
             private fun portrait(w: Int, h: Int) = h >= w
             fun left(w: Int, h: Int) = (w * if (portrait(w, h)) 0.03f else 0.02f).toInt()
             fun bottom(w: Int, h: Int) = (h * if (portrait(w, h)) 0.07f else 0.05f).toInt()
             fun width(w: Int, h: Int) = (w * if (portrait(w, h)) 0.74f else 0.42f).toInt()
-            fun height(w: Int, h: Int) = (h * if (portrait(w, h)) 0.32f else 0.58f).toInt()
+            private fun chatHeight(w: Int, h: Int) = (h * if (portrait(w, h)) 0.32f else 0.50f).toInt()
+            fun giftHeight(w: Int, h: Int) = (h * if (portrait(w, h)) 0.14f else 0.28f).toInt()
+            fun height(w: Int, h: Int) = chatHeight(w, h) + giftHeight(w, h)
         }
 
         val bitmap: Bitmap = Bitmap.createBitmap(width(w, h), height(w, h), Bitmap.Config.ARGB_8888)
         var empty = true; private set
         private val canvas = Canvas(bitmap)
+        private val chatTop = giftHeight(w, h).toFloat()
         private val textSize = maxOf(w, h) / 46f
         private val padX = textSize * 0.55f
         private val padY = textSize * 0.30f
@@ -400,32 +411,49 @@ object ChatBurner {
             setShadowLayer(textSize * 0.12f, 0f, 0f, 0x99000000.toInt())
         }
         private val pill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x66000000 }
-        private var shownFrom = -1
-        private var shownTo = -1
+        private val nickPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE; this.textSize = textSize * 0.92f; typeface = Typeface.DEFAULT_BOLD
+            setShadowLayer(textSize * 0.1f, 0f, 0f, 0x88000000.toInt())
+        }
+        private val subPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xEEFFFFFF.toInt(); this.textSize = textSize * 0.80f
+            setShadowLayer(textSize * 0.1f, 0f, 0f, 0x88000000.toInt())
+        }
+        private val countPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFFFFE14D.toInt(); this.textSize = textSize * 1.5f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD_ITALIC)
+            setShadowLayer(textSize * 0.15f, 0f, textSize * 0.05f, 0xAA000000.toInt())
+        }
+        private val giftPill = Paint(Paint.ANTI_ALIAS_FLAG)
+        private val iconPaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+        private var shown = longArrayOf(-2, -2, -2, -2)
 
         /** Returns true when the bitmap was redrawn for time [ms]. */
         fun update(ms: Long): Boolean {
-            // Visible: comments already said, said less than VISIBLE_MS ago, newest MAX_VISIBLE of them.
-            var to = upperBound(ms)                 // exclusive
-            var from = to
-            while (from > 0 && to - from < MAX_VISIBLE && ms - lines[from - 1].ms < VISIBLE_MS) from--
-            if (from == to) { to = -1; from = -1 }
-            if (from == shownFrom && to == shownTo) return false
-            shownFrom = from; shownTo = to
-            draw(from, to)
+            val cTo = upperBound(lines.size) { lines[it].ms <= ms }
+            var cFrom = cTo
+            while (cFrom > 0 && cTo - cFrom < MAX_VISIBLE && ms - lines[cFrom - 1].ms < VISIBLE_MS) cFrom--
+            val gTo = upperBound(gifts.size) { gifts[it].ms <= ms }
+            var gFrom = gTo
+            while (gFrom > 0 && gTo - gFrom < MAX_GIFTS && ms - gifts[gFrom - 1].ms < GIFT_MS) gFrom--
+            val key = longArrayOf(cFrom.toLong(), cTo.toLong(), gFrom.toLong(), gTo.toLong())
+            if (key.contentEquals(shown)) return false
+            shown = key
+            bitmap.eraseColor(Color.TRANSPARENT)
+            empty = cFrom == cTo && gFrom == gTo
+            if (!empty) drawGifts(gFrom, gTo, drawChat(cFrom, cTo))
             return true
         }
 
-        private fun upperBound(ms: Long): Int {
-            var lo = 0; var hi = lines.size
-            while (lo < hi) { val mid = (lo + hi) ushr 1; if (lines[mid].ms <= ms) lo = mid + 1 else hi = mid }
+        /** First index in 0 until n for which [le] is false (items are sorted, [le] is "time <= now"). */
+        private inline fun upperBound(n: Int, le: (Int) -> Boolean): Int {
+            var lo = 0; var hi = n
+            while (lo < hi) { val mid = (lo + hi) ushr 1; if (le(mid)) lo = mid + 1 else hi = mid }
             return lo
         }
 
-        private fun draw(from: Int, to: Int) {
-            bitmap.eraseColor(Color.TRANSPARENT)
-            empty = from < 0
-            if (empty) return
+        /** Draws the comments from the bottom up; returns where the space above them starts. */
+        private fun drawChat(from: Int, to: Int): Float {
             val maxW = (bitmap.width - padX * 2).toInt()
             var y = bitmap.height.toFloat()
             for (i in to - 1 downTo from) {
@@ -447,13 +475,48 @@ object ChatBurner {
                     .setIncludePad(false).build()
                 val boxH = layout.height + padY * 2
                 val top = y - boxH
-                if (top < 0) break
-                val r = RectF(0f, top, lw + padX * 2, y)
-                canvas.drawRoundRect(r, boxH / 2.4f, boxH / 2.4f, pill)
+                if (top < chatTop) break
+                canvas.drawRoundRect(RectF(0f, top, lw + padX * 2, y), boxH / 2.4f, boxH / 2.4f, pill)
                 canvas.save()
                 canvas.translate(padX, top + padY)
                 layout.draw(canvas)
                 canvas.restore()
+                y = top - gap
+            }
+            return y
+        }
+
+        /** TikTok-style gift banners: name / "sent X" on a pink pill, the gift's picture, then ×count. */
+        private fun drawGifts(from: Int, to: Int, above: Float) {
+            val bh = textSize * 2.55f
+            val icon = bh * 0.86f
+            var y = above  // right above the comments, like TikTok
+            for (i in to - 1 downTo from) {
+                val g = gifts[i]
+                val top = y - bh
+                if (top < 0) break
+                val count = if (g.count > 1) "×${g.count}" else ""
+                val countW = if (count.isEmpty()) 0f else countPaint.measureText(count)
+                val maxText = bitmap.width - (padX * 3 + icon + countW + padX)
+                val nick = TextUtils.ellipsize(g.nick.ifBlank { "—" }, nickPaint, maxText, TextUtils.TruncateAt.END).toString()
+                val label = TextUtils.ellipsize(g.label, subPaint, maxText, TextUtils.TruncateAt.END).toString()
+                val textW = maxOf(nickPaint.measureText(nick), subPaint.measureText(label))
+                val width = min(padX + textW + padX * 0.7f + icon + (if (count.isEmpty()) 0f else padX * 0.5f + countW) + padX,
+                    bitmap.width.toFloat())
+                giftPill.shader = android.graphics.LinearGradient(0f, 0f, width, 0f,
+                    0xE6FF2D72.toInt(), 0x8C7B2CFF.toInt(), android.graphics.Shader.TileMode.CLAMP)
+                canvas.drawRoundRect(RectF(0f, top, width, top + bh), bh / 2, bh / 2, giftPill)
+                canvas.drawText(nick, padX, top + bh * 0.44f, nickPaint)
+                canvas.drawText(label, padX, top + bh * 0.80f, subPaint)
+                val ix = padX + textW + padX * 0.7f
+                val iconRect = RectF(ix, top + (bh - icon) / 2, ix + icon, top + (bh + icon) / 2)
+                val bmp = g.icon
+                if (bmp != null) canvas.drawBitmap(bmp, null, iconRect, iconPaint)
+                else {
+                    val p = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { this.textSize = icon * 0.78f }
+                    canvas.drawText("🎁", ix, iconRect.bottom - icon * 0.16f, p)
+                }
+                if (count.isNotEmpty()) canvas.drawText(count, ix + icon + padX * 0.5f, top + bh * 0.68f, countPaint)
                 y = top - gap
             }
         }

@@ -243,7 +243,6 @@
     <string name="toast_low_space_stop">המקום בטלפון כמעט נגמר — עוצר ושומר את @%1$s</string>
     <string name="notif_saving_stream">💾 שומר את השידור של %1$s…</string>
     <string name="toast_stopping">⏹️ עוצר ושומר את השידור של @%1$s…</string>
-    <string name="notif_watching_text">מקליט אוטומטית כשמישהו עולה לשידור חי</string>
     <string name="notif_action_stop_watch">כבה מעקב</string>
     <string name="channel_watch">מעקב שידורים חיים</string>
     <string name="channel_watch_desc">התראה קבועה כשהמעקב האוטומטי פעיל</string>
@@ -559,4 +558,15 @@
     <string name="chat_rec_hint">השאירו את טיקטוק פתוח על השידור בזמן ההקלטה — הצ\'אט קיים רק שם. בסוף ההקלטה TikMod מוסיף את הצ\'אט לסרטון (לוקח רגע). עותק טקסט נשמר גם ב-Download/TikMod.</string>
     <string name="cl460_chat">הצ\'אט בתוך ההקלטות</string>
     <string name="cl460_chat_desc">מקליטים שידור בזמן שצופים בו — והתגובות מופיעות בתוך הסרטון, כמו בטיקטוק, כל אחת ברגע שבו נכתבה.</string>
+    <string name="gift_sent">שלח/ה %1$s</string>
+    <string name="gifts_in_video">מתנות בהקלטה</string>
+    <string name="gifts_all">הכל</string>
+    <string name="gifts_animated">עם אנימציה</string>
+    <string name="gifts_none">בלי</string>
+    <string name="gifts_in_video_desc">עם אנימציה = מתנות עם אפקט על כל המסך, בלי קטנות כמו ורד. מוצגות כבאנר מעל הצ\'אט, אחד לכל קומבו עם הספירה הסופית.</string>
+    <string name="notif_watching_text">יתחיל להקליט כשאחד מהם יעלה לשידור</string>
+    <string name="cl460_gifts">מתנות בהקלטות</string>
+    <string name="cl460_gifts_desc">מתנות מופיעות כבאנרים מעל הצ\'אט, עם תמונת המתנה וספירת הקומבו. בוחרים: הכל, רק עם אנימציה, או בלי.</string>
+    <string name="cl460_notifs">התראות מסונכרנות וברורות</string>
+    <string name="cl460_notifs_desc">התראה אחת לכל הקלטה, מההקלטה ועד השמירה. הקלטה שעצרתם נשארת עצורה, גם אחרי ש-TikMod מופעל מחדש.</string>
 </resources>

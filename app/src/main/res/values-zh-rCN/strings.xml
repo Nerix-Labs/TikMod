@@ -243,7 +243,6 @@
     <string name="toast_low_space_stop">存储空间即将用尽 — 正在停止并保存 @%1$s</string>
     <string name="notif_saving_stream">💾 正在保存 %1$s 的直播…</string>
     <string name="toast_stopping">⏹️ 正在停止并保存 @%1$s 的直播…</string>
-    <string name="notif_watching_text">有人开播时自动录制</string>
     <string name="notif_action_stop_watch">停止监控</string>
     <string name="channel_watch">直播监控</string>
     <string name="channel_watch_desc">自动监控开启时的常驻通知</string>
@@ -526,4 +525,15 @@
     <string name="chat_rec_hint">录制时请让 TikTok 保持在该直播页面——聊天只存在于那里。录制结束后，TikMod 会把聊天加入视频（需要片刻）。文本副本也会保存在 Download/TikMod。</string>
     <string name="cl460_chat">录像中的直播聊天</string>
     <string name="cl460_chat_desc">边看边录直播，评论会像在 TikTok 中一样出现在视频里，每条都在发送的那一刻出现。</string>
+    <string name="gift_sent">送出了 %1$s</string>
+    <string name="gifts_in_video">录像中的礼物</string>
+    <string name="gifts_all">全部</string>
+    <string name="gifts_animated">带特效</string>
+    <string name="gifts_none">不显示</string>
+    <string name="gifts_in_video_desc">带特效 = 有全屏特效的礼物，不含玫瑰等小礼物。以横幅显示在聊天上方，每个连击一条并显示最终数量。</string>
+    <string name="notif_watching_text">其中有人开播时将开始录制</string>
+    <string name="cl460_gifts">录像中的礼物</string>
+    <string name="cl460_gifts_desc">礼物以横幅形式显示在聊天上方，带礼物图片和连击数。可选：全部、仅带特效、不显示。</string>
+    <string name="cl460_notifs">清晰同步的通知</string>
+    <string name="cl460_notifs_desc">每个录制只有一个通知，从录制到保存。你停止的录制会保持停止，即使 TikMod 重启。</string>
 </resources>
