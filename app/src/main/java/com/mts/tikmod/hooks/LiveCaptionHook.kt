@@ -33,6 +33,7 @@ import com.mts.tikmod.Prefs
 import com.mts.tikmod.R
 import com.mts.tikmod.captions.CaptionLanguages
 import com.mts.tikmod.captions.CaptionService
+import com.mts.tikmod.utils.CaptionGate
 import com.mts.tikmod.utils.L
 import com.mts.tikmod.utils.MediaContext
 import com.mts.tikmod.utils.XLog
@@ -96,7 +97,10 @@ class LiveCaptionHook : BaseHook() {
             val id = live?.roomId
             if (id != candidate) { candidate = id; candidateSince = now }
             when {
-                live != null && id != room && id != hiddenRoom && now - candidateSince >= 1000 -> start(act, live)
+                // Only once the viewer settled on a stream, and new stream connections spaced out (see CaptionGate):
+                // swiping through LIVE never opens a connection per room.
+                live != null && id != room && id != hiddenRoom && now - candidateSince >= CaptionGate.DWELL_MS &&
+                    CaptionGate.tryStart(live.roomId, now) -> start(act, live)
                 id == null && room != null && now - candidateSince > 4000 -> stop()
                 room != null && now - lastPing > 10_000 -> { lastPing = now; call("captions_ping", null) }
             }
@@ -124,6 +128,7 @@ class LiveCaptionHook : BaseHook() {
     private fun stop() {
         if (room != null) call("captions_stop", null)
         room = null
+        CaptionGate.activeRoom = null
         detach()
     }
 

@@ -113,7 +113,13 @@ private enum class Screen(val icon: ImageVector, private val labelRes: Int, priv
 private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
     val ctx = LocalContext.current
     var screen by rememberSaveable { mutableStateOf(Screen.HOME) }
-    LaunchedEffect(startTab) { if (startTab == "live") screen = Screen.LIVE }
+    // "Stop the addiction" settings open as a page inside the Feed tab.
+    var focusOpen by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(startTab) {
+        if (startTab == "live") screen = Screen.LIVE
+        if (startTab == "focus") { screen = Screen.FEED; focusOpen = true }
+    }
+    androidx.activity.compose.BackHandler(enabled = screen == Screen.FEED && focusOpen) { focusOpen = false }
     val active = remember { Prefs.isModuleActive(ctx) }
     // "What's new" opens by itself once after every update; the history sheet from Home → Updates.
     var showWhatsNew by remember { mutableStateOf(Updater.shouldShowWhatsNew(ctx) && Changelog.forVersion(BuildConfig.VERSION_NAME) != null) }
@@ -139,11 +145,12 @@ private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 when (s) {
-                    Screen.HOME -> HomeScreen(active, onNavigate = { screen = it }, onThemeChange = onThemeChange, onShowHistory = { showHistory = true })
+                    Screen.HOME -> HomeScreen(active, onNavigate = { screen = it }, onThemeChange = onThemeChange, onShowHistory = { showHistory = true },
+                        onOpenFocus = { screen = Screen.FEED; focusOpen = true })
                     Screen.DOWNLOADS -> DownloadsScreen()
                     Screen.LIVE -> LiveScreen()
                     Screen.CHAT -> ChatScreen()
-                    Screen.FEED -> FeedScreen()
+                    Screen.FEED -> if (focusOpen) FocusScreen { focusOpen = false } else FeedScreen { focusOpen = true }
                 }
             }
         }
@@ -207,7 +214,7 @@ private fun ScreenTitle(title: String, subtitle: String, accent: Color) {
 // ================================================================== HOME
 
 @Composable
-private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onThemeChange: (String) -> Unit, onShowHistory: () -> Unit) {
+private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onThemeChange: (String) -> Unit, onShowHistory: () -> Unit, onOpenFocus: () -> Unit) {
     val ctx = LocalContext.current
     val history = remember { Prefs.readHistory(ctx) }
     val ads = remember { Prefs.readStat(ctx, Prefs.STAT_ADS_BLOCKED) }
@@ -265,6 +272,13 @@ private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onThemeCha
                 QuickTile(Icons.Rounded.FiberManualRecord, L.t(R.string.quick_autolive), Prefs.KEY_AUTO_LIVE, Neon.Pink, Modifier.weight(1f)) { LiveWatchService.sync(ctx) }
                 QuickTile(Icons.Rounded.Screenshot, L.t(R.string.quick_screenshot), Prefs.KEY_UNRESTRICT_ALL, Neon.Lime, Modifier.weight(1f))
             }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                QuickTile(Icons.Rounded.SelfImprovement, L.t(R.string.focus_title), Prefs.KEY_FOCUS_ON, Neon.Lime, Modifier.weight(1f)) {
+                    if (it) com.mts.tikmod.focus.Focus.start(ctx, 0) else com.mts.tikmod.focus.Focus.stop(ctx)
+                }
+                QuickTile(Icons.Rounded.Timeline, L.t(R.string.feed_seekbar), Prefs.KEY_FORCE_SEEKBAR, Neon.Cyan, Modifier.weight(1f))
+            }
+            TextButton(onClick = onOpenFocus, modifier = Modifier.align(Alignment.End)) { Text(L.t(R.string.focus_open)) }
         }
     }
     if (history.isNotEmpty()) {
@@ -395,7 +409,7 @@ private fun AboutCard() {
 }
 
 @Composable
-private fun ActionButton(icon: ImageVector, text: String, modifier: Modifier = Modifier, accent: Color = Neon.Cyan, onClick: () -> Unit) {
+internal fun ActionButton(icon: ImageVector, text: String, modifier: Modifier = Modifier, accent: Color = Neon.Cyan, onClick: () -> Unit) {
     Row(
         modifier.height(48.dp).clip(RoundedCornerShape(16.dp))
             .background(accent.copy(alpha = 0.12f)).border(1.dp, accent.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
@@ -923,10 +937,11 @@ private fun ChatScreen() {
 // ================================================================== FEED
 
 @Composable
-private fun FeedScreen() {
+private fun FeedScreen(onOpenFocus: () -> Unit) {
     val ctx = LocalContext.current
     val blocked = remember { Prefs.readStat(ctx, Prefs.STAT_ADS_BLOCKED) }
     Appear(0) { ScreenTitle(L.t(R.string.nav_feed), L.t(R.string.feed_subtitle), Neon.Amber) }
+    Appear(1) { FocusEntryCard(onOpenFocus) }
     Appear(1) {
         GlassCard(padding = 18.dp) {
             Row(verticalAlignment = Alignment.CenterVertically) {

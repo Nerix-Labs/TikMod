@@ -30,7 +30,8 @@ object ModuleManager {
             RegionHook(),
             VideoControlHook(),
             AutoScrollHook(),
-            PureModeHook()
+            PureModeHook(),
+            FocusHook()
         )
     }
 
@@ -80,6 +81,7 @@ object ModuleManager {
             }
 
             val className = activity.javaClass.name
+            (hooks.firstOrNull { it is FocusHook } as? FocusHook)?.onResumed(activity)
             val live = className.contains("LivePlay")
             com.mts.tikmod.utils.MediaContext.liveScreenVisible = live
             (hooks.firstOrNull { it is LiveCaptionHook } as? LiveCaptionHook)?.onScreen(if (live) activity else null)
@@ -95,6 +97,7 @@ object ModuleManager {
 
     /** The LIVE screen went to the background (home button, another app): nothing is being watched. */
     fun onActivityStopped(activity: Activity) {
+        runCatching { (hooks.firstOrNull { it is FocusHook } as? FocusHook)?.onStopped(activity) }
         runCatching {
             if (!activity.javaClass.name.contains("LivePlay")) return
             com.mts.tikmod.utils.MediaContext.liveScreenVisible = false

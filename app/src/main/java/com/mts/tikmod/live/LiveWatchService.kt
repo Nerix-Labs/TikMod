@@ -113,6 +113,7 @@ class LiveWatchService : Service() {
     private val state = ConcurrentHashMap<String, JSONObject>()
     private val lock = Object()
     @Volatile private var alive = false
+    private var backoff = 1L
     private var wakeLock: PowerManager.WakeLock? = null
     private var nextNotifId = 4400
 
@@ -222,16 +223,24 @@ class LiveWatchService : Service() {
             val channels = if (autoOn) Prefs.autoLiveChannels(this) else emptyList()
             if (channels.isEmpty() && sessions.isEmpty() && pendingStarts.get() == 0) { stopSelf(); return }
             state.keys.retainAll(channels.toSet() + sessions.keys)
-            for (h in channels) {
+            var failed = false
+            for ((i, h) in channels.withIndex()) {
                 if (!alive) return
+                // Lookups are spaced out (a burst of identical requests every minute looks automated).
+                if (i > 0) synchronized(lock) { if (alive) lock.wait(1500L + (Math.random() * 2500).toLong()) }
                 runCatching { check(h) }.onFailure { e ->
+                    failed = true
                     state.getOrPut(h) { JSONObject() }.put("error", e.message ?: "network").put("checked", System.currentTimeMillis())
                 }
             }
             writeState()
             updateWatchNotification(channels.size)
-            val interval = (Prefs.string(this, Prefs.KEY_AUTO_LIVE_INTERVAL).toLongOrNull() ?: 60L).coerceIn(15L, 900L)
-            synchronized(lock) { if (alive) lock.wait(interval * 1000) }
+            // Back off while TikTok's server refuses (rate limit / check page), up to 15 minutes; a little jitter always.
+            backoff = if (failed) (backoff * 2).coerceAtMost(16) else 1
+            val base = (Prefs.string(this, Prefs.KEY_AUTO_LIVE_INTERVAL).toLongOrNull() ?: 60L).coerceIn(30L, 900L)
+            val interval = (base * backoff).coerceAtMost(900L) * 1000L
+            val jitter = (interval * (0.85 + Math.random() * 0.3)).toLong()
+            synchronized(lock) { if (alive) lock.wait(jitter) }
         }
     }
 

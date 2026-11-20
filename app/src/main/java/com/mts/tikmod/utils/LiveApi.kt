@@ -41,6 +41,8 @@ object LiveApi {
         try {
             if (conn.responseCode !in 200..299) throw IllegalStateException("HTTP ${conn.responseCode}")
             val body = conn.inputStream.bufferedReader().use { it.readText() }
+            // A check page instead of JSON means "slow down": the caller backs off.
+            if (!body.trimStart().startsWith("{")) throw IllegalStateException("not JSON (rate limited?)")
             val data = JSONObject(body).optJSONObject("data") ?: return null
             val user = data.optJSONObject("user") ?: return null
             val room = data.optJSONObject("liveRoom")

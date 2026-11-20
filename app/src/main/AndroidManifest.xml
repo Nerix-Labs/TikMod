@@ -54,6 +54,18 @@
             android:exported="true"
             android:grantUriPermissions="true" />
 
+        <!-- "Stop the addiction" on / off from Quick Settings -->
+        <service
+            android:name=".focus.FocusTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_focus_tile"
+            android:label="@string/focus_title"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
         <!-- Quick Settings Tile Service -->
         <service
             android:name=".TikModTileService"

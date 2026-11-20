@@ -497,7 +497,7 @@ object TikModDownloader {
                 var tagsThisSegment = 0
                 var conn: HttpURLConnection? = null
                 try {
-                    conn = open(url, readTimeoutMs = 20_000)
+                    conn = open(url, readTimeoutMs = 20_000, live = true)
                     onConn(conn)
                     if (conn.responseCode !in 200..299) throw IllegalStateException("HTTP ${conn.responseCode}")
                     conn.inputStream.use { input ->
@@ -1130,12 +1130,16 @@ object TikModDownloader {
 
     private fun timestamp() = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
 
-    internal fun open(url: String, readTimeoutMs: Int = 30_000): HttpURLConnection {
+    internal fun open(url: String, readTimeoutMs: Int = 30_000, live: Boolean = false): HttpURLConnection {
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.connectTimeout = 15_000
         conn.readTimeout = readTimeoutMs
         conn.instanceFollowRedirects = true
-        conn.setRequestProperty("User-Agent", "com.zhiliaoapp.musically/2024707030 (Linux; U; Android ${Build.VERSION.RELEASE}; ${Locale.getDefault()}; ${Build.MODEL}; Cronet/TTNetVersion)")
+        // LIVE stream pulls say who they are: a second client posing as the TikTok app (with a stale version) on the
+        // viewer's signed stream URL is exactly what LIVE anti-bot checks look for.
+        conn.setRequestProperty("User-Agent",
+            if (live) "TikMod/${com.mts.tikmod.BuildConfig.VERSION_NAME} (Linux; Android ${Build.VERSION.RELEASE}; ${Build.MODEL})"
+            else "com.zhiliaoapp.musically/2024707030 (Linux; U; Android ${Build.VERSION.RELEASE}; ${Locale.getDefault()}; ${Build.MODEL}; Cronet/TTNetVersion)")
         conn.setRequestProperty("Accept", "*/*")
         conn.setRequestProperty("Referer", "https://www.tiktok.com/")
         conn.connect()

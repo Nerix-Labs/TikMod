@@ -108,6 +108,16 @@ class TikModProvider : ContentProvider() {
                     }
                     Bundle().apply { putBoolean("success", key != null && key in allowed) }
                 }
+                // Focus mode: what it kept / hid on each feed page (shown live in the TikMod app).
+                "focus_log" -> {
+                    if (!arg.isNullOrBlank()) runCatching { com.mts.tikmod.focus.FocusLog.append(ctx, org.json.JSONArray(arg)) }
+                    Bundle().apply { putBoolean("success", true) }
+                }
+                "focus_profile_put" -> {
+                    if (!arg.isNullOrBlank()) runCatching { com.mts.tikmod.focus.FocusLog.saveProfile(ctx, arg) }
+                    Bundle().apply { putBoolean("success", true) }
+                }
+                "focus_profile_get" -> Bundle().apply { putString("profile", com.mts.tikmod.focus.FocusLog.profileJson(ctx)) }
                 "chat_lines" -> {
                     if (!arg.isNullOrBlank()) runCatching { com.mts.tikmod.utils.ChatLog.append(ctx, arg) }
                     Bundle().apply { putBoolean("success", true) }

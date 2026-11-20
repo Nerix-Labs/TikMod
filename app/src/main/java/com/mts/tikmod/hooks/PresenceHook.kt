@@ -3,6 +3,7 @@ package com.mts.tikmod.hooks
 import android.content.Context
 import com.mts.tikmod.Prefs
 import com.mts.tikmod.utils.MediaContext
+import com.mts.tikmod.utils.VerifyWatch
 import com.mts.tikmod.utils.XLog
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
@@ -44,7 +45,10 @@ class PresenceHook : BaseHook() {
                     if (i < 0) return
                     val url = param.args[i] as String
                     val path = url.substringAfter("://").substringAfter('/', "").substringBefore('?')
-                    if (netlog && seen.add(path)) XLog.log("NET ${url.substringAfter("://").substringBefore('/')} /$path")
+                    val host = url.substringAfter("://").substringBefore('/')
+                    if (netlog && seen.add(path)) XLog.log("NET $host /$path")
+                    VerifyWatch.count(path)
+                    if (VerifyWatch.isVerifyRequest(host, path)) VerifyWatch.onVerifyRequest(host, path)
                     if (netlog && path.startsWith("webcast/room/enter")) dump(param.args, url)
                     if (path.startsWith("webcast/room/enter")) roomId(param.args, url)?.let { MediaContext.onRoomEntered(it) }
                     else if (path.startsWith("webcast/room/leave")) roomId(param.args, url)?.let { MediaContext.onRoomLeft(it) }

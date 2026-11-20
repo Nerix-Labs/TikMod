@@ -141,6 +141,37 @@ object Prefs {
     const val KEY_DISABLE_AUTO_PAUSE = "key_disable_auto_pause"
     const val KEY_BLOCK_LIVE_GIFTS = "key_block_live_gifts"
 
+    // "Stop the addiction" (Focus mode): what the For You feed may show, and when (see focus/Focus.kt)
+    const val KEY_FOCUS_ON = "key_focus_on"                     // manual switch
+    const val KEY_FOCUS_SCHEDULE = "key_focus_schedule"         // also turn on by itself in a time window
+    const val KEY_FOCUS_FROM = "key_focus_from"                 // "HH:mm"
+    const val KEY_FOCUS_TO = "key_focus_to"                     // "HH:mm" (may be past midnight)
+    const val KEY_FOCUS_DAYS = "key_focus_days"                 // Calendar.DAY_OF_WEEK numbers, "1,2,…,7"
+    const val KEY_FOCUS_UNTIL = "key_focus_until"               // manual switch ends at this time (ms, "0" = until turned off)
+    const val KEY_FOCUS_STARTED = "key_focus_started"           // when the manual switch was turned on (ms)
+    const val KEY_FOCUS_BOREDOM = "key_focus_boredom"           // 0..100: share of the feed that is NOT the stuff that hooks you
+    const val KEY_FOCUS_RAMP = "key_focus_ramp"                 // minutes to reach that share ("0" = at once)
+    const val KEY_FOCUS_STRICT = "key_focus_strict"             // only the chosen topics, nothing else
+    const val KEY_FOCUS_LEARN = "key_focus_learn"               // learn what hooks you from how long you watch
+    const val KEY_FOCUS_PROFILE_RESET = "key_focus_profile_reset" // bumped to make TikTok forget what it learned
+    const val KEY_FOCUS_LEVEL = "key_focus_level"               // only | mostly | calm (older: always | more | less)
+    const val FOCUS_ONLY = "only"
+    const val FOCUS_MOSTLY = "mostly"
+    const val FOCUS_CALM = "calm"
+    const val KEY_FOCUS_TOPICS = "key_focus_topics"             // allowed topic ids (FocusTopics), comma separated
+    const val KEY_FOCUS_ALLOW_WORDS = "key_focus_allow_words"   // extra words that count as "allowed"
+    const val KEY_FOCUS_BLOCK_WORDS = "key_focus_block_words"   // words that are always hidden while active
+    const val KEY_FOCUS_HIDE = "key_focus_hide"                 // content types hidden while active: live,photo,shop,short,viral
+    const val KEY_BEDTIME_ON = "key_bedtime_on"
+    const val KEY_BEDTIME_FROM = "key_bedtime_from"
+    const val KEY_BEDTIME_TO = "key_bedtime_to"
+    const val KEY_BEDTIME_DAYS = "key_bedtime_days"
+    const val KEY_BEDTIME_SCREEN = "key_bedtime_screen"         // gentle "time to sleep" screen inside TikTok
+    const val KEY_WINDDOWN = "key_winddown"                     // minutes before bedtime the feed calms down (0 = off)
+    const val KEY_SESSION_LIMIT = "key_session_limit"           // minutes of scrolling before it gets stricter (0 = off)
+    const val KEY_SESSION_REMIND = "key_session_remind"         // a gentle reminder when the limit is reached
+    const val STAT_FOCUS_FILTERED = "stat_focus_filtered"
+
     // Privacy
     const val KEY_DISABLE_READ_RECEIPTS = "key_disable_read_receipts"
     const val KEY_DISABLE_TYPING_INDICATOR = "key_disable_typing_indicator"
@@ -208,6 +239,31 @@ object Prefs {
         KEY_FORCE_SEEKBAR to true,
         KEY_DISABLE_AUTO_PAUSE to true,
         KEY_BLOCK_LIVE_GIFTS to true,
+        KEY_FOCUS_ON to false,
+        KEY_FOCUS_SCHEDULE to false,
+        KEY_FOCUS_FROM to "16:00",
+        KEY_FOCUS_TO to "20:00",
+        KEY_FOCUS_DAYS to "1,2,3,4,5,6,7",
+        KEY_FOCUS_UNTIL to "0",
+        KEY_FOCUS_STARTED to "0",
+        KEY_FOCUS_BOREDOM to "70",
+        KEY_FOCUS_RAMP to "0",
+        KEY_FOCUS_STRICT to false,
+        KEY_FOCUS_LEARN to true,
+        KEY_FOCUS_PROFILE_RESET to "0",
+        KEY_FOCUS_LEVEL to FOCUS_MOSTLY,
+        KEY_FOCUS_TOPICS to "learning,science,tech",
+        KEY_FOCUS_ALLOW_WORDS to "",
+        KEY_FOCUS_BLOCK_WORDS to "",
+        KEY_FOCUS_HIDE to "live,shop",
+        KEY_BEDTIME_ON to false,
+        KEY_BEDTIME_FROM to "23:00",
+        KEY_BEDTIME_TO to "07:00",
+        KEY_BEDTIME_DAYS to "1,2,3,4,5,6,7",
+        KEY_BEDTIME_SCREEN to true,
+        KEY_WINDDOWN to "30",
+        KEY_SESSION_LIMIT to "0",
+        KEY_SESSION_REMIND to true,
         KEY_DISABLE_READ_RECEIPTS to true,
         KEY_DISABLE_TYPING_INDICATOR to true,
         KEY_READ_RECEIPTS_MODE to READ_RECEIPTS_MODE_ON_REPLY,

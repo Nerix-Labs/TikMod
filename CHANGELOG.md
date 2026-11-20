@@ -2,6 +2,28 @@
 
 All notable changes to TikMod. Versions follow [semantic versioning](https://semver.org).
 
+## 4.7.0 — 2026-11-20
+
+### Added
+- **Stop the addiction.** A dial for how much of your feed shouldn't hook you, from 0 to 100% (at 90%, about
+  9 posts in 10 are ordinary rather than the kind you can't stop watching). Apply it at once, or let it build
+  up gradually over 5–60 minutes. Each post gets an attraction score from what you tend to watch to the end,
+  creators you follow, how viral it is and how short. TikMod learns from how long you stay on each post, and
+  that profile never leaves the phone. Start it for 15 minutes to 3 hours, or with no limit, from TikMod or
+  from a Quick Settings tile; TikTok shows a short note when it turns on or off. The screen has swipeable
+  tabs: Mix (the dial with a live 10-post preview), Topics (topics that always pass, an "only these topics"
+  mode, blocked words), Activity (every post checked: shown or hidden, and why), Learned (what hooks you and
+  what you skip, with a reset) and Automatic (focus hours, bedtime, session limit).
+
+### Fixed
+- **Ads inserted on the phone.** Besides the ads in feed pages, ads TikTok adds to the feed on the phone
+  afterwards ("ad re-ranking") are now removed, and paid partnerships are detected more reliably.
+- **Progress bar on every video.** On TikTok 47.9 the seek bar was hidden on many videos (short clips
+  especially); it shows on every video again when the setting is on.
+- **"Verify you're not a robot" in LIVE.** Live captions opened a second stream connection too quickly and too
+  often, which triggered TikTok's robot checks. Connections are now spaced out and limited, and the
+  auto-LIVE watcher checks channels more gently.
+
 ## 4.6.0 — 2026-11-19
 
 ### Added

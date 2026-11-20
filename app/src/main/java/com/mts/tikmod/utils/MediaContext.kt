@@ -83,7 +83,9 @@ object MediaContext {
      */
     fun onRoomEntered(id: String) {
         enteredId = id
-        XLog.log("MediaContext: entered LIVE room $id")
+        val now = System.currentTimeMillis()
+        synchronized(enters) { enters.addLast(now); while (enters.size > 64) enters.removeFirst() }
+        XLog.log("MediaContext: entered LIVE room $id (${entersSince(now - 60_000)} in the last minute)")
         // LIVE history: counts once the viewer stayed a few seconds.
         mainHandler.postDelayed({ if (enteredId == id && liveScreenVisible) addToHistory(id) }, 6000)
     }
@@ -91,6 +93,14 @@ object MediaContext {
     fun onRoomLeft(id: String) {
         if (enteredId == id) enteredId = null
     }
+
+    private val enters = ArrayDeque<Long>()
+
+    /** How many LIVE rooms TikTok entered since [since] (diagnostics for verification checks). */
+    fun entersSince(since: Long): Int = synchronized(enters) { enters.count { it >= since } }
+
+    /** The room on screen, for logs. */
+    fun enteredRoom(): String? = enteredId
 
     private fun addToHistory(id: String) {
         val live = rooms[id] ?: return

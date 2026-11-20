@@ -48,7 +48,7 @@ class AudioFeed(private val urls: () -> List<String>, private val onEnded: () ->
             if (list.isEmpty()) { failures++; XLog.log("Captions: no stream address (#$failures)"); sleep(2000); list = urls(); continue }
             val before = decodedMs
             try {
-                val c = TikModDownloader.open(list[index % list.size], readTimeoutMs = 15_000)
+                val c = TikModDownloader.open(list[index % list.size], readTimeoutMs = 15_000, live = true)
                 conn = c
                 if (c.responseCode !in 200..299) throw IllegalStateException("HTTP ${c.responseCode}")
                 c.inputStream.use { input ->

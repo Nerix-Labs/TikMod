@@ -79,7 +79,29 @@ class LiveChatHook : BaseHook() {
             }
             XLog.log("LiveChat: hooked $hooked chat/gift render method(s)")
             hookGiftAssets(classLoader)
+            hookLiveCaptcha(classLoader)
         }
+    }
+
+    /** Diagnostics only: notes when the LIVE server pushes its "verify you're human" check (see VerifyWatch). */
+    private fun hookLiveCaptcha(cl: ClassLoader) {
+        val msg = XposedHelpers.findClassIfExists("com.bytedance.android.livesdk.model.message.AccessControlMessage", cl) ?: return
+        val dec = XposedHelpers.findClassIfExists("com.bytedance.android.livesdk.model.message._AccessControlMessage_ProtoDecoder", cl) ?: return
+        val hook = object : XC_MethodHook() {
+            override fun afterHookedMethod(param: MethodHookParam) {
+                val m = param.result?.takeIf { msg.isInstance(it) } ?: return
+                runCatching {
+                    val c = XposedHelpers.getObjectField(m, "captcha") ?: return
+                    com.mts.tikmod.utils.VerifyWatch.onLiveCaptcha(
+                        runCatching { XposedHelpers.getLongField(c, "roomId") }.getOrDefault(0L),
+                        runCatching { XposedHelpers.getLongField(c, "verifyDurationInSec") }.getOrDefault(0L)
+                    )
+                }
+            }
+        }
+        var n = 0
+        dec.declaredMethods.filter { it.returnType == msg || it.returnType == Any::class.java }.forEach { XposedBridge.hookMethod(it, hook); n++ }
+        XLog.log("LiveChat: watching LIVE access-control checks ($n)")
     }
 
     /**
