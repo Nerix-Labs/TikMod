@@ -1,0 +1,31 @@
+{
+  "en": {
+    "badge": { "e": "🧘", "id": "" },
+    "title": "TikMod 4.7.0 — Stop the addiction",
+    "summary": "Decide how much of your feed is allowed to hook you — TikMod does the rest.",
+    "bullets": [
+      { "icon": { "e": "🎚", "id": "" }, "text": "A 0–100% dial: at 90%, about 9 posts in 10 won't be the kind you can't stop watching" },
+      { "icon": { "e": "📈", "id": "" }, "text": "At once, or gradually over 5–60 minutes" },
+      { "icon": { "e": "🧠", "id": "" }, "text": "Learns what grabs you from how long you watch — nothing leaves the phone" },
+      { "icon": { "e": "👀", "id": "" }, "text": "See every post it checked: shown or hidden, and why" },
+      { "icon": { "e": "⚡", "id": "" }, "text": "Start it instantly from TikMod or a Quick Settings tile; focus hours, bedtime, session limit" },
+      { "icon": { "e": "🚫", "id": "" }, "text": "Ads TikTok inserts on the phone are removed too" },
+      { "icon": { "e": "⏩", "id": "" }, "text": "Progress bar on every video; no more robot checks in LIVE" }
+    ]
+  },
+  "he": {
+    "badge": { "e": "🧘", "id": "" },
+    "title": "TikMod 4.7.0 — עצירת ההתמכרות",
+    "summary": "מחליטים כמה מהפיד מותר לו למשוך אתכם — TikMod עושה את השאר.",
+    "bullets": [
+      { "icon": { "e": "🎚", "id": "" }, "text": "מחוון 0–100%: ב-90%, בערך 9 מכל 10 סרטונים לא יהיו מהסוג שאי אפשר להפסיק לראות" },
+      { "icon": { "e": "📈", "id": "" }, "text": "בבת אחת, או בהדרגה במשך 5–60 דקות" },
+      { "icon": { "e": "🧠", "id": "" }, "text": "לומד מה מושך אתכם לפי זמן הצפייה — שום דבר לא יוצא מהטלפון" },
+      { "icon": { "e": "👀", "id": "" }, "text": "רואים כל סרטון שנבדק: הוצג או הוסתר, ולמה" },
+      { "icon": { "e": "⚡", "id": "" }, "text": "הפעלה מיידית מ-TikMod או מאריח בהגדרות המהירות; שעות ריכוז, שעת שינה, מגבלת זמן" },
+      { "icon": { "e": "🚫", "id": "" }, "text": "גם פרסומות שטיקטוק מכניס בטלפון מוסרות" },
+      { "icon": { "e": "⏩", "id": "" }, "text": "פס התקדמות בכל סרטון; בלי בדיקות רובוט בלייב" }
+    ]
+  },
+  "footer": "Works on TikTok 47.9.2 · עובד על טיקטוק 47.9.2"
+}
