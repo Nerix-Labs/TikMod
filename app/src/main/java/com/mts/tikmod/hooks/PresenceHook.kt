@@ -3,6 +3,7 @@ package com.mts.tikmod.hooks
 import android.content.Context
 import com.mts.tikmod.Prefs
 import com.mts.tikmod.utils.MediaContext
+import com.mts.tikmod.utils.StoryTracker
 import com.mts.tikmod.utils.VerifyWatch
 import com.mts.tikmod.utils.XLog
 import de.robv.android.xposed.XC_MethodHook
@@ -20,7 +21,7 @@ import java.util.Collections
  * Debug: `adb shell setprop debug.tikmod.netlog 1` logs every distinct request path (no query, no body).
  */
 class PresenceHook : BaseHook() {
-    override val name: String = "Presence Privacy (Online / Views)"
+    override val name: String = "Presence Privacy (Online / Views / Stories / Profiles)"
 
     private companion object {
         const val BLOCKED = "http://127.0.0.1:9/tikmod_blocked"
@@ -52,6 +53,8 @@ class PresenceHook : BaseHook() {
                     if (netlog && path.startsWith("webcast/room/enter")) dump(param.args, url)
                     if (path.startsWith("webcast/room/enter")) roomId(param.args, url)?.let { MediaContext.onRoomEntered(it) }
                     else if (path.startsWith("webcast/room/leave")) roomId(param.args, url)?.let { MediaContext.onRoomLeft(it) }
+                    // TikTok reports a story as watched: that's the story on screen (archived before the report may be blocked).
+                    else if (path.startsWith(STORY_VIEW_REPORT)) formField(param.args, url, "story_id")?.let { StoryTracker.onViewed(it) }
                     val rule = matchRule(path) ?: return
                     param.args[i] = BLOCKED
                     if (seen.add("blocked:$path")) XLog.log("Presence: blocked /$path ($rule)")
@@ -62,8 +65,11 @@ class PresenceHook : BaseHook() {
     }
 
     /** room_id of an enter/leave request: in the form body, or in the query. */
-    private fun roomId(args: Array<Any?>, url: String): String? = runCatching {
-        val pattern = Regex("(?:^|[?&])room_id=(\\d+)")
+    private fun roomId(args: Array<Any?>, url: String): String? = formField(args, url, "room_id")
+
+    /** A numeric form field of a request (`@Field`, in the body) or query parameter. */
+    private fun formField(args: Array<Any?>, url: String, name: String): String? = runCatching {
+        val pattern = Regex("(?:^|[?&])${Regex.escape(name)}=(\\d+)")
         pattern.find(url)?.let { return@runCatching it.groupValues[1] }
         val body = args.filterNotNull().firstOrNull { a -> a.javaClass.methods.any { it.name == "writeTo" && it.parameterTypes.size == 1 } } ?: return@runCatching null
         val out = java.io.ByteArrayOutputStream()
@@ -99,6 +105,8 @@ class PresenceHook : BaseHook() {
     private fun matchRule(path: String): String? {
         if (Prefs.bool(null, Prefs.KEY_HIDE_ONLINE_STATUS) && ONLINE_RULES.any { path.startsWith(it) }) return "online"
         if (Prefs.bool(null, Prefs.KEY_HIDE_VIEWS) && VIEW_RULES.any { path.startsWith(it) }) return "views"
+        if (Prefs.bool(null, Prefs.KEY_HIDE_STORY_VIEWS) && path.startsWith(STORY_VIEW_REPORT)) return "story views"
+        if (Prefs.bool(null, Prefs.KEY_HIDE_PROFILE_VIEWS) && path.startsWith(PROFILE_VIEW_REPORT)) return "profile views"
         return null
     }
 
@@ -114,6 +122,15 @@ class PresenceHook : BaseHook() {
 
     /** My own "active now" report. activity_status/fetch (other people's status) is left alone. */
     private val ONLINE_RULES = listOf("tiktok/v1/activity_status/report")
-    /** Per-video play reports (view counts, watch history). */
-    private val VIEW_RULES = listOf("aweme/v1/aweme/stats/")
+    /**
+     * Per-video play reports (view counts, watch history). TikTok sends two: AwemeStatsApi.awemeStatsReport and
+     * awemeFastStatsReport (the "fast" one was missed before 4.9.0).
+     */
+    private val VIEW_RULES = listOf("aweme/v1/aweme/stats/", "aweme/v1/fast/stats/")
+
+    // Found in TikTok 47.1.4's Retrofit interfaces (the paths are plain strings, they don't change with obfuscation):
+    /** IStoryApi.reportStoryViewed: POST, form fields story_id, author_id, unlocked. Puts me on the story's viewer list. */
+    private val STORY_VIEW_REPORT = "tiktok/story/view/report/"
+    /** IProfileViewerApi.reportView: POST, form fields user_id, sec_user_id, scene. Puts me in their "Profile views". */
+    private val PROFILE_VIEW_REPORT = "tiktok/user/profile/view_record/add/"
 }

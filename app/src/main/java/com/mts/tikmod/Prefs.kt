@@ -98,6 +98,11 @@ object Prefs {
     const val KEY_AUTO_LIVE_INTERVAL = "key_auto_live_interval" // seconds
     const val KEY_AUTO_LIVE_QUALITY = "key_auto_live_quality"   // origin | uhd | hd | sd
     const val KEY_HIDE_VIEWS = "key_hide_views"                   // don't report the videos I watch
+    const val KEY_HIDE_STORY_VIEWS = "key_hide_story_views"       // watch stories without being on their viewer list
+    const val KEY_HIDE_PROFILE_VIEWS = "key_hide_profile_views"   // visit profiles without showing up in "Profile views"
+    const val KEY_STORY_ARCHIVE = "key_story_archive"             // keep a copy of every story I watch (deleted ones get marked)
+    const val KEY_STORY_AUTO = "key_story_auto"                   // save stories of the channels below by themselves
+    const val KEY_STORY_AUTO_CHANNELS = "key_story_auto_channels" // comma-separated handles
     const val KEY_LIVE_HISTORY = "key_live_history"               // keep a list of LIVE streams I entered
     const val KEY_LIVE_HISTORY_JSON = "live_history_json"         // the list itself (not exported)
     const val KEY_APP_LANGUAGE = "key_app_language"             // "system" or a language tag (see L.LANGUAGES)
@@ -283,6 +288,11 @@ object Prefs {
         KEY_APP_LANGUAGE to "system",
         KEY_LIVE_HISTORY to true,
         KEY_HIDE_VIEWS to false,
+        KEY_HIDE_STORY_VIEWS to false,
+        KEY_HIDE_PROFILE_VIEWS to false,
+        KEY_STORY_ARCHIVE to true,
+        KEY_STORY_AUTO to false,
+        KEY_STORY_AUTO_CHANNELS to "",
         KEY_LIVE_CAPTIONS to false,
         KEY_CAPTION_SOURCE to "auto",
         KEY_CAPTION_TARGET to "",
@@ -552,6 +562,13 @@ object Prefs {
 
     fun setAutoLiveChannels(context: Context, list: List<String>) =
         setString(context, KEY_AUTO_LIVE_CHANNELS, list.map { it.trim().removePrefix("@").lowercase() }.filter { it.isNotBlank() }.distinct().joinToString(","))
+
+    // ---- Story auto-save channels ----
+    fun storyAutoChannels(context: Context?): List<String> =
+        string(context, KEY_STORY_AUTO_CHANNELS).split(',').map { it.trim().removePrefix("@").lowercase() }.filter { it.isNotBlank() }.distinct()
+
+    fun setStoryAutoChannels(context: Context, list: List<String>) =
+        setString(context, KEY_STORY_AUTO_CHANNELS, list.map { it.trim().removePrefix("@").lowercase() }.filter { it.isNotBlank() }.distinct().joinToString(","))
 
     // Recording quality per channel (TikMod's process only): {"handle": "origin|uhd|hd|sd"}; missing = the global one.
     private const val KEY_CHANNEL_QUALITY = "key_auto_live_channel_quality"

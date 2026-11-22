@@ -115,11 +115,15 @@ private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
     var screen by rememberSaveable { mutableStateOf(Screen.HOME) }
     // "Stop the addiction" settings open as a page inside the Feed tab.
     var focusOpen by rememberSaveable { mutableStateOf(false) }
+    // Stories (archive, auto-save, anonymous viewing) open as a page inside the Downloads tab.
+    var storiesOpen by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(startTab) {
         if (startTab == "live") screen = Screen.LIVE
         if (startTab == "focus") { screen = Screen.FEED; focusOpen = true }
+        if (startTab == "stories") { screen = Screen.DOWNLOADS; storiesOpen = true }
     }
     androidx.activity.compose.BackHandler(enabled = screen == Screen.FEED && focusOpen) { focusOpen = false }
+    androidx.activity.compose.BackHandler(enabled = screen == Screen.DOWNLOADS && storiesOpen) { storiesOpen = false }
     val active = remember { Prefs.isModuleActive(ctx) }
     // "What's new" opens by itself once after every update; the history sheet from Home → Updates.
     var showWhatsNew by remember { mutableStateOf(Updater.shouldShowWhatsNew(ctx) && Changelog.forVersion(BuildConfig.VERSION_NAME) != null) }
@@ -147,7 +151,7 @@ private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
                 when (s) {
                     Screen.HOME -> HomeScreen(active, onNavigate = { screen = it }, onThemeChange = onThemeChange, onShowHistory = { showHistory = true },
                         onOpenFocus = { screen = Screen.FEED; focusOpen = true })
-                    Screen.DOWNLOADS -> DownloadsScreen()
+                    Screen.DOWNLOADS -> if (storiesOpen) StoriesScreen { storiesOpen = false } else DownloadsScreen { storiesOpen = true }
                     Screen.LIVE -> LiveScreen()
                     Screen.CHAT -> ChatScreen()
                     Screen.FEED -> if (focusOpen) FocusScreen { focusOpen = false } else FeedScreen { focusOpen = true }
@@ -430,9 +434,10 @@ internal fun ActionButton(icon: ImageVector, text: String, modifier: Modifier = 
 // ================================================================== DOWNLOADS
 
 @Composable
-private fun DownloadsScreen() {
+private fun DownloadsScreen(onOpenStories: () -> Unit) {
     val ctx = LocalContext.current
     Appear(0) { ScreenTitle(L.t(R.string.nav_downloads), L.t(R.string.dl_subtitle), Neon.Cyan) }
+    Appear(1) { StoriesEntryCard(onOpenStories) }
     Appear(1) {
         Section(Icons.Rounded.Download, L.t(R.string.dl_engine), L.t(R.string.dl_engine_sub)) {
             ToggleRow(L.t(R.string.dl_engine_toggle), L.t(R.string.dl_engine_toggle_desc), Prefs.KEY_REMOVE_WATERMARK, Icons.Rounded.PowerSettingsNew) { Prefs.setForceDownloadEnabled(ctx, it) }
@@ -953,6 +958,8 @@ private fun ChatScreen() {
             ToggleRow(L.t(R.string.chat_hide_typing), L.t(R.string.chat_hide_typing_desc), Prefs.KEY_DISABLE_TYPING_INDICATOR, Icons.Rounded.KeyboardHide, Neon.Violet)
             ToggleRow(L.t(R.string.chat_hide_online), L.t(R.string.chat_hide_online_desc), Prefs.KEY_HIDE_ONLINE_STATUS, Icons.Rounded.WifiOff, Neon.Violet)
             ToggleRow(L.t(R.string.chat_hide_views), L.t(R.string.chat_hide_views_desc), Prefs.KEY_HIDE_VIEWS, Icons.Rounded.PlayDisabled, Neon.Violet, badge = L.t(R.string.tag_experimental))
+            ToggleRow(L.t(R.string.stories_hide_views), L.t(R.string.stories_hide_views_desc), Prefs.KEY_HIDE_STORY_VIEWS, Icons.Rounded.AutoStories, Neon.Violet, badge = L.t(R.string.tag_new))
+            ToggleRow(L.t(R.string.profile_hide_views), L.t(R.string.profile_hide_views_desc), Prefs.KEY_HIDE_PROFILE_VIEWS, Icons.Rounded.PersonOff, Neon.Violet, badge = L.t(R.string.tag_new))
         }
     }
     Appear(3) {

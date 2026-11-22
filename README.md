@@ -36,6 +36,12 @@ Made by **Nerix Labs**.
 - Stop any single recording from the LIVE you're watching; the others keep going
 - Recordings run in TikMod's own foreground service, so they keep going after TikTok is swiped away
 
+**Stories**
+- Download any story without a watermark (video or photos) from its share sheet
+- Story archive: every story you watch is kept for 30 days; stories their creator deletes stay, marked 🗑
+- Auto-save the stories of chosen channels to the gallery
+- Watch stories anonymously (you're not on the viewer list) and hide your profile visits from "Profile views"
+
 **Chat**
 - Read receipts: normal, never, or only after you reply in that chat
 - Hide the typing indicator and online status
@@ -89,6 +95,7 @@ The APK ends up in `app/build/outputs/apk/debug/`. JDK 17+ and the Android SDK a
 | Auto-recorder service | `live/LiveWatchService.kt`, `utils/LiveApi.kt` |
 | Live captions: stream audio to PCM, speech recognition, translation | `captions/`, `hooks/LiveCaptionHook.kt` |
 | Live chat recording and burn-in (OpenGL overlay, hardware re-encode) | `hooks/LiveChatHook.kt`, `utils/ChatLog.kt`, `utils/ChatBurner.kt` |
+| Stories: tracking in TikTok, archive / auto-save in TikMod | `hooks/StoryHook.kt`, `utils/StoryTracker.kt`, `stories/StoryStore.kt`, `ui/StoriesUi.kt` |
 | Chat privacy and deleted messages | `hooks/ChatPrivacyHook.kt`, `hooks/AntiRecallHook.kt`, `hooks/DeletedBubble.kt` |
 | Feed cleaning | `hooks/AdsHook.kt` |
 | Locating obfuscated classes across TikTok versions | `discovery/Resolver.kt` |
@@ -135,6 +142,7 @@ Modifying apps may violate their terms of service — use at your own risk.
 - **הורדות:** סרטונים בלי סימן מים באיכות הגבוהה ביותר, קרוסלות תמונות, שמע, קאבר ותמונת פרופיל.
 - **שיתוף חכם:** שליחת הקובץ עצמו לוואטסאפ ולטלגרם במקום קישור בלבד.
 - **לייב:** הקלטת שידורים חיים ל-MP4 תקין, כולל הקלטה אוטומטית של ערוצים במעקב, שממשיכה גם כשטיקטוק סגור.
+- **סטוריז:** הורדה בלי סימן מים, ארכיון של כל סטורי שצפיתם בו (סטוריז שנמחקו נשארים עם סימן 🗑), שמירה אוטומטית מערוצים נבחרים, וצפייה אנונימית בסטוריז ובפרופילים.
 - **צ'אט:** "נצפה" רק אחרי שעונים, הסתרת "מקליד/ה" ו"פעיל/ה עכשיו", והודעות שנמחקו נשארות עם סימן פח קטן.
 - **פיד:** חסימת פרסומות וסינון שידורים, סרטוני קניות ופוסטי תמונות.
 - **אפליקציה:** 10 שפות לפי שפת הטלפון, עדכונים מתוך האפליקציה, חלונית "מה חדש" והיסטוריית גרסאות.

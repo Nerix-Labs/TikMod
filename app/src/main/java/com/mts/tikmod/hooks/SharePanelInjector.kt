@@ -199,7 +199,7 @@ class SharePanelInjector : BaseHook() {
             live != null -> Quad("🔴", L.t(R.string.card_record_live), L.t(R.string.card_record_live_sub, live.owner.ifBlank { live.roomId }), "LIVE")
             photoMode -> Quad("🖼️", L.p(R.plurals.card_download_photos, media!!.images.size), L.t(R.string.card_photos_sub, media.authorUniqueId), "${media.images.size} IMG")
             else -> Quad(
-                "⬇", L.t(R.string.card_download_video),
+                "⬇", if (media?.isStory == true) L.t(R.string.card_download_story) else L.t(R.string.card_download_video),
                 listOfNotNull(
                     best?.qualityTag,
                     best?.let { if (it.isH265) "H.265" else "H.264" },
