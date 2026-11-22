@@ -751,4 +751,26 @@
     <string name="f3_bedtime_desc">Au coucher, au moins %1$d%% du fil ne vous accrochera pas, et les vidéos virales et clips courts disparaissent.</string>
     <string name="f3_session_desc">Après autant de temps d\'affilée, le mélange devient plus strict tout seul.</string>
     <!-- focus mode 3: end -->
+    <string name="toast_rec_stopping_one">⏹️ TikMod : arrêt de @%1$s et enregistrement — les autres enregistrements continuent</string>
+    <string name="card_also_recording">Aussi en cours (%1$d) — touchez-en un pour l\'arrêter</string>
+    <string name="ch_private_live">En direct • compte privé : enregistré dès que TikTok affiche le direct</string>
+    <string name="ch_not_found_private">Invisible sur le web — si c\'est un compte privé que vous suivez, il est enregistré quand TikTok affiche son LIVE</string>
+    <string name="notif_private_live">%1$s est en direct (compte privé)</string>
+    <string name="notif_private_live_text">Son direct n\'est fourni qu\'à TikTok. Touchez pour l\'ouvrir dans TikTok — l\'enregistrement démarre tout seul et continue quand vous partez.</string>
+    <string name="notif_private_live_action">Ouvrir et enregistrer</string>
+    <!-- 4.8.0 -->
+    <string name="update_bad_checksum">Le téléchargement ne correspond pas à la somme de contrôle publiée, il n\'a donc pas été installé. Réessaie plus tard.</string>
+    <string name="about_report_bug">Signaler un bug</string>
+    <string name="report_collecting">Collecte du rapport…</string>
+    <string name="ch_quality_global">Auto</string>
+    <string name="cl480_private">Les comptes privés que tu suis sont aussi enregistrés</string>
+    <string name="cl480_private_desc">Leur flux n\'est fourni qu\'à TikTok connecté à ton compte. Ajoute-les à l\'enregistrement auto : quand TikTok affiche leur LIVE (dans le fil, la barre Abonnements ou à l\'ouverture), l\'enregistrement démarre tout seul, et une notification ouvre le LIVE en un geste.</string>
+    <string name="cl480_stop">Arrêter un enregistrement, les autres continuent</string>
+    <string name="cl480_stop_desc">Le bouton d\'enregistrement d\'un LIVE n\'arrête plus que ce flux. Les autres flux en cours d\'enregistrement sont listés dessous, chacun avec son bouton d\'arrêt.</string>
+    <string name="cl480_quality">Qualité par chaîne</string>
+    <string name="cl480_quality_desc">Touche la qualité à côté d\'une chaîne dans la liste d\'enregistrement auto pour lui donner la sienne (Source, 1080p, 720p ou 480p). Auto suit le réglage général.</string>
+    <string name="cl480_report">Signaler un bug</string>
+    <string name="cl480_report_desc">Un geste dans À propos rassemble les versions, les hooks actifs au dernier lancement de TikTok et le journal récent, puis ouvre le menu de partage. Rien n\'est envoyé tout seul.</string>
+    <string name="cl480_safety">Plus sûr et plus léger</string>
+    <string name="cl480_safety_desc">Seuls TikTok et TikMod peuvent désormais accéder aux réglages et à l\'enregistreur de TikMod. Les mises à jour sont vérifiées par somme de contrôle avant installation, l\'app est plus légère, et les sous-titres en direct continuent d\'être traduits sur le téléphone quand le service de Google est indisponible.</string>
 </resources>

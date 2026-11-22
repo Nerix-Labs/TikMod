@@ -729,4 +729,26 @@
     <string name="f3_bedtime_desc">就寝时间至少 %1$d%% 的推荐内容不会吸住你，爆款和短片会被隐藏。</string>
     <string name="f3_session_desc">连续使用这么久后，配比会自动变得更严格。</string>
     <!-- focus mode 3: end -->
+    <string name="toast_rec_stopping_one">⏹️ TikMod：正在停止 @%1$s 并保存——其他录制继续进行</string>
+    <string name="card_also_recording">同时正在录制（%1$d）——点按即可停止</string>
+    <string name="ch_private_live">直播中 • 私密账号：TikTok 一显示直播就开始录制</string>
+    <string name="ch_not_found_private">网页上不可见——如果这是你关注的私密账号，TikTok 显示其直播时就会录制</string>
+    <string name="notif_private_live">%1$s 正在直播（私密账号）</string>
+    <string name="notif_private_live_text">其直播只提供给 TikTok。点按在 TikTok 中打开——录制会自动开始，离开后也会继续。</string>
+    <string name="notif_private_live_action">打开并录制</string>
+    <!-- 4.8.0 -->
+    <string name="update_bad_checksum">下载的文件与发布的校验和不一致，因此未安装。请稍后再试。</string>
+    <string name="about_report_bug">报告问题</string>
+    <string name="report_collecting">正在收集报告…</string>
+    <string name="ch_quality_global">自动</string>
+    <string name="cl480_private">你关注的私密账号也能录制</string>
+    <string name="cl480_private_desc">这类账号的直播流只提供给登录你账号的 TikTok。把它们加入自动录制：当 TikTok 显示其直播（在推荐页、关注栏或打开时），录制会自动开始，通知可一键打开直播。</string>
+    <string name="cl480_stop">停止一个录制，其他继续</string>
+    <string name="cl480_stop_desc">直播里的录制按钮现在只停止这一路直播。其他正在录制的直播列在下方，每个都有自己的停止按钮。</string>
+    <string name="cl480_quality">按频道设置画质</string>
+    <string name="cl480_quality_desc">在自动录制列表中点按频道旁的画质，为它单独设置（原画、1080p、720p 或 480p）。自动则跟随全局设置。</string>
+    <string name="cl480_report">报告问题</string>
+    <string name="cl480_report_desc">在“关于”中点一下即可收集版本信息、上次启动 TikTok 时生效的 Hook 以及最近的日志，并打开分享菜单。不会自动发送任何内容。</string>
+    <string name="cl480_safety">更安全、更轻量</string>
+    <string name="cl480_safety_desc">现在只有 TikTok 和 TikMod 能访问 TikMod 的设置和录制器。更新在安装前会校验校验和，应用体积更小，并且在 Google 服务不可用时，直播字幕仍会在手机上继续翻译。</string>
 </resources>

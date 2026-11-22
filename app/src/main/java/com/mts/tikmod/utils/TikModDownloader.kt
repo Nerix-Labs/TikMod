@@ -324,17 +324,34 @@ object TikModDownloader {
     val isLiveRecording: Boolean
         get() = localRecording || remoteRecordings(Prefs.hostContext).isNotEmpty()
 
+    /** Channel being recorded by the in-process fallback recorder. */
+    @Volatile private var localOwner: String? = null
+
+    private fun key(owner: String) = owner.trim().removePrefix("@").lowercase()
+
+    /** Every channel being recorded right now (TikMod's service + the in-process fallback), lower-case handles. */
+    fun recordingHandles(ctx: Context?): List<String> =
+        (remoteRecordings(ctx) + listOfNotNull(localOwner?.takeIf { localRecording })).map { key(it) }.distinct()
+
     private fun remoteRecordings(ctx: Context?): List<String> = ctx?.let { c ->
         runCatching { c.contentResolver.call(Uri.parse(Prefs.PROVIDER_URI), "live_recording", null, null)?.getStringArrayList("handles") }.getOrNull()
     }.orEmpty()
 
+    /** Whether this very stream is being recorded (other streams may be recording at the same time). */
+    fun isRecording(ctx: Context?, live: MediaContext.LiveStream): Boolean =
+        live.owner.isNotBlank() && key(live.owner) in recordingHandles(ctx)
+
+    /** Stops one channel's recording; the others keep going. */
+    fun stopRecordingOf(context: Context, owner: String) {
+        val h = key(owner)
+        if (localRecording && localOwner?.let { key(it) } == h) { stopLiveRecording(context); return }
+        runCatching { context.contentResolver.call(Uri.parse(Prefs.PROVIDER_URI), "stop_live_record", h, null) }
+        toast(context, L.t(R.string.toast_rec_stopping_one, h))
+    }
+
+    /** The record button in a LIVE: records this stream, or stops this stream's recording. Never touches the others. */
     fun toggleLiveRecording(context: Context, live: MediaContext.LiveStream) {
-        if (localRecording) { stopLiveRecording(context); return }
-        val remote = remoteRecordings(context)
-        if (remote.isNotEmpty()) {
-            remote.forEach { h -> runCatching { context.contentResolver.call(Uri.parse(Prefs.PROVIDER_URI), "stop_live_record", h, null) } }
-            return
-        }
+        if (isRecording(context, live)) { stopRecordingOf(context, live.owner); return }
         startLiveRecording(context, live)
     }
 
@@ -353,10 +370,12 @@ object TikModDownloader {
         val intent = Intent("com.mts.tikmod.action.RECORD_LIVE")
             .setComponent(android.content.ComponentName("com.mts.tikmod", "com.mts.tikmod.live.LiveWatchService"))
             .putExtras(extras)
-        val direct = runCatching {
+            .putExtra(Prefs.EXTRA_IPC_TOKEN, Prefs.ipcToken(ctx))
+        // Without the token TikMod's service ignores a direct start, so go through the provider instead.
+        val direct = intent.getStringExtra(Prefs.EXTRA_IPC_TOKEN) != null && runCatching {
             if (Build.VERSION.SDK_INT >= 26) ctx.startForegroundService(intent) else ctx.startService(intent)
         }.onFailure { XLog.log("LiveRecorder: direct hand-off failed (${it.message}), trying provider") }
-            .getOrNull() != null
+            .isSuccess
         if (direct) return true
         return runCatching {
             ctx.contentResolver.call(Uri.parse(Prefs.PROVIDER_URI), "start_live_record", null, extras)?.getBoolean("success") == true
@@ -379,12 +398,14 @@ object TikModDownloader {
 
     fun startLiveRecording(context: Context, live: MediaContext.LiveStream) {
         val ctx = context.applicationContext ?: context
-        if (localRecording) return
         if (delegateToTikMod(ctx, live)) {
             XLog.log("LiveRecorder: handed @${live.owner} to TikMod's service")
             return
         }
+        // The in-process fallback records one stream at a time (TikMod's service records any number).
+        if (localRecording) { toast(ctx, L.t(R.string.toast_parallel_limit)); return }
         localRecording = true
+        localOwner = live.owner.ifBlank { live.roomId }
         ensureStopReceiver(ctx)
         createChannel(ctx)
         toast(ctx, L.t(R.string.toast_rec_started))

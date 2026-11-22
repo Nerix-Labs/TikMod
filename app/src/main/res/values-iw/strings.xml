@@ -762,4 +762,26 @@
     <string name="f3_bedtime_desc">בשעת השינה לפחות %1$d%% מהפיד לא ימשוך אותך, ולהיטים ויראליים וקליפים קצרים יוסתרו.</string>
     <string name="f3_session_desc">אחרי זמן רצוף כזה התמהיל נעשה קפדני יותר מעצמו.</string>
     <!-- focus mode 3: end -->
+    <string name="toast_rec_stopping_one">⏹️ TikMod: עוצר את @%1$s ושומר — שאר ההקלטות ממשיכות</string>
+    <string name="card_also_recording">מקליט עכשיו גם (%1$d) — הקש על אחד כדי לעצור אותו</string>
+    <string name="ch_private_live">בשידור • חשבון פרטי: יוקלט ברגע שטיקטוק מציג את השידור</string>
+    <string name="ch_not_found_private">לא גלוי ברשת — אם זה חשבון פרטי שאתה עוקב אחריו, הוא יוקלט כשטיקטוק מציג את השידור שלו</string>
+    <string name="notif_private_live">%1$s בשידור חי (חשבון פרטי)</string>
+    <string name="notif_private_live_text">השידור שלו נמסר רק לטיקטוק. הקש כדי לפתוח אותו בטיקטוק — ההקלטה מתחילה לבד וממשיכה גם כשיוצאים.</string>
+    <string name="notif_private_live_action">פתח והקלט</string>
+    <!-- 4.8.0 -->
+    <string name="update_bad_checksum">הקובץ שהורד לא תואם לחתימה שפורסמה, ולכן לא הותקן. נסו שוב מאוחר יותר.</string>
+    <string name="about_report_bug">דיווח על באג</string>
+    <string name="report_collecting">אוסף את הדוח…</string>
+    <string name="ch_quality_global">אוטומטי</string>
+    <string name="cl480_private">גם חשבונות פרטיים שאתם עוקבים אחריהם מוקלטים</string>
+    <string name="cl480_private_desc">השידור שלהם נמסר רק לטיקטוק המחובר לחשבון שלכם. מוסיפים אותם להקלטה האוטומטית: כשטיקטוק מציג את הלייב שלהם (בפיד, בפס הנעקבים או כשפותחים אותו) ההקלטה מתחילה מעצמה, והתראה פותחת את הלייב בלחיצה.</string>
+    <string name="cl480_stop">עוצרים הקלטה אחת, השאר ממשיכות</string>
+    <string name="cl480_stop_desc">כפתור ההקלטה בלייב עוצר עכשיו רק את השידור הזה. שידורים אחרים שמוקלטים מופיעים מתחתיו, ולכל אחד כפתור עצירה משלו.</string>
+    <string name="cl480_quality">איכות לכל ערוץ</string>
+    <string name="cl480_quality_desc">לוחצים על האיכות ליד ערוץ ברשימת ההקלטה האוטומטית כדי לתת לו איכות משלו (מקור, 1080p, 720p או 480p). אוטומטי עוקב אחרי ההגדרה הכללית.</string>
+    <string name="cl480_report">דיווח על באג</string>
+    <string name="cl480_report_desc">לחיצה אחת במסך אודות אוספת את הגרסאות, אילו הוקים נכנסו בהפעלה האחרונה של טיקטוק ואת הלוג האחרון, ופותחת את חלון השיתוף. שום דבר לא נשלח מעצמו.</string>
+    <string name="cl480_safety">בטוח וקל יותר</string>
+    <string name="cl480_safety_desc">רק טיקטוק ו-TikMod יכולים לגשת עכשיו להגדרות ולמקליט של TikMod. עדכונים נבדקים מול checksum לפני ההתקנה, האפליקציה קטנה יותר, והכתוביות בלייב ממשיכות להיות מתורגמות בטלפון כשהשירות של Google לא זמין.</string>
 </resources>

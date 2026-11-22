@@ -364,6 +364,36 @@ object Prefs {
      */
     @Volatile var hostContext: Context? = null
 
+    // ---- IPC token ----
+    // TikMod's service is exported so TikTok (in front) can start a LIVE recording directly. Any other app could
+    // too, so every start/stop command must carry this random token. TikMod creates it once; TikTok receives it
+    // from the provider together with the settings (the provider only answers TikTok and TikMod itself).
+    const val EXTRA_IPC_TOKEN = "tikmod_token"
+    private const val IPC_PREFS = "tikmod_ipc"
+    @Volatile private var hostIpcToken: String? = null
+
+    /** TikMod's process: the stored token (created on first use). TikTok's process: the one the provider gave. */
+    fun ipcToken(context: Context?): String? {
+        val ctx = context ?: hostContext ?: return hostIpcToken
+        if (!isOwnProcess(ctx)) {
+            if (hostIpcToken == null) refreshCache(ctx, force = true)
+            return hostIpcToken
+        }
+        return runCatching {
+            val sp = ctx.getSharedPreferences(IPC_PREFS, Context.MODE_PRIVATE)
+            sp.getString("token", null) ?: synchronized(this) {
+                sp.getString("token", null) ?: java.util.UUID.randomUUID().toString().also { sp.edit().putString("token", it).commit() }
+            }
+        }.getOrNull()
+    }
+
+    /** Constant-time check of a token that came with an Intent. */
+    fun isValidIpcToken(context: Context, token: String?): Boolean {
+        val own = ipcToken(context) ?: return false
+        if (token == null) return false
+        return java.security.MessageDigest.isEqual(own.toByteArray(), token.toByteArray())
+    }
+
     fun refreshCache(contextArg: Context?, force: Boolean = false) {
         val now = System.currentTimeMillis()
         if (!force && (now - lastCacheTime) < 2000) return
@@ -381,6 +411,7 @@ object Prefs {
                 } else {
                     val remote = runCatching { getRemoteBundle(context) }.getOrNull()
                     if (remote != null && remote.containsKey(KEY_ANTI_RECALL)) {
+                        remote.getString(EXTRA_IPC_TOKEN)?.let { hostIpcToken = it }
                         cache = SPECS.mapValues { (k, def) ->
                             @Suppress("DEPRECATION")
                             val v = remote.get(k)
@@ -521,6 +552,29 @@ object Prefs {
 
     fun setAutoLiveChannels(context: Context, list: List<String>) =
         setString(context, KEY_AUTO_LIVE_CHANNELS, list.map { it.trim().removePrefix("@").lowercase() }.filter { it.isNotBlank() }.distinct().joinToString(","))
+
+    // Recording quality per channel (TikMod's process only): {"handle": "origin|uhd|hd|sd"}; missing = the global one.
+    private const val KEY_CHANNEL_QUALITY = "key_auto_live_channel_quality"
+    val LIVE_QUALITIES = listOf("origin", "uhd", "hd", "sd")
+
+    private fun channelQualities(context: Context): JSONObject =
+        runCatching { JSONObject(getSP(context)?.getString(KEY_CHANNEL_QUALITY, "{}") ?: "{}") }.getOrDefault(JSONObject())
+
+    /** The quality set for this channel, or "" when it follows the global setting. */
+    fun channelQuality(context: Context, handle: String): String =
+        channelQualities(context).optString(handle.trim().removePrefix("@").lowercase()).takeIf { it in LIVE_QUALITIES }.orEmpty()
+
+    /** "" goes back to the global setting. */
+    fun setChannelQuality(context: Context, handle: String, quality: String) {
+        val json = channelQualities(context)
+        val h = handle.trim().removePrefix("@").lowercase()
+        if (quality in LIVE_QUALITIES) json.put(h, quality) else json.remove(h)
+        getSP(context)?.edit()?.putString(KEY_CHANNEL_QUALITY, json.toString())?.apply()
+    }
+
+    /** What a recording of this channel asks the LIVE API for: its own quality, else the global one. */
+    fun liveQuality(context: Context, handle: String): String =
+        channelQuality(context, handle).ifEmpty { string(context, KEY_AUTO_LIVE_QUALITY) }
 
     fun readAutoLiveState(context: Context): JSONObject =
         runCatching { JSONObject(getSP(context)?.getString(KEY_AUTO_LIVE_STATE, "{}") ?: "{}") }.getOrDefault(JSONObject())

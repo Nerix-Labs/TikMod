@@ -53,23 +53,31 @@ class LiveWatchService : Service() {
         private const val MIN_FREE_TO_START = 1L shl 30        // 1 GB
         private const val MIN_FREE_WHILE_RECORDING = 300L shl 20 // 300 MB
 
+        /** An Intent for this service, signed with the IPC token (the service is exported; see [Prefs.ipcToken]). */
+        private fun cmd(ctx: Context, action: String): Intent =
+            Intent(ctx, LiveWatchService::class.java).setAction(action).putExtra(Prefs.EXTRA_IPC_TOKEN, Prefs.ipcToken(ctx))
+
+        /** Commands that start, stop or change something: only accepted with the token. */
+        private val GUARDED = setOf("com.mts.tikmod.action.RECORD_LIVE", "com.mts.tikmod.action.LIVE_FOUND")
+
         /** Record a channel right now (from the TikMod app). The service looks up the stream itself. */
         fun recordNow(context: Context, handle: String) {
             val ctx = context.applicationContext
             runCatching {
-                ContextCompat.startForegroundService(ctx, Intent(ctx, LiveWatchService::class.java)
-                    .setAction(ACTION_RECORD).putExtra(EXTRA_HANDLE, handle))
+                ContextCompat.startForegroundService(ctx, cmd(ctx, ACTION_RECORD).putExtra(EXTRA_HANDLE, handle))
             }
         }
 
         fun stop(context: Context, handle: String) {
-            runCatching { context.startService(Intent(context, LiveWatchService::class.java).setAction(ACTION_STOP_REC).putExtra(EXTRA_HANDLE, handle)) }
+            runCatching { context.startService(cmd(context, ACTION_STOP_REC).putExtra(EXTRA_HANDLE, handle)) }
         }
 
         fun stopAll(context: Context) {
-            runCatching { context.startService(Intent(context, LiveWatchService::class.java).setAction(ACTION_STOP_ALL)) }
+            runCatching { context.startService(cmd(context, ACTION_STOP_ALL)) }
         }
         const val ACTION_RECORD = "com.mts.tikmod.action.RECORD_LIVE" // manual recording handed over from TikTok
+        /** TikTok loaded the stream of a watched channel (private accounts you follow included): record it like an auto one. */
+        const val ACTION_FOUND = "com.mts.tikmod.action.LIVE_FOUND"
         const val EXTRA_HANDLE = "handle"
         const val EXTRA_TITLE = "title"
         const val EXTRA_URLS = "urls"
@@ -111,6 +119,9 @@ class LiveWatchService : Service() {
     private val skipUntilOffline: MutableSet<String> = Collections.synchronizedSet(HashSet())
     private val resumeAllowed: MutableSet<String> = Collections.synchronizedSet(HashSet())
     private val state = ConcurrentHashMap<String, JSONObject>()
+    /** Stream addresses TikTok handed over lately, per channel (the web lookup has none for private accounts). */
+    private val tiktokUrls = ConcurrentHashMap<String, List<String>>()
+    private val privateNotified: MutableSet<String> = Collections.synchronizedSet(HashSet())
     private val lock = Object()
     @Volatile private var alive = false
     private var backoff = 1L
@@ -134,6 +145,8 @@ class LiveWatchService : Service() {
                 if (st == "recording" || st == "saving") resumeAllowed.add(k)
                 // Stopped by the user: stays stopped until that stream ends, also across restarts and updates.
                 if (st == "skipped") skipUntilOffline.add(k)
+                // Already told "private account is live" for this stream: no second notification after a restart.
+                if (st == "private") privateNotified.add(k)
             }
         }
         // Save whatever an interrupted recording left behind, then start watching.
@@ -145,6 +158,13 @@ class LiveWatchService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val action = intent?.action
+        if (action != null && (action in GUARDED || action == ACTION_STOP_REC || action == ACTION_STOP_ALL || action == ACTION_STOP_SERVICE) &&
+            !Prefs.isValidIpcToken(this, intent?.getStringExtra(Prefs.EXTRA_IPC_TOKEN))) {
+            XLog.log("AutoLive: ignored '$action' without a valid token")
+            if (sessions.isEmpty() && !Prefs.bool(this, Prefs.KEY_AUTO_LIVE)) stopSelf()
+            return START_STICKY
+        }
         when (intent?.action) {
             ACTION_STOP_REC -> intent.getStringExtra(EXTRA_HANDLE)?.let { stopRecording(it) }
             ACTION_STOP_ALL -> sessions.keys.toList().forEach { stopRecording(it) }
@@ -162,7 +182,7 @@ class LiveWatchService : Service() {
                     // Started from the TikMod app: look the stream up ourselves.
                     pendingStarts.incrementAndGet()
                     thread(name = "TikMod-RecordNow") {
-                        val room = runCatching { LiveApi.fetch(handle, Prefs.string(this, Prefs.KEY_AUTO_LIVE_QUALITY)) }.getOrNull()
+                        val room = runCatching { LiveApi.fetch(handle, Prefs.liveQuality(this, handle)) }.getOrNull()
                         when {
                             room == null -> TikModDownloader.toast(this, L.t(R.string.toast_user_not_found, handle))
                             !room.live || room.flvUrls.isEmpty() -> TikModDownloader.toast(this, L.t(R.string.toast_not_live, handle))
@@ -172,6 +192,12 @@ class LiveWatchService : Service() {
                         wake()
                     }
                 }
+                wake()
+            }
+            ACTION_FOUND -> {
+                val handle = intent.getStringExtra(EXTRA_HANDLE)?.trim()?.removePrefix("@")?.lowercase().orEmpty()
+                val urls = intent.getStringArrayListExtra(EXTRA_URLS).orEmpty()
+                if (handle.isNotBlank() && urls.isNotEmpty()) foundInTikTok(handle, intent.getStringExtra(EXTRA_TITLE).orEmpty(), urls, intent.getStringExtra("room"))
                 wake()
             }
             ACTION_STOP_SERVICE -> {
@@ -206,7 +232,7 @@ class LiveWatchService : Service() {
         for (rec in TikModDownloader.interruptedRecordings(this)) {
             val handle = rec.owner.trim().removePrefix("@").lowercase()
             val room = if (handle == "live" || handle.isBlank()) null
-            else runCatching { LiveApi.fetch(handle, Prefs.string(this, Prefs.KEY_AUTO_LIVE_QUALITY)) }.getOrNull()
+            else runCatching { LiveApi.fetch(handle, Prefs.liveQuality(this, handle)) }.getOrNull()
             if (room != null && room.live && room.flvUrls.isNotEmpty() && !sessions.containsKey(handle)) {
                 XLog.log("AutoLive: @$handle is still live — continuing the interrupted recording")
                 TikModDownloader.toast(this, L.t(R.string.toast_rec_resuming, handle))
@@ -245,17 +271,25 @@ class LiveWatchService : Service() {
     }
 
     private fun check(handle: String) {
-        val room = LiveApi.fetch(handle, Prefs.string(this, Prefs.KEY_AUTO_LIVE_QUALITY))
+        val room = LiveApi.fetch(handle, Prefs.liveQuality(this, handle))
         val st = state.getOrPut(handle) { JSONObject() }
         st.put("checked", System.currentTimeMillis()).remove("error")
-        if (room == null) { st.put("status", "missing"); return }
+        // Not visible to the web lookup (a private account): TikTok itself reports its LIVE (see foundInTikTok).
+        if (room == null) { if (!sessions.containsKey(handle)) st.put("status", "missing"); return }
         st.put("nick", room.nickname).put("viewers", room.viewers).put("title", room.title)
         if (!room.live) {
             seenOffline.add(handle); skipUntilOffline.remove(handle); resumeAllowed.remove(handle)
+            privateNotified.remove(handle); tiktokUrls.remove(handle)
             if (!sessions.containsKey(handle)) st.put("status", "offline")
             return
         }
         if (sessions.containsKey(handle)) return
+        // Live, but its stream is only given to followers (private account): TikTok has to load it.
+        if (room.flvUrls.isEmpty() && handle !in skipUntilOffline) {
+            st.put("status", "private")
+            if (privateNotified.add(handle)) notifyPrivateLive(handle, room.nickname)
+            return
+        }
         val trigger = Prefs.string(this, Prefs.KEY_AUTO_LIVE_TRIGGER)
         val allowed = trigger == Prefs.AUTO_LIVE_TRIGGER_ANY || handle in seenOffline || handle in resumeAllowed
         if (!allowed || handle in skipUntilOffline || room.flvUrls.isEmpty()) {
@@ -265,6 +299,50 @@ class LiveWatchService : Service() {
         if (!hasSlot()) { st.put("status", "queued"); return }
         if (freeSpace() < MIN_FREE_TO_START) { st.put("status", "nospace"); return }
         startRecording(handle, room.nickname, room.title, room.flvUrls, manual = false, roomId = room.roomId)
+    }
+
+    /**
+     * TikTok loaded the LIVE stream of a watched channel — while browsing, in the Following LIVE bar, or when you
+     * opened it. That's the way private accounts you follow get recorded: their stream is only given to TikTok
+     * (signed in as you), never to the web lookup. Same rules as the watcher: a recording you stopped stays
+     * stopped, the parallel limit and free space apply.
+     */
+    private fun foundInTikTok(handle: String, title: String, urls: List<String>, roomId: String?) {
+        tiktokUrls[handle] = urls
+        if (!Prefs.bool(this, Prefs.KEY_AUTO_LIVE) || handle !in Prefs.autoLiveChannels(this)) return
+        if (sessions.containsKey(handle) || handle in skipUntilOffline) return
+        val st = state.getOrPut(handle) { JSONObject() }
+        val prev = st.optString("status")
+        val trigger = Prefs.string(this, Prefs.KEY_AUTO_LIVE_TRIGGER)
+        // "Only when it starts": the web can't see a private account go live, so TikTok seeing it counts.
+        val allowed = trigger == Prefs.AUTO_LIVE_TRIGGER_ANY || handle in seenOffline || handle in resumeAllowed ||
+            prev == "private" || prev == "missing" || prev.isBlank()
+        if (!allowed) return
+        if (!hasSlot()) { st.put("status", "queued"); writeState(); return }
+        if (freeSpace() < MIN_FREE_TO_START) { st.put("status", "nospace"); writeState(); return }
+        XLog.log("AutoLive: TikTok shows @$handle live — recording")
+        val nick = st.optString("nick").ifBlank { handle }
+        runCatching { getSystemService(NotificationManager::class.java).cancel(privateNotifId(handle)) }
+        startRecording(handle, nick, title, urls, manual = false, roomId = roomId)
+    }
+
+    private fun privateNotifId(handle: String) = 5200 + (handle.hashCode() and 0x3FF)
+
+    /** A private account went live: one tap opens it in TikTok, and the recording starts by itself. */
+    private fun notifyPrivateLive(handle: String, nickname: String) {
+        val open = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://www.tiktok.com/@$handle/live"))
+            .setPackage("com.zhiliaoapp.musically").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val pi = PendingIntent.getActivity(this, privateNotifId(handle), open, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val n = NotificationCompat.Builder(this, EVENTS_CHANNEL)
+            .setSmallIcon(android.R.drawable.presence_video_online)
+            .setContentTitle(L.t(R.string.notif_private_live, nickname.ifBlank { handle }))
+            .setContentText(L.t(R.string.notif_private_live_text))
+            .setStyle(NotificationCompat.BigTextStyle().bigText(L.t(R.string.notif_private_live_text)))
+            .setContentIntent(pi).setAutoCancel(true).setCategory(NotificationCompat.CATEGORY_EVENT)
+            .addAction(android.R.drawable.presence_video_online, L.t(R.string.notif_private_live_action), pi)
+            .build()
+        runCatching { getSystemService(NotificationManager::class.java).notify(privateNotifId(handle), n) }
+        XLog.log("AutoLive: @$handle is live but private — asked to open it in TikTok")
     }
 
     // ------------------------------------------------------------------ recording
@@ -305,7 +383,7 @@ class LiveWatchService : Service() {
         val progressMode = manual || Prefs.string(this, Prefs.KEY_AUTO_LIVE_NOTIFY) != Prefs.AUTO_LIVE_NOTIFY_MINIMAL
         val nm = getSystemService(NotificationManager::class.java)
         val stopPi = PendingIntent.getService(
-            this, s.notifId, Intent(this, LiveWatchService::class.java).setAction(ACTION_STOP_REC).putExtra(EXTRA_HANDLE, handle),
+            this, s.notifId, cmd(this, ACTION_STOP_REC).putExtra(EXTRA_HANDLE, handle),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         val who = nickname.ifBlank { handle }
@@ -334,8 +412,10 @@ class LiveWatchService : Service() {
                     this, owner = handle, title = title.ifBlank { "LIVE @$handle" },
                     urls = {
                         if (firstUrls) { firstUrls = false; initialUrls }
-                        else runCatching { LiveApi.fetch(handle, Prefs.string(this, Prefs.KEY_AUTO_LIVE_QUALITY))?.flvUrls }.getOrNull()
-                            ?.takeIf { it.isNotEmpty() } ?: initialUrls
+                        else runCatching { LiveApi.fetch(handle, Prefs.liveQuality(this, handle))?.flvUrls }.getOrNull()
+                            ?.takeIf { it.isNotEmpty() }
+                            ?: tiktokUrls[handle]?.takeIf { it.isNotEmpty() } // private accounts: what TikTok last loaded
+                            ?: initialUrls
                     },
                     isRunning = { alive && !s.stopped },
                     resume = resume,
@@ -410,7 +490,7 @@ class LiveWatchService : Service() {
         // watcher does; it lists recordings only when nothing is being watched (manual recordings alone).
         val rec = if (count > 0) emptyList() else sessions.keys.toList()
         val stopPi = PendingIntent.getService(
-            this, 1, Intent(this, LiveWatchService::class.java).setAction(ACTION_STOP_SERVICE),
+            this, 1, cmd(this, ACTION_STOP_SERVICE),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         return NotificationCompat.Builder(this, WATCH_CHANNEL)

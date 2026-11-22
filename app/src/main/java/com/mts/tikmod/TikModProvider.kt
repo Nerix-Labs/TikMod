@@ -3,6 +3,8 @@ package com.mts.tikmod
 import android.content.ContentProvider
 import android.content.ContentValues
 import android.content.Context
+import android.os.Binder
+import android.os.Process
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
@@ -20,15 +22,37 @@ class TikModProvider : ContentProvider() {
 
     override fun onCreate(): Boolean = true
 
+    private companion object {
+        /** The only apps besides TikMod that may use this provider: the TikTok builds TikMod hooks. */
+        val HOST_PACKAGES = setOf("com.zhiliaoapp.musically", "com.ss.android.ugc.trill")
+    }
+
+    /**
+     * The provider is exported so the hooked TikTok can reach it, which means any app could call it too (read
+     * settings, start recordings, reset discovery). Only TikMod itself and TikTok are answered.
+     */
+    private fun callerAllowed(): Boolean {
+        val uid = Binder.getCallingUid()
+        if (uid == Process.myUid()) return true
+        // An app calling our provider is always visible to us, so this works under Android 11 package visibility.
+        val pkgs = runCatching { context?.packageManager?.getPackagesForUid(uid) }.getOrNull() ?: return false
+        return pkgs.any { it in HOST_PACKAGES }
+    }
+
     override fun call(method: String, arg: String?, extras: Bundle?): Bundle? {
         return try {
             val ctx = context ?: return Bundle()
+            if (!callerAllowed()) {
+                com.mts.tikmod.utils.XLog.log("Provider: refused '$method' from uid ${Binder.getCallingUid()}")
+                return Bundle()
+            }
             val prefs = ctx.getSharedPreferences(Prefs.PREF_NAME, Context.MODE_PRIVATE)
 
             when (method) {
                 "get_prefs" -> {
                     Prefs.initDefaultsIfNeeded(ctx, doRefresh = false)
                     Prefs.snapshotBundle(prefs).apply {
+                        putString(Prefs.EXTRA_IPC_TOKEN, Prefs.ipcToken(ctx))
                         val lastPing = prefs.getLong("last_active_ping", 0L)
                         putBoolean("module_active", (System.currentTimeMillis() - lastPing) < 24 * 60 * 60 * 1000L)
                     }
@@ -67,7 +91,9 @@ class TikModProvider : ContentProvider() {
                     val ok = runCatching {
                         androidx.core.content.ContextCompat.startForegroundService(ctx,
                             android.content.Intent(ctx, com.mts.tikmod.live.LiveWatchService::class.java)
-                                .setAction(com.mts.tikmod.live.LiveWatchService.ACTION_RECORD).putExtras(extras ?: Bundle()))
+                                .setAction(if (extras?.getBoolean("auto") == true) com.mts.tikmod.live.LiveWatchService.ACTION_FOUND
+                                    else com.mts.tikmod.live.LiveWatchService.ACTION_RECORD).putExtras(extras ?: Bundle())
+                                .putExtra(Prefs.EXTRA_IPC_TOKEN, Prefs.ipcToken(ctx)))
                     }.isSuccess
                     Bundle().apply { putBoolean("success", ok) }
                 }
@@ -75,7 +101,8 @@ class TikModProvider : ContentProvider() {
                     runCatching {
                         ctx.startService(android.content.Intent(ctx, com.mts.tikmod.live.LiveWatchService::class.java)
                             .setAction(com.mts.tikmod.live.LiveWatchService.ACTION_STOP_REC)
-                            .putExtra(com.mts.tikmod.live.LiveWatchService.EXTRA_HANDLE, arg))
+                            .putExtra(com.mts.tikmod.live.LiveWatchService.EXTRA_HANDLE, arg)
+                            .putExtra(Prefs.EXTRA_IPC_TOKEN, Prefs.ipcToken(ctx)))
                     }
                     Bundle().apply { putBoolean("success", true) }
                 }
@@ -129,6 +156,11 @@ class TikModProvider : ContentProvider() {
                 "captions_transcript" -> Bundle().apply { putString("text", com.mts.tikmod.captions.CaptionService.transcript()) }
                 "captions_stop" -> {
                     com.mts.tikmod.captions.CaptionService.command(ctx, com.mts.tikmod.captions.CaptionService.ACTION_STOP, null)
+                    Bundle().apply { putBoolean("success", true) }
+                }
+                // What the last TikTok start hooked and resolved (see ModuleManager.reportDiagnostics).
+                "diag_report" -> {
+                    if (!arg.isNullOrBlank()) runCatching { java.io.File(ctx.filesDir, com.mts.tikmod.utils.BugReport.DIAG_FILE).writeText(arg.take(64_000)) }
                     Bundle().apply { putBoolean("success", true) }
                 }
                 "reset_discovery" -> {

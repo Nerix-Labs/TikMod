@@ -18,6 +18,15 @@ object Changelog {
 
     val versions: List<Version> = listOf(
         Version(
+            "4.8.0", "2026-11-22", listOf(
+                Item(Icons.Rounded.Lock, R.string.cl480_private, R.string.cl480_private_desc) { Neon.Pink },
+                Item(Icons.Rounded.StopCircle, R.string.cl480_stop, R.string.cl480_stop_desc) { Neon.Amber },
+                Item(Icons.Rounded.HighQuality, R.string.cl480_quality, R.string.cl480_quality_desc) { Neon.Cyan },
+                Item(Icons.Rounded.BugReport, R.string.cl480_report, R.string.cl480_report_desc) { Neon.Violet },
+                Item(Icons.Rounded.Shield, R.string.cl480_safety, R.string.cl480_safety_desc) { Neon.Lime },
+            )
+        ),
+        Version(
             "4.7.0", "2026-11-20", listOf(
                 Item(Icons.Rounded.SelfImprovement, R.string.cl470_focus, R.string.cl470_focus_desc) { Neon.Lime },
                 Item(Icons.Rounded.FilterList, R.string.cl470_ads, R.string.cl470_ads_desc) { Neon.Amber },

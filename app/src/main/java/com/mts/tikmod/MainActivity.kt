@@ -405,6 +405,11 @@ private fun AboutCard() {
                 runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Nerix-Labs/TikMod")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
             }) { Icon(Icons.Rounded.Code, L.t(R.string.about_source), tint = Neon.Cyan) }
         }
+        Spacer(Modifier.height(12.dp))
+        // Versions, hook status of the last TikTok start and the recent log, to the share sheet.
+        ActionButton(Icons.Rounded.BugReport, L.t(R.string.about_report_bug), Modifier.fillMaxWidth(), accent = Neon.Amber) {
+            com.mts.tikmod.utils.BugReport.share(ctx)
+        }
     }
 }
 
@@ -639,7 +644,14 @@ private fun LiveScreen() {
             )
             channels.forEach { h ->
                 key(h) {
-                    ChannelRow(h, state.optJSONObject(h), enabled,
+                    var quality by remember { mutableStateOf(Prefs.channelQuality(ctx, h)) }
+                    ChannelRow(h, state.optJSONObject(h), enabled, quality,
+                        onQuality = {
+                            // Global → Source → 1080p → 720p → 480p → Global
+                            val order = listOf("") + Prefs.LIVE_QUALITIES
+                            quality = order[(order.indexOf(quality) + 1) % order.size]
+                            Prefs.setChannelQuality(ctx, h, quality)
+                        },
                         onStop = { LiveWatchService.stop(ctx, h) },
                         onRecord = { LiveWatchService.recordNow(ctx, h) },
                         onRemove = {
@@ -859,7 +871,10 @@ private fun LiveHero(enabled: Boolean, count: Int, state: JSONObject, onToggle: 
 }
 
 @Composable
-private fun ChannelRow(handle: String, st: JSONObject?, enabled: Boolean, onStop: () -> Unit, onRecord: () -> Unit, onRemove: () -> Unit) {
+private fun ChannelRow(
+    handle: String, st: JSONObject?, enabled: Boolean, quality: String,
+    onQuality: () -> Unit, onStop: () -> Unit, onRecord: () -> Unit, onRemove: () -> Unit
+) {
     val status = st?.optString("status").orEmpty()
     val nick = st?.optString("nick").orEmpty()
     val (label, color) = when {
@@ -869,7 +884,8 @@ private fun ChannelRow(handle: String, st: JSONObject?, enabled: Boolean, onStop
         status == "saving" -> L.t(R.string.ch_saving) to Neon.Amber
         status == "live" -> L.t(R.string.ch_live_waiting) to Neon.Lime
         status == "skipped" -> L.t(R.string.ch_live_stopped) to Neon.Amber
-        status == "missing" -> L.t(R.string.ch_not_found) to Neon.Amber
+        status == "private" -> L.t(R.string.ch_private_live) to Neon.Lime
+        status == "missing" -> L.t(R.string.ch_not_found_private) to Neon.Amber
         status == "queued" -> L.t(R.string.ch_queued) to Neon.Amber
         status == "nospace" -> L.t(R.string.ch_no_space) to Neon.Amber
         status == "offline" -> L.t(R.string.ch_offline) + (st?.optLong("checked")?.takeIf { it > 0 }?.let { L.t(R.string.ch_checked) + DateUtils.getRelativeTimeSpanString(it, System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS) } ?: "") to Subtle
@@ -898,6 +914,19 @@ private fun ChannelRow(handle: String, st: JSONObject?, enabled: Boolean, onStop
             Text("@$handle", fontSize = 11.5.sp, color = Subtle, style = LocalTextStyle.current.copy(textDirection = TextDirection.Ltr))
             Text(label, fontSize = 11.5.sp, color = color, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
+        // This channel's recording quality; tap to change ("Auto" follows the global setting).
+        Text(
+            when (quality) {
+                "origin" -> L.t(R.string.live_quality_source)
+                "uhd" -> "1080p"
+                "hd" -> "720p"
+                "sd" -> "480p"
+                else -> L.t(R.string.ch_quality_global)
+            },
+            fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = if (quality.isEmpty()) Subtle else Neon.Pink,
+            modifier = Modifier.clip(RoundedCornerShape(10.dp)).clickable(onClick = onQuality)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)).padding(horizontal = 8.dp, vertical = 4.dp)
+        )
         if (rec) IconButton(onClick = onStop) { Icon(Icons.Rounded.StopCircle, L.t(R.string.action_stop_save), tint = Neon.Pink) }
         if (canRecord) IconButton(onClick = onRecord) { Icon(Icons.Rounded.FiberManualRecord, L.t(R.string.action_record_now), tint = Neon.Pink) }
         IconButton(onClick = onRemove) { Icon(Icons.Rounded.Close, L.t(R.string.action_remove), tint = Subtle) }

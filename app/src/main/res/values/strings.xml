@@ -741,4 +741,26 @@
     <string name="f3_bedtime_desc">At bedtime at least %1$d%% of the feed won\'t hook you, and viral hits and short clips go.</string>
     <string name="f3_session_desc">After this long in one go, the mix gets stricter by itself.</string>
     <!-- focus mode 3: end -->
+    <string name="toast_rec_stopping_one">⏹️ TikMod: stopping @%1$s and saving — the other recordings keep going</string>
+    <string name="card_also_recording">Also recording now (%1$d) — tap one to stop it</string>
+    <string name="ch_private_live">Live • private account: records as soon as TikTok shows the stream</string>
+    <string name="ch_not_found_private">Not visible on the web — if it\'s a private account you follow, it records when TikTok shows its LIVE</string>
+    <string name="notif_private_live">%1$s is live (private account)</string>
+    <string name="notif_private_live_text">Their stream is only given to TikTok. Tap to open it in TikTok — the recording starts by itself and keeps going when you leave.</string>
+    <string name="notif_private_live_action">Open &amp; record</string>
+    <!-- 4.8.0 -->
+    <string name="update_bad_checksum">The download doesn\'t match the published checksum, so it wasn\'t installed. Try again later.</string>
+    <string name="about_report_bug">Report a bug</string>
+    <string name="report_collecting">Collecting the report…</string>
+    <string name="ch_quality_global">Auto</string>
+    <string name="cl480_private">Private accounts you follow, recorded too</string>
+    <string name="cl480_private_desc">Their stream is only given to TikTok signed in as you. Add them to auto-record: when TikTok shows their LIVE (in the feed, the Following bar or when you open it) the recording starts by itself, and a notification opens the LIVE with one tap.</string>
+    <string name="cl480_stop">Stop one recording, keep the others</string>
+    <string name="cl480_stop_desc">The record button in a LIVE now stops only that stream. Other streams being recorded are listed under it, each with its own stop button.</string>
+    <string name="cl480_quality">Quality per channel</string>
+    <string name="cl480_quality_desc">Tap the quality next to a channel in the auto-record list to give it its own (Source, 1080p, 720p or 480p). Auto follows the global setting.</string>
+    <string name="cl480_report">Report a bug</string>
+    <string name="cl480_report_desc">One tap in About collects the versions, which hooks went in on the last TikTok start and the recent log, and opens the share sheet. Nothing is sent by itself.</string>
+    <string name="cl480_safety">Safer and lighter</string>
+    <string name="cl480_safety_desc">Only TikTok and TikMod can reach TikMod\'s settings and recorder now. Updates are checked against a checksum before they install, the app is smaller, and live captions keep translating on the phone when Google\'s service is unavailable.</string>
 </resources>

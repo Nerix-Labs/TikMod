@@ -61,6 +61,7 @@ object ModuleManager {
             }
             // The dex index is only needed while hooks look their targets up.
             com.mts.tikmod.discovery.Resolver.finish()
+            reportDiagnostics(context)
         } catch (t: Throwable) {
             XLog.log("TikMod ModuleManager applyAllHooks error: ${t.message}")
         }
@@ -104,6 +105,42 @@ object ModuleManager {
             (hooks.firstOrNull { it is LiveCaptionHook } as? LiveCaptionHook)?.onScreen(null)
             (hooks.firstOrNull { it is LiveChatHook } as? LiveChatHook)?.onScreen(false)
         }
+    }
+
+    /**
+     * Which hooks went in and how each obfuscated target was found, logged and handed to TikMod, where "Report a
+     * bug" includes it. Runs off the main thread; waits for TikTok's context when hooks went in before it existed.
+     */
+    private fun reportDiagnostics(context: Context?) {
+        Thread({
+            runCatching {
+                var c = context ?: Prefs.hostContext
+                var tries = 0
+                while (c == null && tries++ < 20) { Thread.sleep(3000); c = Prefs.hostContext }
+                val ctx: Context = c ?: return@runCatching
+                val ver = runCatching {
+                    val pi = ctx.packageManager.getPackageInfo(ctx.packageName, 0)
+                    @Suppress("DEPRECATION")
+                    val code = if (android.os.Build.VERSION.SDK_INT >= 28) pi.longVersionCode else pi.versionCode.toLong()
+                    "${pi.versionName} ($code)"
+                }.getOrDefault("?")
+                val process = if (android.os.Build.VERSION.SDK_INT >= 28) android.app.Application.getProcessName() else ctx.packageName
+                val hooksText = hooks.joinToString("\n") { h ->
+                    val s = h.status
+                    (if (s.success) "  ✓ " else "  ✗ ") + h.name +
+                        (s.foundClass?.let { " — $it" } ?: "") + (s.error?.let { " — error: $it" } ?: "")
+                }
+                val text = buildString {
+                    appendLine("${ctx.packageName} $ver • process $process • ${java.util.Date()}")
+                    appendLine("Hooks (${hooks.count { it.status.success }}/${hooks.size}):")
+                    appendLine(hooksText)
+                    appendLine("Obfuscated targets:")
+                    append(com.mts.tikmod.discovery.Resolver.summary().ifBlank { "  (none looked up)" })
+                }
+                XLog.log("TikMod diagnostics:\n$text")
+                ctx.contentResolver.call(android.net.Uri.parse(Prefs.PROVIDER_URI), "diag_report", text, null)
+            }.onFailure { XLog.log("TikMod diagnostics failed: ${it.message}") }
+        }, "TikMod-Diag").start()
     }
 
     fun getStatuses(): List<HookStatus> {

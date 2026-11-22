@@ -10,3 +10,12 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+# ---- TikMod ----
+# LSPosed loads the entry class named in assets/xposed_init, hooks run inside TikTok and reach TikMod's classes by
+# name (provider, services, receivers): keep every TikMod class and member exactly as written.
+-keep class com.mts.tikmod.** { *; }
+# DexKit: JNI calls back into these classes by name.
+-keep class org.luckypray.dexkit.** { *; }
+# The Xposed API is provided by LSPosed at runtime (compileOnly).
+-dontwarn de.robv.android.xposed.**
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod,SourceFile,LineNumberTable

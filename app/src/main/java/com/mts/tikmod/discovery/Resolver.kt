@@ -44,32 +44,50 @@ object Resolver {
         }.getOrDefault(false)
     }
 
+    /** How each target was found in this TikTok process, for diagnostics: key -> "cache|known|structure|MISSING: name". */
+    val results = java.util.concurrent.ConcurrentHashMap<String, String>()
+
+    private fun note(key: String, how: String, what: String) {
+        results[key] = if (what.isEmpty()) how else "$how: $what"
+        if (how == MISSING) XLog.log("Resolver: [$key] NOT FOUND")
+    }
+
+    const val MISSING = "MISSING"
+
+    /** One line per target, sorted; targets that were not found are marked. */
+    fun summary(): String = results.toSortedMap().entries.joinToString("\n") { (k, v) ->
+        (if (v.startsWith(MISSING)) "  ✗ " else "  ✓ ") + "$k → $v"
+    }
+
     // ------------------------------------------------------------------ public API
 
     /** A class: cached → known names → DexKit [search] (returns a class name). */
     fun findClass(key: String, cl: ClassLoader, known: List<String>, search: (DexKitBridge) -> String?): Class<*>? {
         if (!forceSearch) {
-            cached(key)?.let { name -> load(name, cl)?.let { return it } }
-            for (name in known) load(name, cl)?.let { remember(key, name); return it }
+            cached(key)?.let { name -> load(name, cl)?.let { note(key, "cache", name); return it } }
+            for (name in known) load(name, cl)?.let { remember(key, name); note(key, "known", name); return it }
         }
-        val found = runSearch(key) { bs -> bs.firstNotNullOfOrNull { b -> runCatching { search(b) }.getOrNull() } } ?: return null
-        return load(found, cl)?.also { remember(key, found); XLog.log("Resolver: [$key] found by structure -> $found") }
+        val found = runSearch(key) { bs -> bs.firstNotNullOfOrNull { b -> runCatching { search(b) }.getOrNull() } }
+            ?: return null.also { note(key, MISSING, "") }
+        return load(found, cl)?.also { remember(key, found); note(key, "structure", found); XLog.log("Resolver: [$key] found by structure -> $found") }
+            ?: null.also { note(key, MISSING, found) }
     }
 
     /** Like [findClass] for targets that can legitimately be several classes (all of them are returned). */
     fun findClasses(key: String, cl: ClassLoader, known: List<String>, search: (DexKitBridge) -> List<String>): List<Class<*>> {
         if (!forceSearch) {
-            cached(key)?.split(',')?.mapNotNull { load(it, cl) }?.takeIf { it.isNotEmpty() }?.let { return it }
+            cached(key)?.split(',')?.mapNotNull { load(it, cl) }?.takeIf { it.isNotEmpty() }?.let { note(key, "cache", it.joinToString(",") { c -> c.name }); return it }
             known.mapNotNull { load(it, cl) }.takeIf { it.isNotEmpty() }?.let { found ->
-                remember(key, found.joinToString(",") { it.name }); return found
+                remember(key, found.joinToString(",") { it.name }); note(key, "known", found.joinToString(",") { it.name }); return found
             }
         }
         val names = runSearch(key) { bs -> bs.flatMap { b -> runCatching { search(b) }.getOrDefault(emptyList()) } }.orEmpty()
         val classes = names.distinct().mapNotNull { load(it, cl) }
         if (classes.isNotEmpty()) {
             remember(key, classes.joinToString(",") { it.name })
+            note(key, "structure", classes.joinToString(",") { it.name })
             XLog.log("Resolver: [$key] found by structure -> ${classes.joinToString { it.name }}")
-        }
+        } else note(key, MISSING, "")
         return classes
     }
 
@@ -82,18 +100,19 @@ object Resolver {
         accept: (Method) -> Boolean, search: (DexKitBridge) -> List<String>
     ): List<Method> {
         if (!forceSearch) {
-            cached(key)?.let { spec -> methodsOf(spec, cl, accept).takeIf { it.isNotEmpty() }?.let { return it } }
+            cached(key)?.let { spec -> methodsOf(spec, cl, accept).takeIf { it.isNotEmpty() }?.let { note(key, "cache", spec); return it } }
             for ((cls, name) in known) {
                 val ms = load(cls, cl)?.declaredMethods?.filter { it.name == name && accept(it) }.orEmpty()
-                if (ms.isNotEmpty()) { remember(key, "$cls#$name"); return ms }
+                if (ms.isNotEmpty()) { remember(key, "$cls#$name"); note(key, "known", "$cls#$name"); return ms }
             }
         }
         val specs = runSearch(key) { bs -> bs.flatMap { b -> runCatching { search(b) }.getOrDefault(emptyList()) } }.orEmpty().distinct()
         val ms = specs.flatMap { methodsOf(it, cl, accept) }.distinct()
         if (ms.isNotEmpty()) {
             remember(key, specs.first())
+            note(key, "structure", specs.joinToString())
             XLog.log("Resolver: [$key] found by structure -> ${specs.joinToString()}")
-        }
+        } else note(key, MISSING, "")
         return ms
     }
 

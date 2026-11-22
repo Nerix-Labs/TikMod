@@ -11,19 +11,19 @@ android {
         applicationId = "com.mts.tikmod"
         minSdk = 24
         targetSdk = 35
-        versionCode = 14
-        versionName = "4.7.0"
+        versionCode = 15
+        versionName = "4.8.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            // R8 shrinks the libraries (Compose, Material icons…); TikMod's own classes are kept whole in
+            // src/main/keepRules/rules.keep, because LSPosed and TikTok reach them by name.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
         }
     }
     compileOptions {
@@ -45,6 +45,8 @@ android {
 dependencies {
     compileOnly("de.robv.android.xposed:api:82")
     implementation("org.luckypray:dexkit:2.0.7")
+    // Live captions: on-device translation when Google's web endpoints fail (models are downloaded on first use).
+    implementation("com.google.mlkit:translate:17.0.3")
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)

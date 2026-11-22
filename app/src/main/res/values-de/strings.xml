@@ -740,4 +740,26 @@
     <string name="f3_bedtime_desc">Zur Schlafenszeit fesseln dich mindestens %1$d%% des Feeds nicht, virale Hits und kurze Clips verschwinden.</string>
     <string name="f3_session_desc">Nach so langer Zeit am Stück wird der Mix von selbst strenger.</string>
     <!-- focus mode 3: end -->
+    <string name="toast_rec_stopping_one">⏹️ TikMod: @%1$s wird gestoppt und gespeichert — die anderen Aufnahmen laufen weiter</string>
+    <string name="card_also_recording">Läuft gerade auch (%1$d) — zum Stoppen antippen</string>
+    <string name="ch_private_live">Live • privates Konto: wird aufgenommen, sobald TikTok den Stream zeigt</string>
+    <string name="ch_not_found_private">Im Web nicht sichtbar — ist es ein privates Konto, dem du folgst, wird es aufgenommen, wenn TikTok sein LIVE zeigt</string>
+    <string name="notif_private_live">%1$s ist live (privates Konto)</string>
+    <string name="notif_private_live_text">Der Stream wird nur an TikTok gegeben. Tippen, um ihn in TikTok zu öffnen — die Aufnahme startet von selbst und läuft weiter, wenn du gehst.</string>
+    <string name="notif_private_live_action">Öffnen &amp; aufnehmen</string>
+    <!-- 4.8.0 -->
+    <string name="update_bad_checksum">Der Download stimmt nicht mit der veröffentlichten Prüfsumme überein und wurde nicht installiert. Versuche es später erneut.</string>
+    <string name="about_report_bug">Fehler melden</string>
+    <string name="report_collecting">Bericht wird erstellt…</string>
+    <string name="ch_quality_global">Auto</string>
+    <string name="cl480_private">Auch private Konten, denen du folgst, werden aufgenommen</string>
+    <string name="cl480_private_desc">Ihr Stream wird nur an TikTok mit deinem Konto ausgeliefert. Füge sie zur Auto-Aufnahme hinzu: Sobald TikTok ihr LIVE zeigt (im Feed, in der Gefolgt-Leiste oder beim Öffnen), startet die Aufnahme von selbst, und eine Benachrichtigung öffnet das LIVE mit einem Tipp.</string>
+    <string name="cl480_stop">Eine Aufnahme stoppen, die anderen laufen weiter</string>
+    <string name="cl480_stop_desc">Der Aufnahme-Button in einem LIVE stoppt jetzt nur diesen Stream. Andere laufende Aufnahmen stehen darunter, jede mit eigenem Stopp-Button.</string>
+    <string name="cl480_quality">Qualität pro Kanal</string>
+    <string name="cl480_quality_desc">Tippe in der Auto-Aufnahme-Liste auf die Qualität neben einem Kanal, um ihm eine eigene zu geben (Original, 1080p, 720p oder 480p). Auto folgt der allgemeinen Einstellung.</string>
+    <string name="cl480_report">Fehler melden</string>
+    <string name="cl480_report_desc">Ein Tipp unter Über sammelt die Versionen, welche Hooks beim letzten TikTok-Start aktiv wurden, und das aktuelle Log und öffnet das Teilen-Menü. Nichts wird von selbst gesendet.</string>
+    <string name="cl480_safety">Sicherer und schlanker</string>
+    <string name="cl480_safety_desc">Nur TikTok und TikMod können jetzt auf TikMods Einstellungen und Rekorder zugreifen. Updates werden vor der Installation per Prüfsumme geprüft, die App ist kleiner, und Live-Untertitel werden auf dem Handy weiter übersetzt, wenn Googles Dienst nicht erreichbar ist.</string>
 </resources>

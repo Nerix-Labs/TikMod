@@ -185,7 +185,10 @@ class SharePanelInjector : BaseHook() {
             layoutDirection = View.LAYOUT_DIRECTION_RTL
         }
 
-        val recording = TikModDownloader.isLiveRecording
+        // Per stream: another LIVE being recorded doesn't turn this one's button into "Stop".
+        val allRecording = if (live != null) TikModDownloader.recordingHandles(ctx) else emptyList()
+        val recording = live != null && live.owner.isNotBlank() && live.owner.trim().removePrefix("@").lowercase() in allRecording
+        val others = allRecording.filter { live == null || it != live.owner.trim().removePrefix("@").lowercase() }
         val photoMode = media?.isPhotoPost == true && Prefs.isDownloadPhotos(ctx)
         val best = media?.let {
             MediaResolver.rankVideoOptions(it.videoOptions, Prefs.getDownloadQuality(ctx), Prefs.getVideoCodec(ctx)).firstOrNull()
@@ -261,6 +264,41 @@ class SharePanelInjector : BaseHook() {
             runCatching { dialog.dismiss() }
         }
         root.addView(main)
+
+        // Other streams recording right now: each one can be stopped from here, without leaving this LIVE.
+        if (live != null && others.isNotEmpty()) {
+            root.addView(TextView(ctx).apply {
+                text = L.t(R.string.card_also_recording, others.size)
+                textSize = 11.5f; typeface = Typeface.DEFAULT_BOLD; setTextColor(0xCCFFFFFF.toInt())
+                setPadding(dp(ctx, 6), dp(ctx, 10), dp(ctx, 6), dp(ctx, 2))
+            })
+            val row = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(ctx, 4), 0, 0) }
+            for (h in others) {
+                row.addView(TextView(ctx).apply {
+                    text = "⏹  @$h"; textSize = 12.5f; typeface = Typeface.DEFAULT_BOLD
+                    setTextColor(Color.WHITE); gravity = Gravity.CENTER
+                    val bg = GradientDrawable().apply {
+                        cornerRadius = dp(ctx, 16).toFloat(); setColor(0xE62B0A12.toInt()); setStroke(dp(ctx, 1), 0x66FF4E50)
+                    }
+                    background = RippleDrawable(ColorStateList.valueOf(0x40FFFFFF), bg, null)
+                    setPadding(dp(ctx, 14), dp(ctx, 8), dp(ctx, 14), dp(ctx, 8))
+                    layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                        .apply { marginEnd = dp(ctx, 8) }
+                    pressScale(this)
+                    setOnClickListener { v ->
+                        v.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                        TikModDownloader.stopRecordingOf(ctx, h)
+                        // Gone from the row right away; the rest stay.
+                        v.animate().alpha(0f).scaleX(0.8f).scaleY(0.8f).setDuration(160).withEndAction { (v.parent as? ViewGroup)?.removeView(v) }.start()
+                    }
+                })
+            }
+            root.addView(HorizontalScrollView(ctx).apply {
+                isHorizontalScrollBarEnabled = false
+                layoutDirection = View.LAYOUT_DIRECTION_RTL
+                addView(row)
+            })
+        }
 
         if (media != null) {
             val chips = LinearLayout(ctx).apply {

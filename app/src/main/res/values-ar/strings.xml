@@ -784,4 +784,26 @@
     <string name="f3_bedtime_desc">وقت النوم لن يشدّك %1$d%% على الأقل من الخلاصة، وتُخفى المقاطع الرائجة والقصيرة.</string>
     <string name="f3_session_desc">بعد هذه المدة المتواصلة يصبح المزيج أكثر صرامة تلقائيًا.</string>
     <!-- focus mode 3: end -->
+    <string name="toast_rec_stopping_one">⏹️ TikMod: جارٍ إيقاف @%1$s وحفظه — تستمر التسجيلات الأخرى</string>
+    <string name="card_also_recording">يُسجَّل الآن أيضًا (%1$d) — اضغط على أحدها لإيقافه</string>
+    <string name="ch_private_live">مباشر • حساب خاص: يُسجَّل فور عرض TikTok للبث</string>
+    <string name="ch_not_found_private">غير ظاهر على الويب — إن كان حسابًا خاصًا تتابعه، فسيُسجَّل عندما يعرض TikTok بثه</string>
+    <string name="notif_private_live">%1$s في بث مباشر (حساب خاص)</string>
+    <string name="notif_private_live_text">يُعطى بثه لتطبيق TikTok فقط. اضغط لفتحه في TikTok — يبدأ التسجيل تلقائيًا ويستمر عند خروجك.</string>
+    <string name="notif_private_live_action">افتح وسجّل</string>
+    <!-- 4.8.0 -->
+    <string name="update_bad_checksum">الملف الذي تم تنزيله لا يطابق المجموع الاختباري المنشور، لذلك لم يتم تثبيته. حاول مرة أخرى لاحقًا.</string>
+    <string name="about_report_bug">الإبلاغ عن خطأ</string>
+    <string name="report_collecting">جارٍ جمع التقرير…</string>
+    <string name="ch_quality_global">تلقائي</string>
+    <string name="cl480_private">تسجيل الحسابات الخاصة التي تتابعها أيضًا</string>
+    <string name="cl480_private_desc">يُعطى بثّها لتيك توك المسجّل بحسابك فقط. أضفها إلى التسجيل التلقائي: عندما يعرض تيك توك بثّها المباشر (في الخلاصة أو شريط المتابَعين أو عند فتحه) يبدأ التسجيل تلقائيًا، ويفتح إشعارٌ البثّ بنقرة واحدة.</string>
+    <string name="cl480_stop">أوقف تسجيلًا واحدًا وتابع الباقي</string>
+    <string name="cl480_stop_desc">زر التسجيل في البث المباشر يوقف الآن ذلك البث فقط. البثوث الأخرى قيد التسجيل تظهر أسفله، ولكل منها زر إيقاف خاص.</string>
+    <string name="cl480_quality">جودة لكل قناة</string>
+    <string name="cl480_quality_desc">انقر على الجودة بجانب القناة في قائمة التسجيل التلقائي لتحديد جودة خاصة بها (المصدر، 1080p، 720p أو 480p). تلقائي يتبع الإعداد العام.</string>
+    <string name="cl480_report">الإبلاغ عن خطأ</string>
+    <string name="cl480_report_desc">نقرة واحدة في «حول» تجمع الإصدارات، والخطافات التي عملت في آخر تشغيل لتيك توك، والسجل الأخير، ثم تفتح نافذة المشاركة. لا يُرسل شيء تلقائيًا.</string>
+    <string name="cl480_safety">أكثر أمانًا وأخف</string>
+    <string name="cl480_safety_desc">أصبح الوصول إلى إعدادات TikMod ومسجّله مقتصرًا على تيك توك وTikMod فقط. تُفحص التحديثات بمجموع اختباري قبل التثبيت، والتطبيق أصغر حجمًا، وتستمر ترجمة الترجمات المباشرة على الهاتف عندما تكون خدمة Google غير متاحة.</string>
 </resources>

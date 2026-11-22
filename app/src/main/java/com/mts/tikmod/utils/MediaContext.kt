@@ -145,6 +145,44 @@ object MediaContext {
             )
             lastRoomId = id
             if (rooms.size > 64) rooms.keys.take(rooms.size - 64).forEach { rooms.remove(it) }
+            rooms[id]?.let { reportIfWatched(it) }
+        }
+    }
+
+    private val reported = ConcurrentHashMap<String, Long>()
+    private val bg by lazy { android.os.HandlerThread("TikMod-LiveFound").apply { start() }.let { android.os.Handler(it.looper) } }
+
+    /**
+     * TikTok loaded a LIVE stream (on screen, in the Following LIVE bar, a preview…). If its channel is on the
+     * auto-record list, TikMod's watcher gets the stream: that's how private accounts you follow are recorded,
+     * since only TikTok (signed in as you) is given their stream. Only the stream's own addresses are passed on.
+     */
+    private fun reportIfWatched(live: LiveStream) {
+        val handle = live.owner.trim().removePrefix("@").lowercase()
+        if (handle.isBlank() || live.urls.isEmpty()) return
+        val now = System.currentTimeMillis()
+        val last = reported[live.roomId]
+        if (last != null && now - last < 90_000) return
+        reported[live.roomId] = now
+        if (reported.size > 200) reported.clear()
+        bg.post {
+            runCatching {
+                val ctx = Prefs.hostContext ?: return@post
+                if (!Prefs.bool(ctx, Prefs.KEY_AUTO_LIVE) || handle !in Prefs.autoLiveChannels(ctx)) return@post
+                val extras = android.os.Bundle().apply {
+                    putString("handle", handle); putString("title", live.title); putString("room", live.roomId)
+                    putStringArrayList("urls", ArrayList(live.urls)); putBoolean("auto", true)
+                }
+                val intent = android.content.Intent("com.mts.tikmod.action.LIVE_FOUND")
+                    .setComponent(android.content.ComponentName("com.mts.tikmod", "com.mts.tikmod.live.LiveWatchService"))
+                    .putExtras(extras)
+                    .putExtra(Prefs.EXTRA_IPC_TOKEN, Prefs.ipcToken(ctx))
+                // TikTok in front may start TikMod's service itself; otherwise TikMod's provider does it.
+                val direct = intent.getStringExtra(Prefs.EXTRA_IPC_TOKEN) != null &&
+                    runCatching { if (android.os.Build.VERSION.SDK_INT >= 26) ctx.startForegroundService(intent) else ctx.startService(intent) }.isSuccess
+                if (!direct) ctx.contentResolver.call(android.net.Uri.parse(Prefs.PROVIDER_URI), "start_live_record", null, extras)
+                XLog.log("AutoLive: TikTok loaded watched @$handle (room ${live.roomId}) — passed to TikMod")
+            }
         }
     }
 

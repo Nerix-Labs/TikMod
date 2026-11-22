@@ -44,7 +44,9 @@ object Updater {
         val publishedAt: String,  // ISO date
         val apkUrl: String?,
         val apkSize: Long,
-        val pageUrl: String
+        val pageUrl: String,
+        /** SHA-256 of the APK from updates.json (lower-case hex); the download is refused when it doesn't match. */
+        val sha256: String? = null
     )
 
     sealed interface Status {
@@ -124,7 +126,8 @@ object Updater {
                 Release(
                     version = v, name = "TikMod $v", notes = o.optString("notes"), publishedAt = o.optString("date"),
                     apkUrl = o.optString("apk").takeIf { it.startsWith("https://") }, apkSize = o.optLong("size"),
-                    pageUrl = "https://github.com/$REPO/releases/tag/v$v"
+                    pageUrl = "https://github.com/$REPO/releases/tag/v$v",
+                    sha256 = o.optString("sha256").lowercase().takeIf { it.matches(Regex("[0-9a-f]{64}")) }
                 )
             })
         } finally {
@@ -193,6 +196,7 @@ object Updater {
                 conn.setRequestProperty("User-Agent", "TikMod/${BuildConfig.VERSION_NAME}")
                 if (conn.responseCode !in 200..299) error("HTTP ${conn.responseCode}")
                 val total = conn.contentLengthLong.takeIf { it > 0 } ?: release.apkSize
+                val digest = java.security.MessageDigest.getInstance("SHA-256")
                 conn.inputStream.use { input ->
                     out.outputStream().use { o ->
                         val buf = ByteArray(64 * 1024)
@@ -202,6 +206,7 @@ object Updater {
                             val n = input.read(buf)
                             if (n < 0) break
                             o.write(buf, 0, n)
+                            digest.update(buf, 0, n)
                             done += n
                             val now = System.currentTimeMillis()
                             if (total > 0 && now - lastUi > 150) {
@@ -212,6 +217,11 @@ object Updater {
                     }
                 }
                 conn.disconnect()
+                // A corrupted or swapped file never reaches the installer.
+                release.sha256?.let { want ->
+                    val got = digest.digest().joinToString("") { "%02x".format(it) }
+                    if (got != want) { out.delete(); error(L.t(R.string.update_bad_checksum)) }
+                }
                 out
             }
         }.getOrElse {

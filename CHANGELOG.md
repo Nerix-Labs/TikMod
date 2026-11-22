@@ -2,6 +2,37 @@
 
 All notable changes to TikMod. Versions follow [semantic versioning](https://semver.org).
 
+## 4.8.0 — 2026-11-22
+
+### Added
+- **Private accounts you follow, auto-recorded.** Their stream is only given to TikTok signed in as you, never to the
+  web lookup the watcher uses. Now, when TikTok loads the LIVE of a channel on your auto-record list — in the feed,
+  the Following LIVE bar or when you open it — the stream is handed to TikMod and recording starts by itself, with
+  the same rules (a stopped recording stays stopped, parallel limit, free space). When the watcher sees a private
+  account go live, a notification opens it in TikTok with one tap. Reconnects reuse the addresses TikTok loaded.
+- **Stop one recording, keep the others.** The record button in a LIVE now records or stops *that* stream only
+  (it used to stop every recording). Other streams being recorded are listed under it, each with its own ⏹.
+- **Quality per channel.** Each channel in the auto-record list has a quality chip: Auto (the global setting),
+  Source, 1080p, 720p or 480p.
+- **Report a bug** (About): versions, the hooks that went in on the last TikTok start, how every obfuscated target
+  was found, and the recent log — to the share sheet. Nothing is sent by itself.
+- **`tools/check_resolver.py`**: restarts TikTok on a connected phone and reports which hooks and obfuscated targets
+  were found (`--force` tests the DexKit searches themselves), so a new TikTok version can be checked before users
+  notice.
+- Live captions: when both Google web endpoints fail, ML Kit translates on the phone (the model for a language pair
+  downloads once in the background).
+
+### Security
+- TikMod's provider answered any app on the phone (settings, chat lines, Focus profile, starting recordings). It now
+  answers only TikTok and TikMod. The exported recorder service accepts start/stop commands only with a random token
+  that TikMod shares with TikTok through the provider.
+- In-app updates check the APK against the `sha256` in `updates.json` before installing it.
+
+### Changed
+- APK: the launcher icon was one 465×401 PNG copied into every density (2.3 MB); it's now sized per density
+  (0.2 MB). Release builds are shrunk with R8 (TikMod's own classes are kept whole).
+- The "private account is live" notification isn't repeated after the service restarts.
+
 ## 4.7.0 — 2026-11-20
 
 ### Added

@@ -740,4 +740,26 @@
     <string name="f3_bedtime_desc">Uyku saatinde akışın en az %%%1$d\'ı seni bağlamaz; viral hitler ve kısa klipler gizlenir.</string>
     <string name="f3_session_desc">Bu kadar kesintisiz süreden sonra karışım kendiliğinden sıkılaşır.</string>
     <!-- focus mode 3: end -->
+    <string name="toast_rec_stopping_one">⏹️ TikMod: @%1$s durduruluyor ve kaydediliyor — diğer kayıtlar devam ediyor</string>
+    <string name="card_also_recording">Şu an bunlar da kaydediliyor (%1$d) — durdurmak için dokun</string>
+    <string name="ch_private_live">Canlı • gizli hesap: TikTok yayını gösterdiği anda kaydedilir</string>
+    <string name="ch_not_found_private">Web\'de görünmüyor — takip ettiğin gizli bir hesapsa, TikTok LIVE\'ını gösterdiğinde kaydedilir</string>
+    <string name="notif_private_live">%1$s canlı yayında (gizli hesap)</string>
+    <string name="notif_private_live_text">Yayını yalnızca TikTok\'a verilir. TikTok\'ta açmak için dokun — kayıt kendiliğinden başlar ve çıktığında da sürer.</string>
+    <string name="notif_private_live_action">Aç ve kaydet</string>
+    <!-- 4.8.0 -->
+    <string name="update_bad_checksum">İndirilen dosya yayınlanan sağlama toplamıyla eşleşmiyor, bu yüzden yüklenmedi. Daha sonra tekrar dene.</string>
+    <string name="about_report_bug">Hata bildir</string>
+    <string name="report_collecting">Rapor hazırlanıyor…</string>
+    <string name="ch_quality_global">Otomatik</string>
+    <string name="cl480_private">Takip ettiğin gizli hesaplar da kaydediliyor</string>
+    <string name="cl480_private_desc">Yayınları yalnızca senin hesabınla açık olan TikTok\'a verilir. Onları otomatik kayda ekle: TikTok canlı yayınlarını gösterdiğinde (akışta, Takip edilenler çubuğunda veya açtığında) kayıt kendiliğinden başlar ve bir bildirim canlı yayını tek dokunuşla açar.</string>
+    <string name="cl480_stop">Bir kaydı durdur, diğerleri devam etsin</string>
+    <string name="cl480_stop_desc">Canlı yayındaki kayıt düğmesi artık yalnızca o yayını durdurur. Kaydedilen diğer yayınlar altında listelenir, her birinin kendi durdurma düğmesi vardır.</string>
+    <string name="cl480_quality">Kanal başına kalite</string>
+    <string name="cl480_quality_desc">Otomatik kayıt listesinde bir kanalın yanındaki kaliteye dokunarak ona özel kalite ver (Kaynak, 1080p, 720p veya 480p). Otomatik genel ayarı izler.</string>
+    <string name="cl480_report">Hata bildir</string>
+    <string name="cl480_report_desc">Hakkında bölümünde tek dokunuş sürümleri, son TikTok açılışında hangi hook\'ların çalıştığını ve son günlüğü toplar ve paylaşım menüsünü açar. Hiçbir şey kendiliğinden gönderilmez.</string>
+    <string name="cl480_safety">Daha güvenli ve daha hafif</string>
+    <string name="cl480_safety_desc">Artık TikMod\'un ayarlarına ve kaydedicisine yalnızca TikTok ve TikMod erişebilir. Güncellemeler yüklenmeden önce sağlama toplamıyla doğrulanır, uygulama küçüldü ve Google hizmeti kullanılamadığında canlı altyazılar telefonda çevrilmeye devam eder.</string>
 </resources>

@@ -1,0 +1,107 @@
+{
+  "en": {
+    "badge": {
+      "e": "🔒",
+      "id": ""
+    },
+    "title": "TikMod 4.8.0 — Private LIVEs, one stop at a time",
+    "summary": "Auto-record now catches private accounts you follow, and every recording can be stopped on its own.",
+    "bullets": [
+      {
+        "icon": {
+          "e": "🔒",
+          "id": ""
+        },
+        "text": "Private accounts you follow are auto-recorded as soon as TikTok shows their LIVE"
+      },
+      {
+        "icon": {
+          "e": "⏹",
+          "id": ""
+        },
+        "text": "The record button stops only that stream; the others keep going, each with its own stop"
+      },
+      {
+        "icon": {
+          "e": "🎚",
+          "id": ""
+        },
+        "text": "Recording quality per channel: Source, 1080p, 720p or 480p"
+      },
+      {
+        "icon": {
+          "e": "🐞",
+          "id": ""
+        },
+        "text": "Report a bug: versions, hook status and the recent log, ready to share"
+      },
+      {
+        "icon": {
+          "e": "🛡",
+          "id": ""
+        },
+        "text": "Only TikTok can talk to TikMod now; updates verified with SHA-256"
+      },
+      {
+        "icon": {
+          "e": "🪶",
+          "id": ""
+        },
+        "text": "Smaller app; live captions keep translating offline when Google is unavailable"
+      }
+    ]
+  },
+  "he": {
+    "badge": {
+      "e": "🔒",
+      "id": ""
+    },
+    "title": "TikMod 4.8.0 — לייבים פרטיים, עצירה אחת בכל פעם",
+    "summary": "ההקלטה האוטומטית תופסת עכשיו גם חשבונות פרטיים שאתם עוקבים אחריהם, וכל הקלטה נעצרת בנפרד.",
+    "bullets": [
+      {
+        "icon": {
+          "e": "🔒",
+          "id": ""
+        },
+        "text": "חשבונות פרטיים שאתם עוקבים אחריהם מוקלטים אוטומטית ברגע שטיקטוק מציג את הלייב"
+      },
+      {
+        "icon": {
+          "e": "⏹",
+          "id": ""
+        },
+        "text": "כפתור ההקלטה עוצר רק את השידור הזה; השאר ממשיכים, לכל אחד עצירה משלו"
+      },
+      {
+        "icon": {
+          "e": "🎚",
+          "id": ""
+        },
+        "text": "איכות הקלטה לכל ערוץ: מקור, 1080p, 720p או 480p"
+      },
+      {
+        "icon": {
+          "e": "🐞",
+          "id": ""
+        },
+        "text": "דיווח על באג: גרסאות, מצב ההוקים והלוג האחרון, מוכן לשיתוף"
+      },
+      {
+        "icon": {
+          "e": "🛡",
+          "id": ""
+        },
+        "text": "רק טיקטוק יכול לדבר עם TikMod; עדכונים נבדקים עם SHA-256"
+      },
+      {
+        "icon": {
+          "e": "🪶",
+          "id": ""
+        },
+        "text": "אפליקציה קטנה יותר; כתוביות בלייב ממשיכות להיות מתורגמות גם בלי Google"
+      }
+    ]
+  },
+  "footer": "Works on TikTok 47.9.2 · עובד על טיקטוק 47.9.2"
+}

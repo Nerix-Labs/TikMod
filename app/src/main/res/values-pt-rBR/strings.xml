@@ -751,4 +751,26 @@
     <string name="f3_bedtime_desc">Na hora de dormir pelo menos %1$d%% do feed não vai te prender, e virais e clipes curtos somem.</string>
     <string name="f3_session_desc">Depois desse tempo seguido, a mistura fica mais rígida sozinha.</string>
     <!-- focus mode 3: end -->
+    <string name="toast_rec_stopping_one">⏹️ TikMod: parando @%1$s e salvando — as outras gravações continuam</string>
+    <string name="card_also_recording">Também gravando agora (%1$d) — toque em um para parar</string>
+    <string name="ch_private_live">Ao vivo • conta privada: grava assim que o TikTok mostrar a transmissão</string>
+    <string name="ch_not_found_private">Não visível na web — se for uma conta privada que você segue, grava quando o TikTok mostrar a LIVE</string>
+    <string name="notif_private_live">%1$s está ao vivo (conta privada)</string>
+    <string name="notif_private_live_text">A transmissão só é entregue ao TikTok. Toque para abrir no TikTok — a gravação começa sozinha e continua quando você sair.</string>
+    <string name="notif_private_live_action">Abrir e gravar</string>
+    <!-- 4.8.0 -->
+    <string name="update_bad_checksum">O download não corresponde ao checksum publicado, por isso não foi instalado. Tente novamente mais tarde.</string>
+    <string name="about_report_bug">Relatar um bug</string>
+    <string name="report_collecting">Coletando o relatório…</string>
+    <string name="ch_quality_global">Auto</string>
+    <string name="cl480_private">Contas privadas que você segue também são gravadas</string>
+    <string name="cl480_private_desc">A transmissão delas só é entregue ao TikTok conectado à sua conta. Adicione-as à gravação automática: quando o TikTok mostra a LIVE delas (no feed, na barra de Seguindo ou ao abrir), a gravação começa sozinha, e uma notificação abre a LIVE com um toque.</string>
+    <string name="cl480_stop">Pare uma gravação e as outras continuam</string>
+    <string name="cl480_stop_desc">O botão de gravar em uma LIVE agora para só aquela transmissão. As outras que estão sendo gravadas aparecem abaixo, cada uma com seu botão de parar.</string>
+    <string name="cl480_quality">Qualidade por canal</string>
+    <string name="cl480_quality_desc">Toque na qualidade ao lado de um canal na lista de gravação automática para dar a ele uma própria (Original, 1080p, 720p ou 480p). Auto segue a configuração geral.</string>
+    <string name="cl480_report">Relatar um bug</string>
+    <string name="cl480_report_desc">Um toque em Sobre reúne as versões, quais hooks entraram no último início do TikTok e o log recente, e abre o menu de compartilhar. Nada é enviado sozinho.</string>
+    <string name="cl480_safety">Mais seguro e mais leve</string>
+    <string name="cl480_safety_desc">Agora só o TikTok e o TikMod podem acessar as configurações e o gravador do TikMod. As atualizações são verificadas por checksum antes de instalar, o app ficou menor e as legendas ao vivo continuam sendo traduzidas no celular quando o serviço do Google está indisponível.</string>
 </resources>

@@ -31,7 +31,9 @@ Made by **Nerix Labs**.
 - Live captions: translated subtitles over any stream — move, pinch-resize, freeze, styles (Android 13+)
 - Record the live chat: burned into your LIVE recordings, plus a text transcript
 - LIVE history: the streams you entered, kept on the phone only
-- Auto-record: follow channels and recording starts by itself when they go live, even when TikTok is closed
+- Auto-record: follow channels and recording starts by itself when they go live, even when TikTok is closed —
+  private accounts you follow included (as soon as TikTok shows their LIVE), with a quality per channel
+- Stop any single recording from the LIVE you're watching; the others keep going
 - Recordings run in TikMod's own foreground service, so they keep going after TikTok is swiped away
 
 **Chat**
@@ -46,7 +48,8 @@ Made by **Nerix Labs**.
 **App**
 - 10 languages, following the phone's language: English, Hebrew, Arabic, Chinese, French, Spanish, Russian,
   German, Portuguese and Turkish
-- Updates from inside the app, a "What's new" sheet after every update and a full version history
+- Updates from inside the app (checked against a SHA-256), a "What's new" sheet after every update and a full version history
+- Report a bug: versions, hook status and the recent log, ready to share
 - Built to survive TikTok updates: obfuscated targets are located by structure ([DexKit](https://github.com/LuckyPray/DexKit))
   and cached per TikTok build
 
@@ -91,6 +94,9 @@ The APK ends up in `app/build/outputs/apk/debug/`. JDK 17+ and the Android SDK a
 | Locating obfuscated classes across TikTok versions | `discovery/Resolver.kt` |
 | Settings app (Jetpack Compose, Material 3) | `MainActivity.kt`, `ui/` |
 | In-app updates and changelog | `updates/` |
+| Diagnostics: hook status per TikTok start, "Report a bug" | `ModuleManager.kt`, `utils/BugReport.kt` |
+| Check a new TikTok version from a PC (adb) | `tools/check_resolver.py` |
+| Release: size + SHA-256 into `updates.json` | `tools/release_json.py` |
 
 ## Changelog
 

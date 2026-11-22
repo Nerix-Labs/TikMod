@@ -11,6 +11,7 @@ import java.net.URLEncoder
  * the beginning of a sentence while it grows.
  *
  * Two endpoints: when the first one fails or rate-limits, it rests for a while and the second one is used.
+ * When both fail, ML Kit's on-device translator takes over ([OnDeviceTranslator]).
  */
 object Translator {
 
@@ -33,18 +34,26 @@ object Translator {
         val key = "$sl>$tl>$text"
         synchronized(cache) { cache[key] }?.let { return it }
         val q = URLEncoder.encode(text, "UTF-8")
-        val result = if (System.currentTimeMillis() < primaryRestsUntil) secondary(sl, tl, q) else try {
-            primary(sl, tl, q)
+        val result = try {
+            online(sl, tl, q)
         } catch (t: Throwable) {
             if (t is InterruptedException) throw t
-            primaryRestsUntil = System.currentTimeMillis() + 60_000
-            secondary(sl, tl, q)
+            OnDeviceTranslator.translate(text, sl, tl) ?: throw t
         }
         // Single Hebrew words come back with vowel points, which nobody writes in running text.
         val clean = if (tl == "iw") result.replace(Regex("[\\u0591-\\u05C7]"), "") else result
         synchronized(cache) { cache[key] = clean }
         return clean
     }
+
+    private fun online(sl: String, tl: String, q: String): String =
+        if (System.currentTimeMillis() < primaryRestsUntil) secondary(sl, tl, q) else try {
+            primary(sl, tl, q)
+        } catch (t: Throwable) {
+            if (t is InterruptedException) throw t
+            primaryRestsUntil = System.currentTimeMillis() + 60_000
+            secondary(sl, tl, q)
+        }
 
     private fun primary(sl: String, tl: String, q: String): String {
         val root = JSONArray(get("https://translate.googleapis.com/translate_a/single?client=gtx&sl=$sl&tl=$tl&dt=t&q=$q"))
