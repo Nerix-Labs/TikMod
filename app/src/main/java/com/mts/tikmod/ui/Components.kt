@@ -113,26 +113,22 @@ fun AuroraBackground(modifier: Modifier = Modifier) {
         )
         if (glowMode) {
             // Neon: three colored lights and a synthwave floor grid rolling towards you at the bottom.
-            glow(Neon.Cyan, w * (0.05f + 0.25f * a), -h * 0.03f, w * 1.0f, 0.24f)
-            glow(Neon.Pink, w * (1.0f - 0.20f * a), h * 0.30f, w * 0.75f, 0.14f)
-            glow(Neon.Violet, w * (0.35f + 0.3f * a), h * 0.95f, w * 0.9f, 0.20f)
-            val horizon = h * 0.70f
+            glow(Neon.Cyan, w * (0.05f + 0.25f * a), -h * 0.03f, w * 1.0f, 0.18f)
+            glow(Neon.Violet, w * (0.35f + 0.3f * a), h * 0.95f, w * 0.9f, 0.14f)
+            val horizon = h * 0.74f
             val vanish = Offset(w / 2, horizon)
-            val line = Neon.Pink
-            // Floor lines towards the vanishing point.
-            for (i in -12..12) {
-                val x = w / 2 + i * w * 0.16f
-                drawLine(Brush.verticalGradient(listOf(Color.Transparent, line.copy(alpha = 0.16f)), startY = horizon, endY = h),
-                    vanish, Offset(x, h), strokeWidth = 1.2f)
+            val line = Neon.Violet
+            // A faint floor grid at the very bottom, behind the tab bar.
+            for (i in -8..8) {
+                val x = w / 2 + i * w * 0.22f
+                drawLine(Brush.verticalGradient(listOf(Color.Transparent, line.copy(alpha = 0.08f)), startY = horizon, endY = h),
+                    vanish, Offset(x, h), strokeWidth = 1f)
             }
-            // Horizontal lines, closer together near the horizon, moving down.
-            for (k in 0 until 10) {
-                val p = ((k + grid) / 10f)
+            for (k in 0 until 7) {
+                val p = ((k + grid) / 7f)
                 val y = horizon + (h - horizon) * p * p
-                drawLine(line.copy(alpha = 0.04f + 0.14f * p), Offset(0f, y), Offset(w, y), strokeWidth = 1.2f)
+                drawLine(line.copy(alpha = 0.02f + 0.07f * p), Offset(0f, y), Offset(w, y), strokeWidth = 1f)
             }
-            drawRect(Brush.verticalGradient(listOf(Neon.Pink.copy(alpha = 0.10f), Color.Transparent), startY = horizon - 2, endY = horizon + 60f),
-                topLeft = Offset(0f, horizon - 2), size = androidx.compose.ui.geometry.Size(w, 62f))
             return@Canvas
         }
         glow(Neon.Cyan, w * (0.10f + 0.20f * a), -h * 0.02f, w * 0.95f, if (dark) 0.16f else 0.10f)
@@ -193,14 +189,14 @@ fun GlassCard(modifier: Modifier = Modifier, glow: Boolean = false, padding: Dp 
     val edge = when {
         glow && neon -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)) // drawn below, rotating
         glow -> Brush.linearGradient(listOf(Neon.Cyan.copy(alpha = 0.45f), Neon.Violet.copy(alpha = 0.18f), Edge))
-        neon -> Brush.linearGradient(listOf(Neon.Cyan.copy(alpha = 0.30f), Neon.Violet.copy(alpha = 0.10f), Neon.Pink.copy(alpha = 0.26f)))
+        neon -> Brush.verticalGradient(listOf(cs.onSurface.copy(alpha = 0.11f), cs.onSurface.copy(alpha = 0.05f)))
         else -> Brush.verticalGradient(listOf(cs.onSurface.copy(alpha = 0.10f), Edge))
     }
     Column(
         modifier.fillMaxWidth()
             // Neon: the card glows in its colors.
-            .then(if (neon) Modifier.shadow(if (glow) 26.dp else 10.dp, shape, clip = false,
-                ambientColor = if (glow) Neon.Cyan else Neon.Violet, spotColor = if (glow) Neon.Pink else Neon.Violet) else Modifier)
+            // Only hero cards glow; the rest stay calm so the screen doesn't shout.
+            .then(if (neon && glow) Modifier.shadow(22.dp, shape, clip = false, ambientColor = Neon.Cyan, spotColor = Neon.Pink) else Modifier)
             .clip(shape)
             // An opaque base, so the glow shadow never shows through the tinted fill.
             .then(if (neon) Modifier.background(cs.surfaceContainer) else Modifier)
@@ -264,9 +260,7 @@ fun IconTile(icon: ImageVector, accent: Color, size: Dp = 40.dp) {
     Box(
         Modifier.size(size)
             .clip(shape)
-            .background(if (Neon.glow) Brush.linearGradient(listOf(accent.copy(alpha = 0.32f), accent.copy(alpha = 0.08f)))
-                else Brush.linearGradient(listOf(accent.copy(alpha = if (Neon.isDark) 0.14f else 0.12f), accent.copy(alpha = if (Neon.isDark) 0.14f else 0.12f))))
-            .then(if (Neon.glow) Modifier.border(1.dp, accent.copy(alpha = 0.55f), shape) else Modifier),
+            .background(accent.copy(alpha = if (Neon.isDark) 0.15f else 0.12f)),
         contentAlignment = Alignment.Center
     ) { Icon(icon, null, tint = accent, modifier = Modifier.size(size * 0.50f)) }
 }

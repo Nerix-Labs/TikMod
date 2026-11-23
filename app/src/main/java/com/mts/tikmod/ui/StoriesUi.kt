@@ -130,14 +130,14 @@ fun StoriesScreen(onBack: (() -> Unit)?) {
     Appear(2) { SectionLabel(L.t(R.string.home_system)) }
 
     Appear(2) {
-        Section(Icons.Rounded.VisibilityOff, L.t(R.string.stories_privacy), accent = Neon.Violet) {
+        Section(Icons.Rounded.VisibilityOff, L.t(R.string.stories_privacy), accent = Neon.Violet, collapsible = true, initiallyExpanded = false) {
             ToggleRow(L.t(R.string.stories_hide_views), L.t(R.string.stories_hide_views_desc), Prefs.KEY_HIDE_STORY_VIEWS, Icons.Rounded.VisibilityOff, Neon.Violet)
             ToggleRow(L.t(R.string.profile_hide_views), L.t(R.string.profile_hide_views_desc), Prefs.KEY_HIDE_PROFILE_VIEWS, Icons.Rounded.PersonOff, Neon.Violet)
         }
     }
 
     Appear(2) {
-        Section(Icons.Rounded.Inventory2, L.t(R.string.stories_keep), accent = Neon.Pink) {
+        Section(Icons.Rounded.Inventory2, L.t(R.string.stories_keep), accent = Neon.Pink, collapsible = true, initiallyExpanded = false) {
             ToggleRow(L.t(R.string.stories_archive), L.t(R.string.stories_archive_desc), Prefs.KEY_STORY_ARCHIVE, Icons.Rounded.AutoStories, Neon.Pink)
             DeletedNotifyToggle()
             Hint(L.t(R.string.stories_download_hint))
@@ -177,7 +177,7 @@ private fun AutoSaveSection() {
         Prefs.setStoryAutoChannels(ctx, channels)
         input = ""
     }
-    Section(Icons.Rounded.DownloadForOffline, L.t(R.string.stories_auto), L.t(R.string.stories_auto_desc), accent = Neon.Cyan) {
+    Section(Icons.Rounded.DownloadForOffline, L.t(R.string.stories_auto), L.t(R.string.stories_auto_desc), accent = Neon.Cyan, collapsible = true, initiallyExpanded = false) {
         ToggleRowRaw(L.t(R.string.stories_auto_toggle), null, enabled, Icons.Rounded.Bolt, Neon.Cyan) {
             enabled = it; Prefs.setBool(ctx, Prefs.KEY_STORY_AUTO, it)
         }

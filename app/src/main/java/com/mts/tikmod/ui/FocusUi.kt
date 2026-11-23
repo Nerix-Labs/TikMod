@@ -723,11 +723,11 @@ private fun AutoTab(changed: () -> Unit) {
  * goes; a 10-minute break resets it. A small chart shows the curve with the chosen numbers.
  */
 @Composable
-internal fun DynamicSection(changed: () -> Unit = {}) {
+internal fun DynamicSection(changed: () -> Unit = {}, collapsed: Boolean = false) {
     val ctx = LocalContext.current
     var grace by remember { mutableStateOf(Prefs.string(ctx, Prefs.KEY_FOCUS_DYN_GRACE).toIntOrNull() ?: 10) }
     var rise by remember { mutableStateOf(Prefs.string(ctx, Prefs.KEY_FOCUS_DYN_RISE).toIntOrNull() ?: 30) }
-    Section(Icons.Rounded.AutoGraph, L.t(R.string.focus_dyn_title), L.t(R.string.focus_dyn_desc), accent = Neon.Lime, badge = L.t(R.string.tag_new)) {
+    Section(Icons.Rounded.AutoGraph, L.t(R.string.focus_dyn_title), L.t(R.string.focus_dyn_desc), accent = Neon.Lime, collapsible = collapsed, initiallyExpanded = !collapsed) {
         ToggleRow(L.t(R.string.focus_dyn_on), null, Prefs.KEY_FOCUS_DYNAMIC, Icons.Rounded.AutoGraph, Neon.Lime) { changed() }
         // The curve: 0 during the free minutes, then up to the full dial.
         val total = (grace + rise) * 1.25f

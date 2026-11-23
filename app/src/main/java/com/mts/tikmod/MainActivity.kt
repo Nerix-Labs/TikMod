@@ -66,6 +66,7 @@ import com.mts.tikmod.ui.theme.TikModTheme
 import com.mts.tikmod.utils.TikModDownloader
 import com.mts.tikmod.updates.Changelog
 import com.mts.tikmod.updates.Updater
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -123,6 +124,9 @@ private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
     var focusOpen by rememberSaveable { mutableStateOf(false) }
     // The watch history opens as a page inside the Downloads tab.
     var watchOpen by rememberSaveable { mutableStateOf(false) }
+    // Settings open as a page from Home's gear.
+    var settingsOpen by rememberSaveable { mutableStateOf(false) }
+    androidx.activity.compose.BackHandler(enabled = screen == Screen.HOME && settingsOpen) { settingsOpen = false }
     LaunchedEffect(startTab) {
         if (startTab == "live") screen = Screen.LIVE
         if (startTab == "focus") { screen = Screen.FEED; focusOpen = true }
@@ -160,8 +164,9 @@ private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 when (s) {
-                    Screen.HOME -> HomeScreen(active, onNavigate = { screen = it }, onThemeChange = onThemeChange, onShowHistory = { showHistory = true },
-                        onOpenFocus = { screen = Screen.FEED; focusOpen = true }, onOpenWatch = { screen = Screen.DOWNLOADS; watchOpen = true },
+                    Screen.HOME -> if (settingsOpen) SettingsScreen({ settingsOpen = false }, onThemeChange) { showHistory = true }
+                    else HomeScreen(active, onNavigate = { screen = it }, onShowHistory = { showHistory = true },
+                        onOpenWatch = { screen = Screen.DOWNLOADS; watchOpen = true }, onOpenSettings = { settingsOpen = true },
                         onGo = { tab ->
                             when (tab) {
                                 "downloads" -> { watchOpen = false; screen = Screen.DOWNLOADS }
@@ -171,6 +176,7 @@ private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
                                 "chat" -> screen = Screen.CHAT
                                 "feed" -> { focusOpen = false; screen = Screen.FEED }
                                 "focus" -> { focusOpen = true; screen = Screen.FEED }
+                                "home" -> settingsOpen = true
                             }
                         })
                     Screen.DOWNLOADS -> if (watchOpen) WatchHistoryScreen { watchOpen = false } else DownloadsScreen(onOpenWatch = { watchOpen = true })
@@ -182,6 +188,7 @@ private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
             }
             // Once the big title has scrolled away, a compact bar keeps the place's name (tap: back to the top).
             val title = when {
+                s == Screen.HOME && settingsOpen -> L.t(R.string.home_system)
                 s == Screen.HOME -> "TikMod"
                 s == Screen.DOWNLOADS && watchOpen -> L.t(R.string.watch_title)
                 s == Screen.FEED && focusOpen -> L.t(R.string.focus_title)
@@ -292,15 +299,9 @@ private fun FloatingNav(current: Screen, modifier: Modifier = Modifier, onSelect
 
 @Composable
 internal fun ScreenTitle(title: String, subtitle: String, accent: Color) {
-    Column(Modifier.padding(horizontal = 6.dp).padding(top = 10.dp, bottom = 4.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(6.dp).clip(CircleShape).background(accent))
-            Spacer(Modifier.width(8.dp))
-            Text("TIKMOD", fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp, color = accent)
-        }
-        Spacer(Modifier.height(6.dp))
-        Text(title, style = if (Neon.glow) MaterialTheme.typography.displaySmall.copy(brush = Brush.linearGradient(listOf(Color.White, accent, Neon.Violet)))
-            else MaterialTheme.typography.displaySmall)
+    Column(Modifier.padding(horizontal = 6.dp).padding(top = 8.dp, bottom = 2.dp)) {
+        Text(title, style = if (Neon.glow) MaterialTheme.typography.headlineMedium.copy(brush = Brush.linearGradient(listOf(Color.White, accent)))
+            else MaterialTheme.typography.headlineMedium)
         Text(subtitle, fontSize = 14.sp, color = Subtle, lineHeight = 19.sp, modifier = Modifier.padding(top = 4.dp))
     }
 }
@@ -335,53 +336,31 @@ private fun HomeLiveState(ctx: android.content.Context): List<Pair<String, JSONO
 }
 
 @Composable
-private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onThemeChange: (String) -> Unit, onShowHistory: () -> Unit, onOpenFocus: () -> Unit, onOpenWatch: () -> Unit, onGo: (String) -> Unit) {
+private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onShowHistory: () -> Unit, onOpenWatch: () -> Unit, onGo: (String) -> Unit, onOpenSettings: () -> Unit) {
     val ctx = LocalContext.current
-    val history = remember { Prefs.readHistory(ctx) }
-    val ads = remember { Prefs.readStat(ctx, Prefs.STAT_ADS_BLOCKED) }
-    val channels = remember { Prefs.autoLiveChannels(ctx).size }
     var recording by remember { mutableStateOf(emptyList<Pair<String, JSONObject>>()) }
     LaunchedEffect(Unit) { while (true) { recording = withContext(Dispatchers.IO) { HomeLiveState(ctx) }; delay(2000) } }
 
+    // Home is only what you need at a glance; everything else is one tap away (tabs, search, the gear).
     Appear(0) {
-        Row(Modifier.padding(horizontal = 6.dp).padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(start = 6.dp, end = 2.dp).padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("TIKMOD  ·  NERIX LABS", fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp,
-                    style = LocalTextStyle.current.copy(brush = Brush.linearGradient(Neon.brand)))
-                Spacer(Modifier.height(6.dp))
-                Text(greeting(), style = if (Neon.glow) MaterialTheme.typography.displaySmall.copy(fontSize = 38.sp, brush = Brush.linearGradient(listOf(Color.White, Neon.Cyan, Neon.Pink)))
-                    else MaterialTheme.typography.displaySmall)
-                Spacer(Modifier.height(8.dp))
-                Row(
-                    Modifier.clip(CircleShape).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-                        .border(1.dp, Edge, CircleShape).padding(horizontal = 10.dp, vertical = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Text(greeting(), style = if (Neon.glow) MaterialTheme.typography.headlineMedium.copy(brush = Brush.linearGradient(listOf(Color.White, Neon.Cyan)))
+                    else MaterialTheme.typography.headlineMedium)
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
                     PulsingDot(if (active) Neon.Lime else Neon.Pink, 7.dp)
                     Spacer(Modifier.width(8.dp))
-                    Text((if (active) L.t(R.string.status_connected) else L.t(R.string.status_inactive)) + "  ·  v" + BuildConfig.VERSION_NAME,
-                        fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Subtle)
+                    Text(if (active) L.t(R.string.status_connected) else L.t(R.string.status_inactive), fontSize = 13.sp, color = Subtle)
                 }
             }
-            CoreOrb(active, 64.dp)
+            // Settings: language, look, updates, backup, about.
+            IconButton(onClick = onOpenSettings, modifier = Modifier.size(48.dp).clip(CircleShape)
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))) {
+                Icon(Icons.Rounded.Settings, L.t(R.string.home_system), tint = MaterialTheme.colorScheme.onSurface)
+            }
         }
     }
     Appear(1) { SettingsSearch(onGo) }
-    Appear(1) {
-        // One tap to the places used most.
-        QuickActions(listOf(
-            QuickAction(Icons.Rounded.Restore, L.t(R.string.watch_title), { Neon.Cyan }) { onGo("watch") },
-            QuickAction(Icons.Rounded.AutoStories, L.t(R.string.stories_title), { Neon.Pink }) { onGo("stories") },
-            QuickAction(Icons.Rounded.Videocam, L.t(R.string.live_instant), { Neon.Pink }) { onGo("live") },
-            QuickAction(Icons.Rounded.SelfImprovement, L.t(R.string.focus_title), { Neon.Lime }) { onGo("focus") },
-            QuickAction(Icons.Rounded.Download, L.t(R.string.nav_downloads), { Neon.Cyan }) { onGo("downloads") },
-            QuickAction(Icons.Rounded.Forum, L.t(R.string.nav_chat), { Neon.Violet }) { onGo("chat") },
-        ))
-    }
-    Appear(2) { TodayCard(onOpenWatch, onOpenStories = { onNavigate(Screen.STORIES) }) }
-    AnimatedVisibility(recording.isNotEmpty(), enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
-        LiveNowCard(recording) { onNavigate(Screen.LIVE) }
-    }
     (Updater.status as? Updater.Status.Available)?.let { st ->
         Appear(1) { UpdateBanner(st.release) { onShowHistory() } }
     }
@@ -390,48 +369,35 @@ private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onThemeCha
             Text(L.t(R.string.setup_steps), fontSize = 13.sp, lineHeight = 21.sp, modifier = Modifier.padding(horizontal = 10.dp))
         }
     }
-    Appear(2) {
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            StatTile(Icons.Rounded.Download, history.size.toLong(), L.t(R.string.nav_downloads), Neon.Cyan, Modifier.weight(1f).clickable { onNavigate(Screen.DOWNLOADS) })
-            StatTile(Icons.Rounded.Block, ads, L.t(R.string.stat_ads_blocked), Neon.Amber, Modifier.weight(1f).clickable { onNavigate(Screen.FEED) })
-            StatTile(Icons.Rounded.Sensors, channels.toLong(), L.t(R.string.stat_channels), Neon.Pink, Modifier.weight(1f).clickable { onNavigate(Screen.LIVE) })
-        }
+    AnimatedVisibility(recording.isNotEmpty(), enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
+        LiveNowCard(recording) { onNavigate(Screen.LIVE) }
     }
+    Appear(2) { TodayCard(onOpenWatch, onOpenStories = { onNavigate(Screen.STORIES) }) }
     Appear(3) { SectionLabel(L.t(R.string.home_shortcuts)) }
-    Appear(4) {
+    Appear(3) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 QuickTile(Icons.Rounded.Download, L.t(R.string.quick_download), Prefs.KEY_REMOVE_WATERMARK, Neon.Cyan, Modifier.weight(1f)) { Prefs.setForceDownloadEnabled(ctx, it) }
-                QuickTile(Icons.Rounded.DeleteSweep, L.t(R.string.quick_deleted), Prefs.KEY_ANTI_RECALL, Neon.Violet, Modifier.weight(1f))
+                QuickTile(Icons.Rounded.Block, L.t(R.string.quick_ads), Prefs.KEY_REMOVE_ADS, Neon.Cyan, Modifier.weight(1f))
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                QuickTile(Icons.Rounded.Block, L.t(R.string.quick_ads), Prefs.KEY_REMOVE_ADS, Neon.Amber, Modifier.weight(1f))
-                QuickTile(Icons.Rounded.KeyboardHide, L.t(R.string.quick_typing), Prefs.KEY_DISABLE_TYPING_INDICATOR, Neon.Violet, Modifier.weight(1f))
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                QuickTile(Icons.Rounded.FiberManualRecord, L.t(R.string.quick_autolive), Prefs.KEY_AUTO_LIVE, Neon.Pink, Modifier.weight(1f)) { LiveWatchService.sync(ctx) }
-                QuickTile(Icons.Rounded.Screenshot, L.t(R.string.quick_screenshot), Prefs.KEY_UNRESTRICT_ALL, Neon.Lime, Modifier.weight(1f))
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                QuickTile(Icons.Rounded.SelfImprovement, L.t(R.string.focus_title), Prefs.KEY_FOCUS_ON, Neon.Lime, Modifier.weight(1f)) {
-                    if (it) com.mts.tikmod.focus.Focus.start(ctx, 0) else com.mts.tikmod.focus.Focus.stop(ctx)
-                }
-                QuickTile(Icons.Rounded.AutoGraph, L.t(R.string.focus_dyn_on), Prefs.KEY_FOCUS_DYNAMIC, Neon.Lime, Modifier.weight(1f))
-            }
-            TextButton(onClick = onOpenFocus, modifier = Modifier.align(Alignment.End)) { Text(L.t(R.string.focus_open)) }
-        }
-    }
-    if (history.isNotEmpty()) {
-        Appear(5) { SectionLabel(L.t(R.string.home_recent)) }
-        Appear(6) {
-            GlassCard(padding = 10.dp) {
-                history.take(3).forEach { HistoryRow(it) }
-                TextButton(onClick = { onNavigate(Screen.DOWNLOADS) }, modifier = Modifier.align(Alignment.End)) { Text(L.t(R.string.home_all_downloads)) }
+                QuickTile(Icons.Rounded.FiberManualRecord, L.t(R.string.quick_autolive), Prefs.KEY_AUTO_LIVE, Neon.Cyan, Modifier.weight(1f)) { LiveWatchService.sync(ctx) }
+                QuickTile(Icons.Rounded.AutoGraph, L.t(R.string.focus_dyn_on), Prefs.KEY_FOCUS_DYNAMIC, Neon.Cyan, Modifier.weight(1f))
             }
         }
     }
-    Appear(7) { SectionLabel(L.t(R.string.home_system)) }
-    Appear(8) { SystemSection(onThemeChange, onShowHistory) }
+}
+
+/** Settings page (gear on Home): language, look, management, tweaks, updates, about. */
+@Composable
+private fun SettingsScreen(onBack: () -> Unit, onThemeChange: (String) -> Unit, onShowHistory: () -> Unit) {
+    Appear(0) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, L.t(R.string.action_back)) }
+            Text(L.t(R.string.home_system), style = MaterialTheme.typography.headlineMedium)
+        }
+    }
+    Appear(1) { SystemSection(onThemeChange, onShowHistory) }
 }
 
 @Composable
@@ -588,7 +554,7 @@ private fun DownloadsScreen(onOpenWatch: () -> Unit) {
         }
     }
     Appear(2) {
-        Section(Icons.Rounded.Share, L.t(R.string.share_title), L.t(R.string.share_sub), badge = L.t(R.string.tag_new)) {
+        Section(Icons.Rounded.Share, L.t(R.string.share_title), L.t(R.string.share_sub), collapsible = true, initiallyExpanded = false) {
             SegmentedPref(L.t(R.string.share_default), Prefs.KEY_SHARE_MODE, listOf(
                 Opt(Prefs.SHARE_MODE_MEDIA, L.t(R.string.share_mode_file), Icons.Rounded.Movie),
                 Opt(Prefs.SHARE_MODE_MEDIA_LINK, L.t(R.string.share_mode_file_link), Icons.Rounded.AddLink),
@@ -849,7 +815,7 @@ private fun LiveScreen() {
     }
 
     Appear(3) {
-        Section(Icons.Rounded.Tune, L.t(R.string.live_settings), accent = Neon.Pink) {
+        Section(Icons.Rounded.Tune, L.t(R.string.live_settings), accent = Neon.Pink, collapsible = true, initiallyExpanded = false) {
             SegmentedPref(L.t(R.string.live_trigger), Prefs.KEY_AUTO_LIVE_TRIGGER, listOf(
                 Opt(Prefs.AUTO_LIVE_TRIGGER_ANY, L.t(R.string.live_trigger_any), Icons.Rounded.PlayCircle),
                 Opt(Prefs.AUTO_LIVE_TRIGGER_START, L.t(R.string.live_trigger_start), Icons.Rounded.NewReleases)
@@ -883,7 +849,7 @@ private fun LiveScreen() {
     Appear(5) {
         val pm = ctx.getSystemService(PowerManager::class.java)
         var exempt by remember { mutableStateOf(pm.isIgnoringBatteryOptimizations(ctx.packageName)) }
-        Section(Icons.Rounded.BatteryChargingFull, L.t(R.string.live_reliability), accent = Neon.Lime) {
+        Section(Icons.Rounded.BatteryChargingFull, L.t(R.string.live_reliability), accent = Neon.Lime, collapsible = true, initiallyExpanded = false) {
             ToggleRowRaw(
                 L.t(R.string.live_battery), if (exempt) L.t(R.string.live_battery_on) else L.t(R.string.live_battery_off),
                 exempt, Icons.Rounded.BatterySaver, Neon.Lime
@@ -913,7 +879,7 @@ private fun LiveHistorySection(followed: List<String>, onFollow: (String) -> Uni
         confirmButton = { TextButton(onClick = { Prefs.clearLiveHistory(ctx); list = emptyList(); confirmClear = false }) { Text(L.t(R.string.action_clear)) } },
         dismissButton = { TextButton(onClick = { confirmClear = false }) { Text(L.t(R.string.action_cancel)) } }
     )
-    Section(Icons.Rounded.History, L.t(R.string.live_history_title), L.t(R.string.live_history_sub), accent = Neon.Pink, collapsible = true, initiallyExpanded = true) {
+    Section(Icons.Rounded.History, L.t(R.string.live_history_title), L.t(R.string.live_history_sub), accent = Neon.Pink, collapsible = true, initiallyExpanded = false) {
         ToggleRow(L.t(R.string.live_history_toggle), L.t(R.string.live_history_toggle_desc), Prefs.KEY_LIVE_HISTORY, Icons.Rounded.ManageHistory, Neon.Pink)
         if (list.isEmpty()) Hint(L.t(R.string.live_history_empty))
         (if (showAll) list else list.take(6)).forEach { e ->
@@ -972,7 +938,7 @@ private fun RecordNowCard() {
         LiveWatchService.recordNow(ctx, h)
         input = ""
     }
-    Section(Icons.Rounded.Videocam, L.t(R.string.live_instant), L.t(R.string.live_instant_sub), accent = Neon.Pink) {
+    Section(Icons.Rounded.Videocam, L.t(R.string.live_instant), L.t(R.string.live_instant_sub), accent = Neon.Pink, collapsible = true, initiallyExpanded = false) {
         OutlinedTextField(
             value = input, onValueChange = { input = it }, singleLine = true,
             placeholder = { Text(L.t(R.string.live_instant_hint)) },
@@ -1148,7 +1114,7 @@ private fun FeedScreen(onOpenFocus: () -> Unit) {
     val blocked = remember { Prefs.readStat(ctx, Prefs.STAT_ADS_BLOCKED) }
     Appear(0) { ScreenTitle(L.t(R.string.nav_feed), L.t(R.string.feed_subtitle), Neon.Amber) }
     Appear(1) { FocusEntryCard(onOpenFocus) }
-    Appear(1) { com.mts.tikmod.ui.DynamicSection() }
+    Appear(1) { com.mts.tikmod.ui.DynamicSection(collapsed = true) }
     Appear(1) {
         GlassCard(padding = 18.dp) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1170,7 +1136,7 @@ private fun FeedScreen(onOpenFocus: () -> Unit) {
         }
     }
     Appear(3) {
-        Section(Icons.Rounded.FilterAlt, L.t(R.string.feed_clean), L.t(R.string.feed_clean_sub), accent = Neon.Amber) {
+        Section(Icons.Rounded.FilterAlt, L.t(R.string.feed_clean), L.t(R.string.feed_clean_sub), accent = Neon.Amber, collapsible = true, initiallyExpanded = false) {
             ToggleRow(L.t(R.string.feed_live), L.t(R.string.feed_live_desc), Prefs.KEY_HIDE_FEED_LIVE, Icons.Rounded.Sensors, Neon.Amber)
             ToggleRow(L.t(R.string.feed_shop), L.t(R.string.feed_shop_desc), Prefs.KEY_HIDE_SHOP, Icons.Rounded.ShoppingBag, Neon.Amber)
             ToggleRow(L.t(R.string.card_photos), L.t(R.string.feed_photos_desc), Prefs.KEY_HIDE_PHOTO_POSTS, Icons.Rounded.Collections, Neon.Amber)
@@ -1178,7 +1144,7 @@ private fun FeedScreen(onOpenFocus: () -> Unit) {
         }
     }
     Appear(4) {
-        Section(Icons.Rounded.Speed, L.t(R.string.feed_playback), accent = Neon.Cyan) {
+        Section(Icons.Rounded.Speed, L.t(R.string.feed_playback), accent = Neon.Cyan, collapsible = true, initiallyExpanded = false) {
             SegmentedPref(L.t(R.string.feed_speed), Prefs.KEY_PLAYBACK_SPEED, listOf(
                 Opt("0.25", "0.25×"), Opt("0.5", "0.5×"), Opt("1.0", "1×"),
                 Opt("1.5", "1.5×"), Opt("2.0", "2×"), Opt("3.0", "3×")
