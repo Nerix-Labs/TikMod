@@ -74,6 +74,19 @@ class TikModProvider : ContentProvider() {
                     }
                     Bundle().apply { putBoolean("success", true) }
                 }
+                // Stories: TikTok hands over what you watch / what auto-save channels post; TikMod downloads and keeps it.
+                "add_story" -> {
+                    if (!arg.isNullOrBlank()) runCatching { com.mts.tikmod.stories.StoryStore.add(ctx, JSONObject(arg)) }
+                    Bundle().apply { putBoolean("success", true) }
+                }
+                "story_list" -> {
+                    if (!arg.isNullOrBlank()) runCatching { com.mts.tikmod.stories.StoryStore.onAuthorList(ctx, JSONObject(arg)) }
+                    Bundle().apply { putBoolean("success", true) }
+                }
+                "story_deleted" -> {
+                    if (!arg.isNullOrBlank()) runCatching { com.mts.tikmod.stories.StoryStore.markDeleted(ctx, arg) }
+                    Bundle().apply { putBoolean("success", true) }
+                }
                 "add_stat" -> {
                     val key = arg
                     if (key != null && key.startsWith("stat_")) Prefs.addStat(prefs, key, extras?.getInt("n", 1) ?: 1)

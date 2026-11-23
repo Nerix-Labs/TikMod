@@ -56,7 +56,11 @@ object MediaResolver {
         /** Timestamp (ms) of the frame the creator picked as the cover, -1 if unknown. */
         val coverTimeMs: Long = -1,
         /** The real @handle (empty when unknown — [authorUniqueId] may fall back to the nickname). */
-        val authorHandle: String = ""
+        val authorHandle: String = "",
+        /** A TikTok story (disappears after 24 hours). */
+        val isStory: Boolean = false,
+        /** When the story expires (ms), 0 when unknown or not a story. */
+        val expiresAt: Long = 0
     ) {
         val isPhotoPost: Boolean get() = images.isNotEmpty()
         val hasVideo: Boolean get() = videoOptions.isNotEmpty()
@@ -99,9 +103,33 @@ object MediaResolver {
                 durationMs = Reflect.int(video, "getDuration", "duration"),
                 coverTimeMs = (Reflect.get(video, "getCoverTsp", "coverTsp") as? Number)?.toDouble()
                     ?.takeIf { it >= 0 }?.let { (it * 1000).toLong() } ?: -1,
-                authorHandle = Reflect.string(author, "getUniqueId", "uniqueId") ?: ""
+                authorHandle = Reflect.string(author, "getUniqueId", "uniqueId") ?: "",
+                isStory = isStory(aweme),
+                expiresAt = storyExpiry(aweme)
             )
         }.onFailure { XLog.log("MediaResolver: ${it.message}") }.getOrNull()
+    }
+
+    /**
+     * Aweme.isTikTokStory / Aweme.story (a `Story` model with expiredAt, viewed…) are set on stories only.
+     * Plain field names from the JSON, so they don't change with obfuscation. An empty Story object (no expiry) on a
+     * regular post doesn't count.
+     */
+    fun isStory(aweme: Any?): Boolean {
+        if (aweme == null) return false
+        if (Reflect.get(aweme, "getIsTikTokStory", "isTikTokStory") == true) return true
+        return storyExpiry(aweme) > 0
+    }
+
+    /** Story.expiredAt, in ms (TikTok sends seconds); 0 when unknown. */
+    fun storyExpiry(aweme: Any?): Long {
+        val story = Reflect.get(aweme ?: return 0, "getStory", "story") ?: return 0
+        val raw = Reflect.long(story, "getExpiredAt", "expiredAt")
+        return when {
+            raw <= 0 -> 0
+            raw < 100_000_000_000L -> raw * 1000
+            else -> raw
+        }
     }
 
     private fun collectVideoOptions(video: Any?): List<VideoOption> {

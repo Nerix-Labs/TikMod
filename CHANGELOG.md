@@ -2,6 +2,33 @@
 
 All notable changes to TikMod. Versions follow [semantic versioning](https://semver.org).
 
+## 4.9.0 — 2026-11-22
+
+### Added
+- **Stories: download.** The TikMod card in a story's share sheet now says "Download story" and saves it without a
+  watermark (video or photos).
+- **Story archive with deleted stories marked.** Every story you watch is handed to TikMod and kept in its own
+  storage for 30 days (Downloads → Stories). When TikTok loads a creator's complete, fresh story list and a story
+  you archived is missing before its 24 hours are up, it's marked 🗑 deleted (kept 90 days). Open, share, save to
+  the gallery or remove each one.
+- **Auto-save stories** of chosen channels to the gallery (Movies / Pictures › TikMod › Stories) as soon as TikTok
+  shows them.
+- **Watch stories anonymously**: blocks `tiktok/story/view/report/v1` (IStoryApi.reportStoryViewed), so you're not
+  on the story's viewer list. The story is archived before the report is dropped.
+- **Hide my profile visits**: blocks `tiktok/user/profile/view_record/add/v1` (IProfileViewerApi.reportView), so you
+  don't appear in other people's "Profile views". Seeing who visited you still works.
+
+### Fixed
+- "Don't report views" missed TikTok's second play report, `aweme/v1/fast/stats/` (awemeFastStatsReport). Both are
+  blocked now.
+
+### Notes
+- **Beta.** Checked on a phone with TikTok 47.9.2: story download, the archive (video and photo stories), anonymous
+  story viewing and hidden profile visits work. The 🗑 mark and auto-save haven't been seen live yet, and 47.9.2
+  sent no `aweme/v1/fast/stats/` report to block. Problems: About → Report a bug.
+- Targets were found in TikTok 47.1.4's Retrofit interfaces and Gson models (`UserStory.getStories`,
+  `Aweme.getIsTikTokStory`, `Story.setViewed`), whose names aren't obfuscated.
+
 ## 4.8.0 — 2026-11-22
 
 ### Added

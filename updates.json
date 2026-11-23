@@ -1,6 +1,14 @@
 {
   "releases": [
     {
+      "version": "4.9.0",
+      "date": "2026-11-23",
+      "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.9.0/TikMod-4.9.0.apk",
+      "notes": "- Beta: please report problems from About > Report a bug\n- Stories: download without a watermark; an archive of every story you watch, deleted ones kept and marked 🗑\n- Auto-save the stories of chosen channels\n- Watch stories anonymously and hide your profile visits\n- Also includes 4.8.0: private accounts' LIVEs auto-recorded, stop each recording on its own, quality per channel, Report a bug\n- Works on TikTok 47.9.2",
+      "size": 31120017,
+      "sha256": "6a5e54ff81204586588549bfaa85e74bdc44563b64a82cbbf6d9189d3a320128"
+    },
+    {
       "version": "4.7.0",
       "date": "2026-11-20",
       "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.7.0/TikMod-4.7.0.apk",

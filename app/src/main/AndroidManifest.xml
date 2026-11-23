@@ -54,6 +54,17 @@
             android:exported="true"
             android:grantUriPermissions="true" />
 
+        <!-- Story archive: opens / shares the files TikMod keeps in its own storage -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.mts.tikmod.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/story_paths" />
+        </provider>
+
         <!-- "Stop the addiction" on / off from Quick Settings -->
         <service
             android:name=".focus.FocusTileService"
