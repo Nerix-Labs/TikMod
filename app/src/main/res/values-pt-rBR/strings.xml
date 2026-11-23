@@ -913,4 +913,6 @@
     <string name="search_go">Ir</string>
     <string name="cl4100_search_all">Encontre qualquer configuração</string>
     <string name="cl4100_search_all_desc">Busque na tela inicial e alterne os botões direto nos resultados; atalhos para o que você mais usa e uma sensação mais fluida em tudo.</string>
+    <string name="cl4101_restart">Atualizações valem na hora</string>
+    <string name="cl4101_restart_desc">Depois de atualizar o TikMod, o TikTok reinicia sozinho uma vez para carregar a nova versão — sem textos errados nas notificações nem \"Nenhum vídeo encontrado\" até reiniciá-lo.</string>
 </resources>

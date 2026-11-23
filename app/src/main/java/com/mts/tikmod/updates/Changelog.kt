@@ -18,6 +18,11 @@ object Changelog {
 
     val versions: List<Version> = listOf(
         Version(
+            "4.10.1", "2026-11-23", listOf(
+                Item(Icons.Rounded.RestartAlt, R.string.cl4101_restart, R.string.cl4101_restart_desc) { Neon.Lime },
+            )
+        ),
+        Version(
             "4.10.0", "2026-11-23", listOf(
                 Item(Icons.Rounded.AutoAwesome, R.string.cl4100_design, R.string.cl4100_design_desc) { Neon.Violet },
                 Item(Icons.Rounded.Restore, R.string.cl4100_watch, R.string.cl4100_watch_desc) { Neon.Cyan },

@@ -885,4 +885,6 @@
     <string name="search_go">前往</string>
     <string name="cl4100_search_all">任何设置一搜即得</string>
     <string name="cl4100_search_all_desc">在主页搜索，并直接在结果中切换开关；常用位置的快捷入口，处处更流畅。</string>
+    <string name="cl4101_restart">更新立即生效</string>
+    <string name="cl4101_restart_desc">TikMod 更新后，TikTok 会自动重启一次以加载新版本——不再出现通知文字错乱或在重启前提示“未找到视频”。</string>
 </resources>

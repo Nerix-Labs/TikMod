@@ -927,4 +927,6 @@
     <string name="search_go">מעבר להגדרה</string>
     <string name="cl4100_search_all">מוצאים כל הגדרה</string>
     <string name="cl4100_search_all_desc">חיפוש ממסך הבית עם מתגים ישר בתוצאות, קיצורים למקומות הכי שימושיים, ותחושה חלקה יותר בכל מקום.</string>
+    <string name="cl4101_restart">עדכונים נכנסים לתוקף מיד</string>
+    <string name="cl4101_restart_desc">אחרי עדכון של TikMod, טיקטוק נפתח מחדש פעם אחת מעצמו כדי לטעון את הגרסה החדשה — בלי טקסטים שגויים בהתראות ובלי \"לא נמצא וידאו\" עד שמפעילים אותו מחדש.</string>
 </resources>

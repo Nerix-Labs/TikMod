@@ -2,6 +2,21 @@
 
 All notable changes to TikMod. Versions follow [semantic versioning](https://semver.org).
 
+## 4.10.1 — 2026-11-23 (HotFix)
+
+### Fixed
+- **After an update, TikTok kept running the old TikMod.** The old code then read its texts by id from the new APK,
+  where the ids had moved: notifications said "System" instead of "Downloading", and downloads reported "No video
+  found". The cleanup after an update couldn't fix it (`su` isn't granted to TikMod, and `killBackgroundProcesses`
+  can't stop other apps since Android 14). Now TikTok notices it's running an older TikMod than the one installed
+  (version code, or the APK it loaded is gone) the next time it comes to the front, and restarts itself once — it
+  reopens by itself in a fresh process with the new version.
+
+### Notes
+- The restart lives in the new code, so the update *to* 4.10.1 still needs TikTok swiped away once by hand; every
+  update after that is automatic. Checked on a phone: an update while TikTok was open, then TikTok brought back to
+  the front, restarted itself and came back with the hooks loaded; downloads and their notifications are correct.
+
 ## 4.10.0 — 2026-11-23
 
 ### Added

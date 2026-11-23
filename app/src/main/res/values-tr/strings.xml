@@ -899,4 +899,6 @@
     <string name="search_go">Git</string>
     <string name="cl4100_search_all">Her ayarı bul</string>
     <string name="cl4100_search_all_desc">Ana ekrandan ara, anahtarları sonuçlarda aç/kapat; en çok kullandığın yerlere kısayollar ve her yerde daha akıcı bir his.</string>
+    <string name="cl4101_restart">Güncellemeler hemen geçerli</string>
+    <string name="cl4101_restart_desc">TikMod güncellendikten sonra TikTok yeni sürümü yüklemek için bir kez kendini yeniden başlatır — yeniden başlatana kadar bildirimlerde yanlış metin ya da \"video bulunamadı\" yok.</string>
 </resources>

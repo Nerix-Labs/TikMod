@@ -955,4 +955,6 @@
     <string name="search_go">اذهب إليه</string>
     <string name="cl4100_search_all">اعثر على أي إعداد</string>
     <string name="cl4100_search_all_desc">ابحث من الشاشة الرئيسية وبدّل المفاتيح مباشرة في النتائج، واختصارات لأكثر الأماكن استخدامًا، وإحساس أكثر سلاسة في كل مكان.</string>
+    <string name="cl4101_restart">التحديثات تعمل فورًا</string>
+    <string name="cl4101_restart_desc">بعد تحديث TikMod، يعيد تيك توك تشغيل نفسه مرة واحدة لتحميل الإصدار الجديد — بلا نصوص خاطئة في الإشعارات أو \"لم يُعثر على فيديو\" حتى تعيد تشغيله.</string>
 </resources>

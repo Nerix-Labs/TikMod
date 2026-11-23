@@ -1,0 +1,23 @@
+{
+  "en": {
+    "badge": { "e": "🚨", "id": "" },
+    "title": "TikMod 4.10.1 — HotFix",
+    "summary": "Fixes wrong texts and \"No video found\" after updating. Please update.",
+    "bullets": [
+      { "icon": { "e": "🔄", "id": "" }, "text": "After an update, TikTok restarts itself once to load the new TikMod" },
+      { "icon": { "e": "✅", "id": "" }, "text": "Downloads and their notifications work again right after updating" },
+      { "icon": { "e": "👆", "id": "" }, "text": "This time only: swipe TikTok away once after installing" }
+    ]
+  },
+  "he": {
+    "badge": { "e": "🚨", "id": "" },
+    "title": "TikMod 4.10.1 — תיקון חשוב",
+    "summary": "תיקון לטקסטים שגויים ול\"לא נמצא וידאו\" אחרי עדכון. מומלץ לעדכן.",
+    "bullets": [
+      { "icon": { "e": "🔄", "id": "" }, "text": "אחרי עדכון, טיקטוק נפתח מחדש פעם אחת מעצמו עם ה-TikMod החדש" },
+      { "icon": { "e": "✅", "id": "" }, "text": "הורדות וההתראות שלהן עובדות מיד אחרי עדכון" },
+      { "icon": { "e": "👆", "id": "" }, "text": "רק הפעם: אחרי ההתקנה סוגרים את טיקטוק פעם אחת ידנית" }
+    ]
+  },
+  "footer": "Works on TikTok 47.9.2 · עובד על טיקטוק 47.9.2"
+}
