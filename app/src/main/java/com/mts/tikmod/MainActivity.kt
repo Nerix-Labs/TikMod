@@ -337,30 +337,27 @@ private fun HomeLiveState(ctx: android.content.Context): List<Pair<String, JSONO
 
 @Composable
 private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onShowHistory: () -> Unit, onOpenWatch: () -> Unit, onGo: (String) -> Unit, onOpenSettings: () -> Unit) {
-    val ctx = LocalContext.current
-    var recording by remember { mutableStateOf(emptyList<Pair<String, JSONObject>>()) }
-    LaunchedEffect(Unit) { while (true) { recording = withContext(Dispatchers.IO) { HomeLiveState(ctx) }; delay(2000) } }
+    var searching by rememberSaveable { mutableStateOf(false) }
 
-    // Home is only what you need at a glance; everything else is one tap away (tabs, search, the gear).
+    // Header: the wordmark, connection state, search and settings. Everything else is the tile grid.
     Appear(0) {
-        Row(Modifier.padding(start = 6.dp, end = 2.dp).padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(start = 4.dp, end = 0.dp).padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(greeting(), style = if (Neon.glow) MaterialTheme.typography.headlineMedium.copy(brush = Brush.linearGradient(listOf(Color.White, Neon.Cyan)))
-                    else MaterialTheme.typography.headlineMedium)
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
+                Text("TikMod", fontSize = 32.sp, fontWeight = FontWeight.Black, letterSpacing = (-1).sp,
+                    style = LocalTextStyle.current.copy(brush = Brush.linearGradient(Neon.brand)))
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     PulsingDot(if (active) Neon.Lime else Neon.Pink, 7.dp)
-                    Spacer(Modifier.width(8.dp))
-                    Text(if (active) L.t(R.string.status_connected) else L.t(R.string.status_inactive), fontSize = 13.sp, color = Subtle)
+                    Spacer(Modifier.width(7.dp))
+                    Text(greeting() + "  ·  " + (if (active) L.t(R.string.status_connected) else L.t(R.string.status_inactive)),
+                        fontSize = 12.5.sp, color = Subtle, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
-            // Settings: language, look, updates, backup, about.
-            IconButton(onClick = onOpenSettings, modifier = Modifier.size(48.dp).clip(CircleShape)
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))) {
-                Icon(Icons.Rounded.Settings, L.t(R.string.home_system), tint = MaterialTheme.colorScheme.onSurface)
-            }
+            HeaderButton(if (searching) Icons.Rounded.Close else Icons.Rounded.Search, L.t(R.string.search_settings)) { searching = !searching }
+            Spacer(Modifier.width(8.dp))
+            HeaderButton(Icons.Rounded.Settings, L.t(R.string.home_system), onOpenSettings)
         }
     }
-    Appear(1) { SettingsSearch(onGo) }
+    AnimatedVisibility(searching, enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) { SettingsSearch(onGo) }
     (Updater.status as? Updater.Status.Available)?.let { st ->
         Appear(1) { UpdateBanner(st.release) { onShowHistory() } }
     }
@@ -369,23 +366,18 @@ private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onShowHist
             Text(L.t(R.string.setup_steps), fontSize = 13.sp, lineHeight = 21.sp, modifier = Modifier.padding(horizontal = 10.dp))
         }
     }
-    AnimatedVisibility(recording.isNotEmpty(), enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
-        LiveNowCard(recording) { onNavigate(Screen.LIVE) }
-    }
-    Appear(2) { TodayCard(onOpenWatch, onOpenStories = { onNavigate(Screen.STORIES) }) }
-    Appear(3) { SectionLabel(L.t(R.string.home_shortcuts)) }
-    Appear(3) {
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                QuickTile(Icons.Rounded.Download, L.t(R.string.quick_download), Prefs.KEY_REMOVE_WATERMARK, Neon.Cyan, Modifier.weight(1f)) { Prefs.setForceDownloadEnabled(ctx, it) }
-                QuickTile(Icons.Rounded.Block, L.t(R.string.quick_ads), Prefs.KEY_REMOVE_ADS, Neon.Cyan, Modifier.weight(1f))
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                QuickTile(Icons.Rounded.FiberManualRecord, L.t(R.string.quick_autolive), Prefs.KEY_AUTO_LIVE, Neon.Cyan, Modifier.weight(1f)) { LiveWatchService.sync(ctx) }
-                QuickTile(Icons.Rounded.AutoGraph, L.t(R.string.focus_dyn_on), Prefs.KEY_FOCUS_DYNAMIC, Neon.Cyan, Modifier.weight(1f))
-            }
-        }
-    }
+    Appear(1) { BentoGrid(onGo) }
+}
+
+@Composable
+private fun HeaderButton(icon: ImageVector, label: String, onClick: () -> Unit) {
+    Box(
+        Modifier.size(46.dp).clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .border(1.dp, Edge, CircleShape)
+            .pressable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) { Icon(icon, label, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(22.dp)) }
 }
 
 /** Settings page (gear on Home): language, look, management, tweaks, updates, about. */
