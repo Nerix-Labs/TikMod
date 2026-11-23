@@ -1,0 +1,31 @@
+{
+  "en": {
+    "badge": { "e": "📖", "id": "" },
+    "title": "TikMod 4.9.0 — Stories, your way",
+    "summary": "Save any story, keep the ones that get deleted, and watch without showing up on the viewer list.",
+    "bullets": [
+      { "icon": { "e": "⬇️", "id": "" }, "text": "Download any story without a watermark, video or photos, from its share sheet" },
+      { "icon": { "e": "🗂", "id": "" }, "text": "Story archive: every story you watch is kept for 30 days" },
+      { "icon": { "e": "🗑", "id": "" }, "text": "Stories their creator deletes stay in the archive, marked 🗑" },
+      { "icon": { "e": "⭐", "id": "" }, "text": "Auto-save the stories of chosen channels to the gallery" },
+      { "icon": { "e": "🕶", "id": "" }, "text": "Watch stories anonymously: you're not on the viewer list" },
+      { "icon": { "e": "👣", "id": "" }, "text": "Hide your visits from other people's \"Profile views\"" },
+      { "icon": { "e": "🔒", "id": "" }, "text": "Also includes 4.8.0: private accounts' LIVEs auto-recorded, stop each recording on its own, quality per channel, Report a bug" }
+    ]
+  },
+  "he": {
+    "badge": { "e": "📖", "id": "" },
+    "title": "TikMod 4.9.0 — סטוריז, בדרך שלכם",
+    "summary": "שומרים כל סטורי, מחזיקים גם את אלה שנמחקו, וצופים בלי להופיע ברשימת הצופים.",
+    "bullets": [
+      { "icon": { "e": "⬇️", "id": "" }, "text": "הורדת כל סטורי בלי סימן מים, סרטון או תמונות, מחלון השיתוף" },
+      { "icon": { "e": "🗂", "id": "" }, "text": "ארכיון סטוריז: כל סטורי שצפיתם בו נשמר 30 יום" },
+      { "icon": { "e": "🗑", "id": "" }, "text": "סטוריז שהיוצר מחק נשארים בארכיון, עם סימן 🗑" },
+      { "icon": { "e": "⭐", "id": "" }, "text": "שמירה אוטומטית של הסטוריז מערוצים שבחרתם לגלריה" },
+      { "icon": { "e": "🕶", "id": "" }, "text": "צפייה אנונימית בסטוריז: לא מופיעים ברשימת הצופים" },
+      { "icon": { "e": "👣", "id": "" }, "text": "הסתרת הכניסות שלכם מ\"צפיות בפרופיל\" של אחרים" },
+      { "icon": { "e": "🔒", "id": "" }, "text": "כולל גם את 4.8.0: הקלטה אוטומטית של לייבים בחשבונות פרטיים, עצירה של כל הקלטה בנפרד, איכות לכל ערוץ, דיווח על באג" }
+    ]
+  },
+  "footer": "Works on TikTok 47.9.2 · עובד על טיקטוק 47.9.2"
+}
