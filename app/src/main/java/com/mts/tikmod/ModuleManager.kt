@@ -69,8 +69,58 @@ object ModuleManager {
         }
     }
 
+    /**
+     * TikTok is still running the TikMod code it loaded before TikMod was updated: that old code reads its texts by
+     * id from the NEW APK, where the ids have moved (wrong words in toasts and notifications), and none of the new
+     * fixes are active. Detected by comparing the loaded build with the installed one.
+     */
+    private fun staleModule(ctx: Context): Boolean = runCatching {
+        val pi = ctx.packageManager.getPackageInfo(BuildConfig.APPLICATION_ID, 0)
+        @Suppress("DEPRECATION")
+        val installedCode = if (android.os.Build.VERSION.SDK_INT >= 28) pi.longVersionCode else pi.versionCode.toLong()
+        if (installedCode != BuildConfig.VERSION_CODE.toLong()) return@runCatching true
+        // Same version number (a reinstall of the same version): compare the APK the code came from.
+        val loaded = com.mts.tikmod.utils.L.moduleApkPath()
+        val installed = pi.applicationInfo?.sourceDir
+        if (loaded == null || installed == null) { XLog.log("Update check: module path unknown (loaded=$loaded)"); return@runCatching false }
+        loaded != installed && !java.io.File(loaded).exists()
+    }.getOrDefault(false)
+
+    @Volatile private var restarting = false
+    @Volatile private var lastStaleCheck = 0L
+
+    /** Restart TikTok once so it loads the updated TikMod (the user just reopens straight into TikTok). */
+    private fun restartIfStale(activity: Activity): Boolean {
+        val now = System.currentTimeMillis()
+        if (restarting || now - lastStaleCheck < 15_000) return restarting
+        lastStaleCheck = now
+        if (!staleModule(activity)) return false
+        restarting = true
+        XLog.log("TikMod was updated while TikTok was running (loaded ${BuildConfig.VERSION_NAME}) — restarting TikTok")
+        // The old code can't trust its texts any more, so this one is written out.
+        val he = java.util.Locale.getDefault().language.let { it == "iw" || it == "he" }
+        runCatching {
+            android.widget.Toast.makeText(activity,
+                if (he) "TikMod עודכן — טיקטוק נפתח מחדש" else "TikMod was updated — restarting TikTok",
+                android.widget.Toast.LENGTH_LONG).show()
+        }
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            // While TikTok is still in front it may start its own launcher activity in a fresh task; then the
+            // process exits and Android brings that activity up in a new process, with the updated TikMod. (An
+            // alarm-based relaunch after death is blocked as a background start since Android 14.)
+            runCatching {
+                activity.packageManager.getLaunchIntentForPackage(activity.packageName)?.component?.let { c ->
+                    activity.startActivity(android.content.Intent.makeRestartActivityTask(c))
+                }
+            }
+            Runtime.getRuntime().exit(0)
+        }, 1500)
+        return true
+    }
+
     fun onActivityResumed(activity: Activity, classLoader: ClassLoader) {
         try {
+            if (restartIfStale(activity)) return
             applyAllHooks(classLoader, activity)
 
             if (Prefs.isUnrestrictAll(activity)) {

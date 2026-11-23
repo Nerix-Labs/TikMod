@@ -899,4 +899,6 @@
     <string name="search_go">Hingehen</string>
     <string name="cl4100_search_all">Jede Einstellung finden</string>
     <string name="cl4100_search_all_desc">Vom Start aus suchen und Schalter direkt in den Ergebnissen umlegen; Abkürzungen zu den meistgenutzten Bereichen und ein flüssigeres Gefühl überall.</string>
+    <string name="cl4101_restart">Updates wirken sofort</string>
+    <string name="cl4101_restart_desc">Nach einem TikMod-Update startet TikTok einmal selbst neu und lädt die neue Version — keine falschen Texte in Benachrichtigungen und kein „Kein Video gefunden“ mehr bis zum Neustart.</string>
 </resources>

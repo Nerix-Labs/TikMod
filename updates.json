@@ -1,6 +1,14 @@
 {
   "releases": [
     {
+      "version": "4.10.1",
+      "date": "2026-11-23",
+      "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.10.1/TikMod-4.10.1.apk",
+      "notes": "- Beta: please report problems from Settings > About > Report a bug\n- Fixed: after an update TikTok kept the old TikMod (wrong texts in notifications, \\",
+      "size": 31279761,
+      "sha256": "dd2eadd4d20b1c0b0999e8cbe6c469366f108238e8a311d5331e628b58119cf8"
+    },
+    {
       "version": "4.10.0",
       "date": "2026-11-23",
       "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.10.0/TikMod-4.10.0.apk",
