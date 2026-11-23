@@ -22,7 +22,7 @@ import kotlin.math.tanh
 object Focus {
     const val MIN_KEEP = 1
 
-    enum class Why { MANUAL, WINDOW, BEDTIME, WINDDOWN, SESSION }
+    enum class Why { MANUAL, WINDOW, BEDTIME, WINDDOWN, SESSION, DYNAMIC }
 
     /** [strength]: 0 = off … 1 = full. [until]: when the manual switch ends (0 = no end / not manual). */
     data class State(val strength: Float, val why: Set<Why>, val bedtime: Boolean, val until: Long = 0L) {
@@ -116,8 +116,27 @@ object Focus {
             why += Why.SESSION
             if (s == 0f) s = 1f
         }
+        if (Prefs.bool(ctx, Prefs.KEY_FOCUS_DYNAMIC)) {
+            val d = dynamicStrength(ctx, sessionMinutes(), cal)
+            if (d > 0f) { why += Why.DYNAMIC; s = maxOf(s, d) }
+        }
         State(s, why, bedtime, if (why == setOf(Why.MANUAL)) until else 0L)
     }.getOrDefault(OFF)
+
+    /**
+     * Dynamic mode: nothing for the first [Prefs.KEY_FOCUS_DYN_GRACE] minutes of a session, then the feed calms down
+     * step by step until the full dial after another [Prefs.KEY_FOCUS_DYN_RISE] minutes. A 10-minute break starts a
+     * new session (back to normal). Between 23:00 and 05:00 it kicks in twice as fast.
+     */
+    fun dynamicStrength(ctx: Context?, minutes: Int, cal: Calendar = Calendar.getInstance()): Float {
+        var grace = (Prefs.string(ctx, Prefs.KEY_FOCUS_DYN_GRACE).toIntOrNull() ?: 10).coerceAtLeast(0).toFloat()
+        var rise = (Prefs.string(ctx, Prefs.KEY_FOCUS_DYN_RISE).toIntOrNull() ?: 30).coerceAtLeast(1).toFloat()
+        val hour = cal.get(Calendar.HOUR_OF_DAY)
+        if (hour >= 23 || hour < 5) { grace /= 2; rise /= 2 }
+        if (minutes < grace) return 0f
+        // At least a little as soon as the free time is over, so the change is felt.
+        return (0.15f + 0.85f * ((minutes - grace) / rise)).coerceIn(0f, 1f)
+    }
 
     /** Calendar.DAY_OF_WEEK numbers from "1,2,…". Empty = every day. */
     fun days(s: String): Set<Int> = s.split(',').mapNotNull { it.trim().toIntOrNull() }.filter { it in 1..7 }.toSet()
@@ -176,7 +195,9 @@ object Focus {
     /** The share of plain (non-hook) posts the feed aims for right now, 0..1. */
     fun boredomNow(ctx: Context?, st: State): Float {
         if (!st.active) return 0f
-        var x = target(ctx) * rampProgress(ctx, st) * st.strength
+        // Dynamic mode ramps by itself (its strength grows with the session), so the manual ramp doesn't apply.
+        val ramp = if (st.why == setOf(Why.DYNAMIC)) 1f else rampProgress(ctx, st)
+        var x = target(ctx) * ramp * st.strength
         if (Why.SESSION in st.why) x = minOf(1f, x + 0.15f)
         if (st.bedtime) x = maxOf(x, 0.9f)
         return x

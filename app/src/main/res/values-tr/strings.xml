@@ -882,4 +882,16 @@
     <string name="cl4100_tabs_desc">Arşiv, otomatik kaydetme ve gizli izleme, her yerden tek dokunuşla.</string>
     <string name="cl4100_live">Kaydettiğini izle</string>
     <string name="cl4100_live_desc">Kaydedilen her yayında ve şu an canlı olan her takip edilen kanalda bir İzle düğmesi onu TikTok\'ta açar.</string>
+    <string name="theme_studio">Stüdyo</string>
+    <string name="focus_why_dynamic">uzun kaydırma</string>
+    <string name="focus_dyn_title">Dinamik durdurma</string>
+    <string name="focus_dyn_desc">Hep açık, başlatacak bir şey yok: ara vermeden ne kadar uzun kaydırırsan akış o kadar sakinleşir.</string>
+    <string name="focus_dyn_on">Dinamik durdurma</string>
+    <string name="focus_dyn_grace">Önce serbest kaydırma</string>
+    <string name="focus_dyn_rise">Sonra sakinleşme süresi</string>
+    <string name="focus_dyn_hint">10 dakikalık bir ara onu sıfırlar. Gece (23:00–05:00) iki kat hızlı devreye girer. Ayarladığın kadranı ve konuları kullanır.</string>
+    <string name="focus_dyn_free">%1$d dk normal</string>
+    <string name="focus_dyn_full">%1$d dk sonra tam</string>
+    <string name="cl4100_dyn">Dinamik bağımlılık durdurma</string>
+    <string name="cl4100_dyn_desc">Hep açık: önce serbest kaydırma, sonra devam ettikçe akış sakinleşir. Kısa bir ara sıfırlar.</string>
 </resources>

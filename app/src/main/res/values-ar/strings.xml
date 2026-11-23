@@ -938,4 +938,16 @@
     <string name="cl4100_tabs_desc">الأرشيف والحفظ التلقائي والمشاهدة المجهولة، بلمسة واحدة من أي مكان.</string>
     <string name="cl4100_live">شاهد ما تسجّله</string>
     <string name="cl4100_live_desc">زر مشاهدة على كل بث يُسجَّل وكل قناة متابَعة تبث الآن يفتحه في تيك توك.</string>
+    <string name="theme_studio">ستوديو</string>
+    <string name="focus_why_dynamic">تمرير طويل</string>
+    <string name="focus_dyn_title">إيقاف ديناميكي</string>
+    <string name="focus_dyn_desc">يعمل دائمًا دون تشغيل: كلما طال تمريرك دون استراحة، أصبحت الخلاصة أهدأ.</string>
+    <string name="focus_dyn_on">إيقاف ديناميكي</string>
+    <string name="focus_dyn_grace">تمرير حر أولًا</string>
+    <string name="focus_dyn_rise">ثم يهدأ خلال</string>
+    <string name="focus_dyn_hint">استراحة 10 دقائق تعيد ضبطه. ليلًا، بين 23:00 و05:00، يبدأ بضعف السرعة. يستخدم المؤشر والمواضيع التي ضبطتها.</string>
+    <string name="focus_dyn_free">عادي لمدة %1$d د</string>
+    <string name="focus_dyn_full">كامل بعد %1$d د</string>
+    <string name="cl4100_dyn">إيقاف الإدمان الديناميكي</string>
+    <string name="cl4100_dyn_desc">يعمل دائمًا: تمرير حر أولًا، ثم تهدأ الخلاصة كلما استمررت. استراحة قصيرة تعيد ضبطه.</string>
 </resources>

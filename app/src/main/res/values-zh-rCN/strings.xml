@@ -868,4 +868,16 @@
     <string name="cl4100_tabs_desc">存档、自动保存和匿名观看，随时一触即达。</string>
     <string name="cl4100_live">观看正在录制的直播</string>
     <string name="cl4100_live_desc">每个正在录制的直播、每个正在直播的关注频道都有「观看」按钮，可在 TikTok 中打开。</string>
+    <string name="theme_studio">工作室</string>
+    <string name="focus_why_dynamic">长时间刷</string>
+    <string name="focus_dyn_title">动态防沉迷</string>
+    <string name="focus_dyn_desc">始终开启，无需启动：连续刷得越久，推荐流就越平静。</string>
+    <string name="focus_dyn_on">动态防沉迷</string>
+    <string name="focus_dyn_grace">先自由刷</string>
+    <string name="focus_dyn_rise">然后逐渐变平静，历时</string>
+    <string name="focus_dyn_hint">休息 10 分钟即重置。深夜（23:00–05:00）生效速度加倍。使用你设置的滑块和话题。</string>
+    <string name="focus_dyn_free">前 %1$d 分钟正常</string>
+    <string name="focus_dyn_full">%1$d 分钟后全开</string>
+    <string name="cl4100_dyn">动态防沉迷</string>
+    <string name="cl4100_dyn_desc">始终开启：先自由刷，越往后推荐流越平静。短暂休息即可重置。</string>
 </resources>

@@ -176,6 +176,9 @@ object Prefs {
     const val KEY_BEDTIME_SCREEN = "key_bedtime_screen"         // gentle "time to sleep" screen inside TikTok
     const val KEY_WINDDOWN = "key_winddown"                     // minutes before bedtime the feed calms down (0 = off)
     const val KEY_SESSION_LIMIT = "key_session_limit"           // minutes of scrolling before it gets stricter (0 = off)
+    const val KEY_FOCUS_DYNAMIC = "key_focus_dynamic"           // dynamic: always on, stricter the longer you scroll
+    const val KEY_FOCUS_DYN_GRACE = "key_focus_dyn_grace"       // minutes of free scrolling first
+    const val KEY_FOCUS_DYN_RISE = "key_focus_dyn_rise"         // minutes to reach the full dial after that
     const val KEY_SESSION_REMIND = "key_session_remind"         // a gentle reminder when the limit is reached
     const val STAT_FOCUS_FILTERED = "stat_focus_filtered"
 
@@ -270,6 +273,9 @@ object Prefs {
         KEY_BEDTIME_SCREEN to true,
         KEY_WINDDOWN to "30",
         KEY_SESSION_LIMIT to "0",
+        KEY_FOCUS_DYNAMIC to false,
+        KEY_FOCUS_DYN_GRACE to "10",
+        KEY_FOCUS_DYN_RISE to "30",
         KEY_SESSION_REMIND to true,
         KEY_DISABLE_READ_RECEIPTS to true,
         KEY_DISABLE_TYPING_INDICATOR to true,

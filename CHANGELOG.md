@@ -5,9 +5,20 @@ All notable changes to TikMod. Versions follow [semantic versioning](https://sem
 ## 4.10.0 — 2026-11-23
 
 ### Added
-- **A whole new look ("Studio").** Deep ink background with one slow light and a faint dot grid, opaque surfaces
-  with a fine edge, an iris / rose / lavender palette, editorial headlines with small-caps overlines, compact quick
-  toggles with mini switches, and a docked bottom bar that names every section.
+- **A whole new look, in four themes that really differ.** **Neon** (default): true black, electric cyan / magenta /
+  violet, cards that glow in their colors, gradient headlines, a synthwave floor grid rolling at the bottom, and a
+  glowing capsule for the current tab. **Studio**: the same layout, calm — deep ink, iris / rose / lavender, a faint
+  dot grid. **You** (Material You) and **System** (Studio, light or dark like the phone). Everywhere: editorial
+  headlines with small-caps overlines, compact quick toggles with mini switches, a docked bottom bar that names every
+  section.
+- **Dynamic stop the addiction.** Always on, nothing to start: free scrolling for the first minutes of a session
+  (5–30), then the feed calms down step by step until your full dial (over 15–60 minutes); a 10-minute break resets
+  it, and between 23:00 and 05:00 it kicks in twice as fast. A small chart shows the curve; it's on Home, in Feed and
+  in Stop the addiction → Automatic.
+- **Tap a channel to open it in TikTok**: a followed channel opens its LIVE when it's live, its profile otherwise;
+  auto-save channels and archived stories open the profile too.
+- **Story archive as a grid** of 9:16 tiles (three per row, like a profile), at the top of the Stories tab: cover,
+  name, time, a 🗑 mark on deleted ones; tap to open, ⋮ or long-press for save / share / profile / remove.
 - **Home shows your day.** A greeting, a "Today" card (minutes watched in the feed as a ring, videos, creators,
   stories kept, deletions caught) and, while something is recording, a "Recording now" card.
 - **Stories have their own tab**, with archive / deleted / creator counts at the top (it used to live inside
@@ -30,7 +41,8 @@ All notable changes to TikMod. Versions follow [semantic versioning](https://sem
 - **Beta.** Watch history was checked in TikTok 47.9.2 on a phone (posts, covers and time on screen recorded; the
   feed ad left out), and the new look on the phone in Hebrew. Notifications, the archive by creator and download
   search were tested on an emulator with TikTok's calls played over adb (debug builds only accept them from the
-  shell). The Watch button opens `tiktok.com/@handle/live` in TikTok; it wasn't seen on a channel that was live.
+  shell). The Watch button was tried on a stream being recorded and opened that channel's LIVE in TikTok. Dynamic
+  mode was checked in the settings only, not over a long session.
 
 ## 4.9.0 — 2026-11-22
 

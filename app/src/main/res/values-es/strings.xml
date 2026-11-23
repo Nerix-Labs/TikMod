@@ -896,4 +896,16 @@
     <string name="cl4100_tabs_desc">Archivo, guardado automático y visualización anónima, a un toque desde cualquier lugar.</string>
     <string name="cl4100_live">Mira lo que grabas</string>
     <string name="cl4100_live_desc">Un botón Ver en cada directo que se graba y en cada canal seguido que está en vivo lo abre en TikTok.</string>
+    <string name="theme_studio">Estudio</string>
+    <string name="focus_why_dynamic">desplazamiento largo</string>
+    <string name="focus_dyn_title">Freno dinámico</string>
+    <string name="focus_dyn_desc">Siempre activo, nada que iniciar: cuanto más tiempo deslizas sin pausa, más tranquilo se vuelve tu feed.</string>
+    <string name="focus_dyn_on">Freno dinámico</string>
+    <string name="focus_dyn_grace">Primero libre</string>
+    <string name="focus_dyn_rise">Luego más tranquilo en</string>
+    <string name="focus_dyn_hint">Una pausa de 10 minutos lo reinicia. De noche (23:00–05:00) actúa el doble de rápido. Usa tu dial y tus temas.</string>
+    <string name="focus_dyn_free">Normal durante %1$d min</string>
+    <string name="focus_dyn_full">Completo a los %1$d min</string>
+    <string name="cl4100_dyn">Freno dinámico a la adicción</string>
+    <string name="cl4100_dyn_desc">Siempre activo: primero deslizas libre, luego el feed se calma cuanto más sigues. Una pausa corta lo reinicia.</string>
 </resources>

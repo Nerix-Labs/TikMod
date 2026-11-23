@@ -882,4 +882,16 @@
     <string name="cl4100_tabs_desc">Archiv, automatisches Speichern und anonymes Ansehen, von überall mit einem Tipp.</string>
     <string name="cl4100_live">Sieh dir an, was du aufnimmst</string>
     <string name="cl4100_live_desc">Ein Ansehen-Knopf bei jeder laufenden Aufnahme und jedem gefolgten Kanal, der live ist, öffnet ihn in TikTok.</string>
+    <string name="theme_studio">Studio</string>
+    <string name="focus_why_dynamic">langes Scrollen</string>
+    <string name="focus_dyn_title">Dynamischer Stopp</string>
+    <string name="focus_dyn_desc">Immer an, nichts zu starten: Je länger du ohne Pause scrollst, desto ruhiger wird dein Feed.</string>
+    <string name="focus_dyn_on">Dynamischer Stopp</string>
+    <string name="focus_dyn_grace">Erst frei scrollen</string>
+    <string name="focus_dyn_rise">Dann ruhiger über</string>
+    <string name="focus_dyn_hint">Eine Pause von 10 Minuten setzt ihn zurück. Nachts (23:00–05:00) greift er doppelt so schnell. Er nutzt deinen Regler und deine Themen.</string>
+    <string name="focus_dyn_free">Normal für %1$d Min.</string>
+    <string name="focus_dyn_full">Voll nach %1$d Min.</string>
+    <string name="cl4100_dyn">Dynamischer Sucht-Stopp</string>
+    <string name="cl4100_dyn_desc">Immer an: erst frei scrollen, dann wird der Feed ruhiger, je länger du bleibst. Eine kurze Pause setzt ihn zurück.</string>
 </resources>

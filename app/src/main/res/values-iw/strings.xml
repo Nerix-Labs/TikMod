@@ -910,4 +910,16 @@
     <string name="cl4100_tabs_desc">ארכיון, שמירה אוטומטית וצפייה אנונימית, במרחק נגיעה מכל מקום.</string>
     <string name="cl4100_live">לצפות במה שמוקלט</string>
     <string name="cl4100_live_desc">כפתור צפייה בכל שידור שמוקלט ובכל ערוץ במעקב שמשדר עכשיו פותח אותו בטיקטוק.</string>
+    <string name="theme_studio">סטודיו</string>
+    <string name="focus_why_dynamic">גלילה ארוכה</string>
+    <string name="focus_dyn_title">עצירה דינמית</string>
+    <string name="focus_dyn_desc">תמיד פועלת, אין מה להפעיל: ככל שגוללים יותר זמן בלי הפסקה, הפיד נהיה רגוע יותר.</string>
+    <string name="focus_dyn_on">עצירה דינמית</string>
+    <string name="focus_dyn_grace">קודם גלילה חופשית</string>
+    <string name="focus_dyn_rise">ואז נרגע בהדרגה במשך</string>
+    <string name="focus_dyn_hint">הפסקה של 10 דקות מאפסת אותה. בלילה, בין 23:00 ל-05:00, היא נכנסת פי שניים מהר יותר. היא משתמשת במחוון ובנושאים שהגדרת.</string>
+    <string name="focus_dyn_free">רגיל במשך %1$d דק׳</string>
+    <string name="focus_dyn_full">מלא אחרי %1$d דק׳</string>
+    <string name="cl4100_dyn">עצירת התמכרות דינמית</string>
+    <string name="cl4100_dyn_desc">תמיד פועלת: קודם גלילה חופשית, ואז הפיד נרגע ככל שממשיכים. הפסקה קצרה מאפסת.</string>
 </resources>

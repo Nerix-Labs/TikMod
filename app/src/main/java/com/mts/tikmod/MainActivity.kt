@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -81,7 +82,7 @@ class MainActivity : ComponentActivity() {
         LiveWatchService.sync(this)
         setContent {
             var themeKey by remember { mutableStateOf(Prefs.string(this, Prefs.KEY_UI_THEME)) }
-            val mode = when (themeKey) { "dynamic" -> ThemeMode.DYNAMIC; "system" -> ThemeMode.SYSTEM; else -> ThemeMode.NEON }
+            val mode = when (themeKey) { "dynamic" -> ThemeMode.DYNAMIC; "system" -> ThemeMode.SYSTEM; "studio" -> ThemeMode.STUDIO; else -> ThemeMode.NEON }
             TikModTheme(mode) {
                 // Re-read every string and flip the layout direction when the language changes.
                 key(L.revision) {
@@ -198,6 +199,7 @@ private fun FloatingNav(current: Screen, modifier: Modifier = Modifier, onSelect
         ) {
             Screen.entries.forEach { s ->
                 val on = s == current
+                val glow = Neon.glow
                 val pill by animateColorAsState(if (on) s.accent.copy(alpha = 0.18f) else Color.Transparent, tween(250), label = "pill")
                 val fg by animateColorAsState(if (on) s.accent else Subtle, tween(250), label = "fg")
                 val pillW by animateDpAsState(if (on) 52.dp else 34.dp, spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow), label = "pw")
@@ -207,8 +209,15 @@ private fun FloatingNav(current: Screen, modifier: Modifier = Modifier, onSelect
                         .padding(vertical = 4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(Modifier.width(pillW).height(30.dp).clip(CircleShape).background(pill), contentAlignment = Alignment.Center) {
-                        Icon(s.icon, s.label, tint = fg, modifier = Modifier.size(21.dp))
+                    // Neon: the current tab is a glowing gradient capsule.
+                    Box(
+                        Modifier.width(pillW).height(30.dp)
+                            .then(if (on && glow) Modifier.shadow(14.dp, CircleShape, clip = false, ambientColor = s.accent, spotColor = s.accent) else Modifier)
+                            .clip(CircleShape)
+                            .background(if (on && glow) Brush.linearGradient(listOf(s.accent, Neon.Violet)) else Brush.linearGradient(listOf(pill, pill))),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(s.icon, s.label, tint = if (on && glow) Neon.OnAccent else fg, modifier = Modifier.size(21.dp))
                     }
                     Spacer(Modifier.height(3.dp))
                     Text(s.label, color = fg, fontSize = 10.5.sp, fontWeight = if (on) FontWeight.Bold else FontWeight.Medium,
@@ -229,7 +238,8 @@ internal fun ScreenTitle(title: String, subtitle: String, accent: Color) {
             Text("TIKMOD", fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp, color = accent)
         }
         Spacer(Modifier.height(6.dp))
-        Text(title, style = MaterialTheme.typography.displaySmall)
+        Text(title, style = if (Neon.glow) MaterialTheme.typography.displaySmall.copy(brush = Brush.linearGradient(listOf(Color.White, accent, Neon.Violet)))
+            else MaterialTheme.typography.displaySmall)
         Text(subtitle, fontSize = 14.sp, color = Subtle, lineHeight = 19.sp, modifier = Modifier.padding(top = 4.dp))
     }
 }
@@ -237,8 +247,13 @@ internal fun ScreenTitle(title: String, subtitle: String, accent: Color) {
 // ================================================================== HOME
 
 /** Opens a channel's LIVE in TikTok (the browser when TikTok isn't installed). */
-internal fun openLive(ctx: android.content.Context, handle: String) {
-    val view = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.tiktok.com/@${handle.removePrefix("@")}/live")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+internal fun openLive(ctx: android.content.Context, handle: String) = openInTikTok(ctx, "https://www.tiktok.com/@${handle.removePrefix("@")}/live")
+
+/** Opens a channel's profile in TikTok. */
+internal fun openProfile(ctx: android.content.Context, handle: String) = openInTikTok(ctx, "https://www.tiktok.com/@${handle.removePrefix("@")}")
+
+internal fun openInTikTok(ctx: android.content.Context, url: String) {
+    val view = Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     for (pkg in listOf("com.zhiliaoapp.musically", "com.ss.android.ugc.trill")) {
         if (runCatching { ctx.startActivity(Intent(view).setPackage(pkg)); true }.getOrDefault(false)) return
     }
@@ -273,7 +288,8 @@ private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onThemeCha
                 Text("TIKMOD  ·  NERIX LABS", fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp,
                     style = LocalTextStyle.current.copy(brush = Brush.linearGradient(Neon.brand)))
                 Spacer(Modifier.height(6.dp))
-                Text(greeting(), style = MaterialTheme.typography.displaySmall)
+                Text(greeting(), style = if (Neon.glow) MaterialTheme.typography.displaySmall.copy(fontSize = 38.sp, brush = Brush.linearGradient(listOf(Color.White, Neon.Cyan, Neon.Pink)))
+                    else MaterialTheme.typography.displaySmall)
                 Spacer(Modifier.height(8.dp))
                 Row(
                     Modifier.clip(CircleShape).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
@@ -327,7 +343,7 @@ private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onThemeCha
                 QuickTile(Icons.Rounded.SelfImprovement, L.t(R.string.focus_title), Prefs.KEY_FOCUS_ON, Neon.Lime, Modifier.weight(1f)) {
                     if (it) com.mts.tikmod.focus.Focus.start(ctx, 0) else com.mts.tikmod.focus.Focus.stop(ctx)
                 }
-                QuickTile(Icons.Rounded.Timeline, L.t(R.string.feed_seekbar), Prefs.KEY_FORCE_SEEKBAR, Neon.Cyan, Modifier.weight(1f))
+                QuickTile(Icons.Rounded.AutoGraph, L.t(R.string.focus_dyn_on), Prefs.KEY_FOCUS_DYNAMIC, Neon.Lime, Modifier.weight(1f))
             }
             TextButton(onClick = onOpenFocus, modifier = Modifier.align(Alignment.End)) { Text(L.t(R.string.focus_open)) }
         }
@@ -367,7 +383,8 @@ private fun SystemSection(onThemeChange: (String) -> Unit, onShowHistory: () -> 
     LanguageSection()
     Section(Icons.Rounded.Palette, L.t(R.string.sys_look), accent = Neon.Violet) {
         SegmentedPref(L.t(R.string.sys_theme), Prefs.KEY_UI_THEME, listOf(
-            Opt("neon", L.t(R.string.theme_neon), Icons.Rounded.Bolt), Opt("dynamic", "Material You", Icons.Rounded.ColorLens), Opt("system", L.t(R.string.theme_system), Icons.Rounded.Contrast)
+            Opt("neon", L.t(R.string.theme_neon), Icons.Rounded.Bolt), Opt("studio", L.t(R.string.theme_studio), Icons.Rounded.Tonality),
+            Opt("dynamic", "You", Icons.Rounded.ColorLens), Opt("system", L.t(R.string.theme_system), Icons.Rounded.Contrast)
         ), accent = Neon.Violet, onChange = onThemeChange)
     }
     Section(Icons.Rounded.Tune, L.t(R.string.sys_manage), L.t(R.string.sys_manage_sub), accent = Neon.Cyan, collapsible = true, initiallyExpanded = false) {
@@ -972,7 +989,7 @@ private fun ChannelRow(
         Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp).clip(RoundedCornerShape(18.dp))
             .background(if (rec) Neon.Pink.copy(alpha = 0.08f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.035f))
             .border(1.dp, if (rec) Neon.Pink.copy(alpha = 0.22f) else Edge, RoundedCornerShape(18.dp))
-            .clickable { if (isLive) openLive(ctx, handle) }
+            .clickable { if (isLive) openLive(ctx, handle) else openProfile(ctx, handle) }
             .padding(10.dp)
     ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1058,6 +1075,7 @@ private fun FeedScreen(onOpenFocus: () -> Unit) {
     val blocked = remember { Prefs.readStat(ctx, Prefs.STAT_ADS_BLOCKED) }
     Appear(0) { ScreenTitle(L.t(R.string.nav_feed), L.t(R.string.feed_subtitle), Neon.Amber) }
     Appear(1) { FocusEntryCard(onOpenFocus) }
+    Appear(1) { com.mts.tikmod.ui.DynamicSection() }
     Appear(1) {
         GlassCard(padding = 18.dp) {
             Row(verticalAlignment = Alignment.CenterVertically) {

@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -123,7 +124,12 @@ fun StoriesScreen(onBack: (() -> Unit)?) {
         }
     }
 
-    Appear(1) {
+    // The archive first: it's what this tab is for. Settings below.
+    Appear(1) { ArchiveSection(stories) }
+
+    Appear(2) { SectionLabel(L.t(R.string.home_system)) }
+
+    Appear(2) {
         Section(Icons.Rounded.VisibilityOff, L.t(R.string.stories_privacy), accent = Neon.Violet) {
             ToggleRow(L.t(R.string.stories_hide_views), L.t(R.string.stories_hide_views_desc), Prefs.KEY_HIDE_STORY_VIEWS, Icons.Rounded.VisibilityOff, Neon.Violet)
             ToggleRow(L.t(R.string.profile_hide_views), L.t(R.string.profile_hide_views_desc), Prefs.KEY_HIDE_PROFILE_VIEWS, Icons.Rounded.PersonOff, Neon.Violet)
@@ -139,8 +145,6 @@ fun StoriesScreen(onBack: (() -> Unit)?) {
     }
 
     Appear(3) { AutoSaveSection() }
-
-    Appear(4) { ArchiveSection(stories) }
 }
 
 /** "Tell me when a story gets deleted"; asks for the notification permission when it's switched on (Android 13+). */
@@ -203,7 +207,8 @@ private fun AutoSaveSection() {
                         .padding(start = 12.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("@$h", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, style = LocalTextStyle.current.copy(textDirection = TextDirection.Ltr))
+                    Text("@$h", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, style = LocalTextStyle.current.copy(textDirection = TextDirection.Ltr),
+                        modifier = Modifier.clickable { com.mts.tikmod.openProfile(ctx, h) })
                     IconButton(onClick = { channels = channels - h; Prefs.setStoryAutoChannels(ctx, channels) }, modifier = Modifier.size(32.dp)) {
                         Icon(Icons.Rounded.Close, L.t(R.string.action_remove), tint = Subtle, modifier = Modifier.size(16.dp))
                     }
@@ -268,8 +273,16 @@ private fun ArchiveSection(stories: List<JSONObject>) {
         }
         Spacer(Modifier.height(6.dp))
         if (shown.isEmpty()) Hint(if (filter == "deleted") L.t(R.string.stories_deleted_empty) else L.t(R.string.stories_archive_empty))
-        (if (showAll) shown else shown.take(12)).forEach { e -> key(e.optString("aid")) { StoryRow(e) } }
-        if (shown.size > 12) TextButton(onClick = { showAll = !showAll }) {
+        // A grid of tiles, three per row (like a profile), newest first.
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(horizontal = 2.dp)) {
+            (if (showAll) shown else shown.take(18)).chunked(3).forEach { row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    row.forEach { e -> key(e.optString("aid")) { StoryTile(e, Modifier.weight(1f)) } }
+                    repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+                }
+            }
+        }
+        if (shown.size > 18) TextButton(onClick = { showAll = !showAll }) {
             Text(if (showAll) L.t(R.string.history_show_less) else L.p(R.plurals.history_show_all, shown.size))
         }
         if (stories.isNotEmpty()) {
@@ -279,8 +292,13 @@ private fun ArchiveSection(stories: List<JSONObject>) {
     }
 }
 
+/**
+ * One archived story as a 9:16 tile: the cover fills it, name and time sit on a dark gradient at the bottom, a 🗑 mark
+ * when it was deleted. Tap opens it; ⋮ (or a long press) has save / share / profile / remove.
+ */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
-private fun StoryRow(e: JSONObject) {
+private fun StoryTile(e: JSONObject, modifier: Modifier = Modifier) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     val aid = e.optString("aid")
@@ -313,69 +331,77 @@ private fun StoryRow(e: JSONObject) {
         }
     }
 
-    Row(
-        Modifier.fillMaxWidth().padding(vertical = 4.dp).clip(RoundedCornerShape(18.dp))
-            .background(if (isDeleted) Neon.Pink.copy(alpha = 0.10f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-            .clickable(enabled = files.isNotEmpty()) { open() }
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+    val shape = RoundedCornerShape(16.dp)
+    Box(
+        modifier.aspectRatio(9f / 16f).clip(shape)
+            .background(Brush.linearGradient(listOf(Neon.Pink.copy(alpha = 0.25f), Neon.Violet.copy(alpha = 0.20f))))
+            .border(if (isDeleted) 2.dp else 1.dp, if (isDeleted) Neon.Pink else Edge, shape)
+            .combinedClickable(enabled = true, onClick = { if (files.isNotEmpty()) open() else menu = true }, onLongClick = { menu = true })
     ) {
-        // 9:16 thumbnail with a play / photo-count mark.
-        Box(Modifier.width(54.dp).height(84.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
-            thumb?.let { Image(it, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) }
+        thumb?.let { Image(it, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) }
+        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(
+            0f to Color.Black.copy(alpha = 0.40f), 0.22f to Color.Transparent, 0.55f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.85f)
+        )))
+        // Top: deleted mark / photo count, and the menu.
+        Row(Modifier.fillMaxWidth().padding(6.dp), verticalAlignment = Alignment.CenterVertically) {
             when {
-                status == "pending" -> CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = Neon.Pink)
-                status == "failed" -> Icon(Icons.Rounded.ErrorOutline, null, tint = Neon.Amber)
-                e.optString("kind") == "photo" && files.size > 1 -> Text("${files.size}", color = Color.White, fontWeight = FontWeight.Black, fontSize = 13.sp,
-                    modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.55f)).padding(horizontal = 6.dp))
-                e.optString("kind") == "video" -> Icon(Icons.Rounded.PlayArrow, null, tint = Color.White, modifier = Modifier.size(26.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.45f)))
+                isDeleted -> Text("🗑", fontSize = 12.sp, modifier = Modifier.clip(CircleShape).background(Neon.Pink).padding(horizontal = 6.dp, vertical = 2.dp))
+                e.optString("kind") == "photo" && files.size > 1 -> Row(
+                    Modifier.clip(CircleShape).background(Color.Black.copy(alpha = 0.5f)).padding(horizontal = 6.dp, vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Rounded.Collections, null, tint = Color.White, modifier = Modifier.size(11.dp))
+                    Spacer(Modifier.width(3.dp))
+                    Text("${files.size}", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                }
             }
-            if (isDeleted) Icon(Icons.Rounded.Delete, null, tint = Color.White,
-                modifier = Modifier.align(Alignment.TopStart).padding(3.dp).size(20.dp).clip(CircleShape).background(Neon.Pink).padding(3.dp))
+            Spacer(Modifier.weight(1f))
+            Box {
+                Icon(Icons.Rounded.MoreVert, null, tint = Color.White,
+                    modifier = Modifier.size(24.dp).clip(CircleShape).clickable { menu = true }.padding(2.dp))
+                DropdownMenu(menu, onDismissRequest = { menu = false }) {
+                    DropdownMenuItem(text = { Text(L.t(R.string.stories_save)) }, leadingIcon = { Icon(Icons.Rounded.SaveAlt, null) }, enabled = files.isNotEmpty(), onClick = {
+                        menu = false
+                        scope.launch {
+                            val ok = withContext(Dispatchers.IO) { StoryStore.saveToGallery(ctx, aid) }
+                            Toast.makeText(ctx, L.t(if (ok) R.string.stories_saved_toast else R.string.stories_save_failed), Toast.LENGTH_SHORT).show()
+                        }
+                    })
+                    DropdownMenuItem(text = { Text(L.t(R.string.action_share)) }, leadingIcon = { Icon(Icons.Rounded.Share, null) }, enabled = files.isNotEmpty(), onClick = { menu = false; share() })
+                    DropdownMenuItem(text = { Text(L.t(R.string.stories_open_profile)) }, leadingIcon = { Icon(Icons.Rounded.Person, null) }, onClick = {
+                        menu = false; com.mts.tikmod.openProfile(ctx, handle)
+                    })
+                    DropdownMenuItem(text = { Text(L.t(R.string.action_remove)) }, leadingIcon = { Icon(Icons.Rounded.DeleteOutline, null) }, onClick = {
+                        menu = false
+                        scope.launch(Dispatchers.IO) { StoryStore.remove(ctx, aid) }
+                    })
+                }
+            }
         }
-        Spacer(Modifier.width(12.dp))
-        Column(Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(e.optString("nick").ifBlank { "@$handle" }, fontWeight = FontWeight.SemiBold, fontSize = 14.5.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                if (isDeleted) { Spacer(Modifier.width(6.dp)); Tag("🗑 " + L.t(R.string.stories_deleted_badge), Neon.Pink) }
+        // Middle: still downloading / failed / a play mark.
+        Box(Modifier.align(Alignment.Center)) {
+            when {
+                status == "pending" -> CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp, color = Color.White)
+                status == "failed" -> Icon(Icons.Rounded.ErrorOutline, null, tint = Neon.Amber, modifier = Modifier.size(26.dp))
+                e.optString("kind") == "video" -> Icon(Icons.Rounded.PlayArrow, null, tint = Color.White,
+                    modifier = Modifier.size(30.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.35f)).padding(3.dp))
             }
-            Text("@$handle", fontSize = 11.5.sp, color = Subtle, style = LocalTextStyle.current.copy(textDirection = TextDirection.Ltr))
+        }
+        // Bottom: who and when.
+        Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(horizontal = 8.dp, vertical = 7.dp)) {
+            Text(e.optString("nick").ifBlank { "@$handle" }, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp,
+                maxLines = 1, overflow = TextOverflow.Ellipsis)
             val now = System.currentTimeMillis()
             val posted = e.optLong("created").takeIf { it > 0 } ?: e.optLong("seen")
-            val line = when {
-                status == "pending" -> L.t(R.string.stories_downloading)
-                status == "failed" -> L.t(R.string.stories_failed)
-                isDeleted -> L.t(R.string.stories_deleted_at, DateUtils.getRelativeTimeSpanString(e.optLong("deletedAt"), now, DateUtils.MINUTE_IN_MILLIS).toString())
-                else -> DateUtils.getRelativeTimeSpanString(posted, now, DateUtils.MINUTE_IN_MILLIS).toString()
-            }
-            Text(line, fontSize = 11.5.sp, color = if (isDeleted) Neon.Pink else Subtle, maxLines = 1)
-            val tags = listOfNotNull(
-                L.t(R.string.stories_auto_badge).takeIf { e.optBoolean("auto") },
-                L.t(R.string.stories_saved_badge).takeIf { e.optBoolean("saved") }
+            Text(
+                if (isDeleted) DateUtils.getRelativeTimeSpanString(e.optLong("deletedAt"), now, DateUtils.MINUTE_IN_MILLIS).toString()
+                else DateUtils.getRelativeTimeSpanString(posted, now, DateUtils.MINUTE_IN_MILLIS).toString(),
+                color = if (isDeleted) Neon.Pink else Color.White.copy(alpha = 0.75f), fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis
             )
-            if (tags.isNotEmpty()) Text(tags.joinToString(" • "), fontSize = 11.sp, color = Neon.Cyan, fontWeight = FontWeight.SemiBold)
-            e.optString("desc").takeIf { it.isNotBlank() }?.let { Text(it, fontSize = 11.5.sp, color = Subtle, maxLines = 1, overflow = TextOverflow.Ellipsis) }
-        }
-        Box {
-            IconButton(onClick = { menu = true }) { Icon(Icons.Rounded.MoreVert, null, tint = Subtle) }
-            DropdownMenu(menu, onDismissRequest = { menu = false }) {
-                DropdownMenuItem(text = { Text(L.t(R.string.stories_save)) }, leadingIcon = { Icon(Icons.Rounded.SaveAlt, null) }, enabled = files.isNotEmpty(), onClick = {
-                    menu = false
-                    scope.launch {
-                        val ok = withContext(Dispatchers.IO) { StoryStore.saveToGallery(ctx, aid) }
-                        Toast.makeText(ctx, L.t(if (ok) R.string.stories_saved_toast else R.string.stories_save_failed), Toast.LENGTH_SHORT).show()
-                    }
-                })
-                DropdownMenuItem(text = { Text(L.t(R.string.action_share)) }, leadingIcon = { Icon(Icons.Rounded.Share, null) }, enabled = files.isNotEmpty(), onClick = { menu = false; share() })
-                DropdownMenuItem(text = { Text(L.t(R.string.stories_open_profile)) }, leadingIcon = { Icon(Icons.Rounded.Person, null) }, onClick = {
-                    menu = false
-                    runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://www.tiktok.com/@$handle")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
-                })
-                DropdownMenuItem(text = { Text(L.t(R.string.action_remove)) }, leadingIcon = { Icon(Icons.Rounded.DeleteOutline, null) }, onClick = {
-                    menu = false
-                    scope.launch(Dispatchers.IO) { StoryStore.remove(ctx, aid) }
-                })
-            }
+            if (e.optBoolean("auto") || e.optBoolean("saved")) Text(
+                listOfNotNull(L.t(R.string.stories_auto_badge).takeIf { e.optBoolean("auto") }, L.t(R.string.stories_saved_badge).takeIf { e.optBoolean("saved") }).joinToString(" · "),
+                color = Neon.Cyan, fontSize = 9.5.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }

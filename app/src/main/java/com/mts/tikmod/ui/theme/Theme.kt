@@ -16,18 +16,58 @@ import androidx.compose.ui.platform.LocalContext
  * Pink LIVE / stories, Violet privacy, Lime health / on, Amber warnings.
  */
 object Neon {
+    enum class Style { NEON, STUDIO }
+
     /** Set by [TikModTheme]: luminous tones on dark backgrounds, deeper ones on light (readable either way). */
     @Volatile var isDark = true
-    val Cyan: Color get() = if (isDark) Color(0xFF8B9CFF) else Color(0xFF3F4FD1)   // iris
-    val Pink: Color get() = if (isDark) Color(0xFFFF6F91) else Color(0xFFC2185B)   // rose
-    val Violet: Color get() = if (isDark) Color(0xFFC3A6FF) else Color(0xFF6A3FD6) // lavender
-    val Lime: Color get() = if (isDark) Color(0xFF5EE6C4) else Color(0xFF0E7A62)   // mint
-    val Amber: Color get() = if (isDark) Color(0xFFFFBE76) else Color(0xFF9A5400)  // apricot
+    /** Neon: electric colors that glow. Studio: calm, softer tones. */
+    @Volatile var style = Style.NEON
+    private val neon get() = style == Style.NEON
+    /** Glow effects (colored shadows, gradient headlines, the grid) — Neon on a dark background only. */
+    val glow: Boolean get() = neon && isDark
+
+    val Cyan: Color get() = when { !isDark -> Color(0xFF3F4FD1); neon -> Color(0xFF00E5FF); else -> Color(0xFF8B9CFF) }
+    val Pink: Color get() = when { !isDark -> Color(0xFFC2185B); neon -> Color(0xFFFF2E8B); else -> Color(0xFFFF6F91) }
+    val Violet: Color get() = when { !isDark -> Color(0xFF6A3FD6); neon -> Color(0xFFA45CFF); else -> Color(0xFFC3A6FF) }
+    val Lime: Color get() = when { !isDark -> Color(0xFF0E7A62); neon -> Color(0xFF39FFB0); else -> Color(0xFF5EE6C4) }
+    val Amber: Color get() = when { !isDark -> Color(0xFF9A5400); neon -> Color(0xFFFFC23D); else -> Color(0xFFFFBE76) }
     /** Text/icons drawn on top of an accent fill. */
-    val OnAccent: Color get() = if (isDark) Color(0xFF0D0E16) else Color.White
+    val OnAccent: Color get() = if (isDark) Color(0xFF07070C) else Color.White
     /** The signature gradient (headers, the status ring, the active tab). */
     val brand: List<Color> get() = listOf(Cyan, Violet, Pink)
 }
+
+/** Neon: true black, surfaces with a violet tint, made for glowing accents. */
+private val NeonGlowDark = darkColorScheme(
+    primary = Color(0xFF00E5FF),
+    onPrimary = Color(0xFF00161A),
+    primaryContainer = Color(0xFF00373F),
+    onPrimaryContainer = Color(0xFFB8F7FF),
+    secondary = Color(0xFFFF2E8B),
+    onSecondary = Color(0xFF1A0010),
+    secondaryContainer = Color(0xFF4F0F2E),
+    onSecondaryContainer = Color(0xFFFFD8E8),
+    tertiary = Color(0xFFA45CFF),
+    onTertiary = Color(0xFF12002B),
+    tertiaryContainer = Color(0xFF34156B),
+    onTertiaryContainer = Color(0xFFEBDCFF),
+    background = Color(0xFF030305),
+    onBackground = Color(0xFFF1F0FA),
+    surface = Color(0xFF09090F),
+    onSurface = Color(0xFFF1F0FA),
+    surfaceVariant = Color(0xFF1B1830),
+    onSurfaceVariant = Color(0xFFBDB8D6),
+    surfaceContainerLowest = Color(0xFF020203),
+    surfaceContainerLow = Color(0xFF0B0A12),
+    surfaceContainer = Color(0xFF0F0E18),
+    surfaceContainerHigh = Color(0xFF14121F),
+    surfaceContainerHighest = Color(0xFF1C1A2B),
+    outline = Color(0xFF3E3960),
+    outlineVariant = Color(0xFF27233F),
+    error = Color(0xFFFF4D6D),
+    errorContainer = Color(0xFF4D0F1C),
+    onErrorContainer = Color(0xFFFFDADF)
+)
 
 /** Default look: deep ink with a hint of blue, quiet surfaces, luminous accents. */
 private val NeonDark = darkColorScheme(
@@ -79,14 +119,17 @@ private val NeonLight = lightColorScheme(
     outlineVariant = Color(0xFFDCDCE6)
 )
 
-enum class ThemeMode { NEON, DYNAMIC, SYSTEM }
+/** NEON: always dark and glowing. STUDIO: always dark and calm. DYNAMIC: Material You. SYSTEM: Studio, light or dark like the phone. */
+enum class ThemeMode { NEON, STUDIO, DYNAMIC, SYSTEM }
 
 @Composable
 fun TikModTheme(mode: ThemeMode = ThemeMode.NEON, content: @Composable () -> Unit) {
     val dark = isSystemInDarkTheme()
     val ctx = LocalContext.current
+    Neon.style = if (mode == ThemeMode.NEON) Neon.Style.NEON else Neon.Style.STUDIO
     val scheme = when (mode) {
-        ThemeMode.NEON -> NeonDark
+        ThemeMode.NEON -> NeonGlowDark
+        ThemeMode.STUDIO -> NeonDark
         ThemeMode.DYNAMIC -> if (Build.VERSION.SDK_INT >= 31) {
             if (dark) dynamicDarkColorScheme(ctx) else dynamicLightColorScheme(ctx)
         } else if (dark) NeonDark else NeonLight

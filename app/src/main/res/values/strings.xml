@@ -883,4 +883,16 @@
     <string name="cl4100_tabs_desc">Archive, auto-save and anonymous viewing, one tap away from anywhere.</string>
     <string name="cl4100_live">Watch what you record</string>
     <string name="cl4100_live_desc">A Watch button on every stream being recorded, and on every followed channel that\'s live, opens it in TikTok.</string>
+    <string name="theme_studio">Studio</string>
+    <string name="focus_why_dynamic">long scrolling</string>
+    <string name="focus_dyn_title">Dynamic stop</string>
+    <string name="focus_dyn_desc">Always on, nothing to start: the longer you scroll without a break, the calmer your feed gets.</string>
+    <string name="focus_dyn_on">Dynamic stop</string>
+    <string name="focus_dyn_grace">Free scrolling first</string>
+    <string name="focus_dyn_rise">Then calmer over</string>
+    <string name="focus_dyn_hint">A 10-minute break resets it. Late at night (23:00–05:00) it kicks in twice as fast. It uses the dial and topics you set.</string>
+    <string name="focus_dyn_free">Normal for %1$d min</string>
+    <string name="focus_dyn_full">Full after %1$d min</string>
+    <string name="cl4100_dyn">Dynamic stop the addiction</string>
+    <string name="cl4100_dyn_desc">Always on: free scrolling first, then the feed gets calmer the longer you go. A short break resets it.</string>
 </resources>

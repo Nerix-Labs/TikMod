@@ -910,4 +910,16 @@
     <string name="cl4100_tabs_desc">Архив, автосохранение и анонимный просмотр — в одно касание откуда угодно.</string>
     <string name="cl4100_live">Смотрите то, что записываете</string>
     <string name="cl4100_live_desc">Кнопка «Смотреть» у каждой записываемой трансляции и у каждого канала в эфире открывает её в TikTok.</string>
+    <string name="theme_studio">Студия</string>
+    <string name="focus_why_dynamic">долгая прокрутка</string>
+    <string name="focus_dyn_title">Динамическая остановка</string>
+    <string name="focus_dyn_desc">Всегда включена, ничего запускать не нужно: чем дольше листаете без перерыва, тем спокойнее лента.</string>
+    <string name="focus_dyn_on">Динамическая остановка</string>
+    <string name="focus_dyn_grace">Сначала свободно</string>
+    <string name="focus_dyn_rise">Затем спокойнее за</string>
+    <string name="focus_dyn_hint">Перерыв в 10 минут сбрасывает её. Ночью (23:00–05:00) она включается вдвое быстрее. Использует вашу шкалу и темы.</string>
+    <string name="focus_dyn_free">Обычно %1$d мин</string>
+    <string name="focus_dyn_full">Полностью через %1$d мин</string>
+    <string name="cl4100_dyn">Динамическая остановка зависимости</string>
+    <string name="cl4100_dyn_desc">Всегда включена: сначала свободная прокрутка, потом лента спокойнее, чем дольше вы листаете. Короткий перерыв сбрасывает.</string>
 </resources>
