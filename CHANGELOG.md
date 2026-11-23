@@ -23,8 +23,11 @@ All notable changes to TikMod. Versions follow [semantic versioning](https://sem
   blocked now.
 
 ### Notes
+- **Beta.** Checked on a phone with TikTok 47.9.2: story download, the archive (video and photo stories), anonymous
+  story viewing and hidden profile visits work. The 🗑 mark and auto-save haven't been seen live yet, and 47.9.2
+  sent no `aweme/v1/fast/stats/` report to block. Problems: About → Report a bug.
 - Targets were found in TikTok 47.1.4's Retrofit interfaces and Gson models (`UserStory.getStories`,
-  `Aweme.getIsTikTokStory`, `Story.setViewed`), whose names aren't obfuscated. Not yet checked on a phone.
+  `Aweme.getIsTikTokStory`, `Story.setViewed`), whose names aren't obfuscated.
 
 ## 4.8.0 — 2026-11-22
 

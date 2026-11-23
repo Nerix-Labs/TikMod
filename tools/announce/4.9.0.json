@@ -1,7 +1,7 @@
 {
   "en": {
     "badge": { "e": "📖", "id": "" },
-    "title": "TikMod 4.9.0 — Stories, your way",
+    "title": "TikMod 4.9.0 Beta — Stories, your way",
     "summary": "Save any story, keep the ones that get deleted, and watch without showing up on the viewer list.",
     "bullets": [
       { "icon": { "e": "⬇️", "id": "" }, "text": "Download any story without a watermark, video or photos, from its share sheet" },
@@ -15,7 +15,7 @@
   },
   "he": {
     "badge": { "e": "📖", "id": "" },
-    "title": "TikMod 4.9.0 — סטוריז, בדרך שלכם",
+    "title": "TikMod 4.9.0 בטא — סטוריז, בדרך שלכם",
     "summary": "שומרים כל סטורי, מחזיקים גם את אלה שנמחקו, וצופים בלי להופיע ברשימת הצופים.",
     "bullets": [
       { "icon": { "e": "⬇️", "id": "" }, "text": "הורדת כל סטורי בלי סימן מים, סרטון או תמונות, מחלון השיתוף" },
@@ -27,5 +27,5 @@
       { "icon": { "e": "🔒", "id": "" }, "text": "כולל גם את 4.8.0: הקלטה אוטומטית של לייבים בחשבונות פרטיים, עצירה של כל הקלטה בנפרד, איכות לכל ערוץ, דיווח על באג" }
     ]
   },
-  "footer": "Works on TikTok 47.9.2 · עובד על טיקטוק 47.9.2"
+  "footer": "Beta · Works on TikTok 47.9.2 · בטא · עובד על טיקטוק 47.9.2"
 }
