@@ -861,4 +861,26 @@
         <item quantity="one">%1$s deleted a story</item>
         <item quantity="other">%1$s deleted %2$d stories</item>
     </plurals>
+
+    <!-- 4.10.0: Studio look (home, stories tab, LIVE watch) -->
+    <string name="greet_morning">Good morning</string>
+    <string name="greet_afternoon">Good afternoon</string>
+    <string name="greet_evening">Good evening</string>
+    <string name="greet_night">Up late</string>
+    <string name="today_min">min</string>
+    <string name="today_watched">watched</string>
+    <string name="today_videos">videos</string>
+    <string name="today_creators">creators</string>
+    <string name="today_stories">stories kept</string>
+    <string name="today_deleted">deleted, still yours</string>
+    <string name="today_empty">Nothing yet today. Open TikTok and your day shows up here.</string>
+    <string name="live_watch">Watch</string>
+    <string name="stories_stat_kept">Archived</string>
+    <string name="stories_stat_deleted">Deleted</string>
+    <string name="cl4100_design">A whole new look</string>
+    <string name="cl4100_design_desc">Calmer, deeper and easier to read: new colors and cards, a home screen that shows your day, and a bottom bar with every section.</string>
+    <string name="cl4100_tabs">Stories get their own tab</string>
+    <string name="cl4100_tabs_desc">Archive, auto-save and anonymous viewing, one tap away from anywhere.</string>
+    <string name="cl4100_live">Watch what you record</string>
+    <string name="cl4100_live_desc">A Watch button on every stream being recorded, and on every followed channel that\'s live, opens it in TikTok.</string>
 </resources>

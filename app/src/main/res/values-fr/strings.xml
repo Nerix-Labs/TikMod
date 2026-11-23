@@ -874,4 +874,26 @@
         <item quantity="many">%1$s a supprimé %2$d stories</item>
         <item quantity="other">%1$s a supprimé %2$d stories</item>
     </plurals>
+
+    <!-- 4.10.0: Studio look (home, stories tab, LIVE watch) -->
+    <string name="greet_morning">Bonjour</string>
+    <string name="greet_afternoon">Bon après-midi</string>
+    <string name="greet_evening">Bonsoir</string>
+    <string name="greet_night">Bonne nuit</string>
+    <string name="today_min">min</string>
+    <string name="today_watched">regardé</string>
+    <string name="today_videos">vidéos</string>
+    <string name="today_creators">créateurs</string>
+    <string name="today_stories">stories gardées</string>
+    <string name="today_deleted">supprimées, toujours à vous</string>
+    <string name="today_empty">Rien encore aujourd\'hui. Ouvrez TikTok et votre journée apparaîtra ici.</string>
+    <string name="live_watch">Regarder</string>
+    <string name="stories_stat_kept">Archivées</string>
+    <string name="stories_stat_deleted">Supprimées</string>
+    <string name="cl4100_design">Un tout nouveau look</string>
+    <string name="cl4100_design_desc">Plus calme, plus profond et plus lisible : nouvelles couleurs et cartes, un écran d\'accueil qui montre votre journée et une barre avec toutes les sections.</string>
+    <string name="cl4100_tabs">Les stories ont leur onglet</string>
+    <string name="cl4100_tabs_desc">Archive, sauvegarde auto et visionnage anonyme, à un geste de partout.</string>
+    <string name="cl4100_live">Regardez ce que vous enregistrez</string>
+    <string name="cl4100_live_desc">Un bouton Regarder sur chaque live enregistré et chaque chaîne suivie en direct l\'ouvre dans TikTok.</string>
 </resources>

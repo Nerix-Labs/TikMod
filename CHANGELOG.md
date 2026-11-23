@@ -5,6 +5,15 @@ All notable changes to TikMod. Versions follow [semantic versioning](https://sem
 ## 4.10.0 — 2026-11-23
 
 ### Added
+- **A whole new look ("Studio").** Deep ink background with one slow light and a faint dot grid, opaque surfaces
+  with a fine edge, an iris / rose / lavender palette, editorial headlines with small-caps overlines, compact quick
+  toggles with mini switches, and a docked bottom bar that names every section.
+- **Home shows your day.** A greeting, a "Today" card (minutes watched in the feed as a ring, videos, creators,
+  stories kept, deletions caught) and, while something is recording, a "Recording now" card.
+- **Stories have their own tab**, with archive / deleted / creator counts at the top (it used to live inside
+  Downloads).
+- **Watch what you record.** Every stream being recorded (Home and LIVE) and every followed channel that's live has a
+  Watch button that opens that LIVE in TikTok; tapping a live channel's row does the same.
 - **Watch history.** Every video and photo post the feed puts on screen (`VideoViewCell.onPageSelected`, the same
   target "Stop the addiction" learns from) is kept on the phone (Downloads → Watch history): author, caption, a small
   cover, how many times you saw it and how long it was on screen. Search by name, @handle or caption, grouped by day;
@@ -18,9 +27,10 @@ All notable changes to TikMod. Versions follow [semantic versioning](https://sem
 - **Search the download history**, and filter it by kind (videos, photos, audio, covers, profile pictures, LIVE).
 
 ### Notes
-- **Beta.** The TikMod side (storage, screens, notification, search, 10 languages) was tested on an emulator with
-  TikTok's calls played over adb (debug builds only accept them from the shell). The watch-history hook itself
-  wasn't run in TikTok yet; it uses the same `VideoViewCell.onPageSelected` the Focus hook already uses on 47.9.2.
+- **Beta.** Watch history was checked in TikTok 47.9.2 on a phone (posts, covers and time on screen recorded; the
+  feed ad left out), and the new look on the phone in Hebrew. Notifications, the archive by creator and download
+  search were tested on an emulator with TikTok's calls played over adb (debug builds only accept them from the
+  shell). The Watch button opens `tiktok.com/@handle/live` in TikTok; it wasn't seen on a channel that was live.
 
 ## 4.9.0 — 2026-11-22
 

@@ -1,0 +1,31 @@
+{
+  "en": {
+    "badge": { "e": "✨", "id": "" },
+    "title": "TikMod 4.10.0 Beta — A whole new look",
+    "summary": "Calmer, deeper, easier to use — and it shows you your day.",
+    "bullets": [
+      { "icon": { "e": "🎨", "id": "" }, "text": "New design from top to bottom, with a bottom bar for every section" },
+      { "icon": { "e": "📊", "id": "" }, "text": "Home shows your day: minutes watched, videos, stories kept, deletions caught" },
+      { "icon": { "e": "🕘", "id": "" }, "text": "Watch history: every video you scroll to, searchable, on the phone only" },
+      { "icon": { "e": "▶️", "id": "" }, "text": "Watch button: open any stream being recorded, or any followed channel that's live" },
+      { "icon": { "e": "📖", "id": "" }, "text": "Stories get their own tab, with the archive grouped by creator" },
+      { "icon": { "e": "🔔", "id": "" }, "text": "A notification when a story in your archive gets deleted" },
+      { "icon": { "e": "🔎", "id": "" }, "text": "Search and filter your downloads" }
+    ]
+  },
+  "he": {
+    "badge": { "e": "✨", "id": "" },
+    "title": "TikMod 4.10.0 בטא — מראה חדש לגמרי",
+    "summary": "רגוע יותר, עמוק יותר, נוח יותר — ומראה לכם את היום שלכם.",
+    "bullets": [
+      { "icon": { "e": "🎨", "id": "" }, "text": "עיצוב חדש מקצה לקצה, עם פס תחתון לכל החלקים" },
+      { "icon": { "e": "📊", "id": "" }, "text": "מסך הבית מראה את היום שלכם: דקות צפייה, סרטונים, סטוריז שנשמרו ומחיקות שנתפסו" },
+      { "icon": { "e": "🕘", "id": "" }, "text": "היסטוריית צפייה: כל סרטון שגללתם אליו, עם חיפוש, רק בטלפון" },
+      { "icon": { "e": "▶️", "id": "" }, "text": "כפתור צפייה: פותחים כל שידור שמוקלט או ערוץ במעקב שמשדר עכשיו" },
+      { "icon": { "e": "📖", "id": "" }, "text": "לסטוריז יש כרטיסייה משלהם, והארכיון מסודר לפי יוצר" },
+      { "icon": { "e": "🔔", "id": "" }, "text": "התראה כשסטורי מהארכיון שלכם נמחק" },
+      { "icon": { "e": "🔎", "id": "" }, "text": "חיפוש וסינון בהורדות" }
+    ]
+  },
+  "footer": "Beta · Works on TikTok 47.9.2 · בטא · עובד על טיקטוק 47.9.2"
+}

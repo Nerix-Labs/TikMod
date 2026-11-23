@@ -846,4 +846,26 @@
     <plurals name="notif_stories_deleted">
         <item quantity="other">%1$s 删除了 %2$d 条快拍</item>
     </plurals>
+
+    <!-- 4.10.0: Studio look (home, stories tab, LIVE watch) -->
+    <string name="greet_morning">早上好</string>
+    <string name="greet_afternoon">下午好</string>
+    <string name="greet_evening">晚上好</string>
+    <string name="greet_night">夜深了</string>
+    <string name="today_min">分钟</string>
+    <string name="today_watched">已观看</string>
+    <string name="today_videos">个视频</string>
+    <string name="today_creators">位创作者</string>
+    <string name="today_stories">条快拍已保存</string>
+    <string name="today_deleted">已删除，仍在你这里</string>
+    <string name="today_empty">今天还没有记录。打开 TikTok，你的今天会显示在这里。</string>
+    <string name="live_watch">观看</string>
+    <string name="stories_stat_kept">已存档</string>
+    <string name="stories_stat_deleted">已删除</string>
+    <string name="cl4100_design">全新外观</string>
+    <string name="cl4100_design_desc">更沉静、更有层次、更易读：新的配色与卡片，展示你一天的主页，以及包含所有板块的底部栏。</string>
+    <string name="cl4100_tabs">快拍拥有独立标签页</string>
+    <string name="cl4100_tabs_desc">存档、自动保存和匿名观看，随时一触即达。</string>
+    <string name="cl4100_live">观看正在录制的直播</string>
+    <string name="cl4100_live_desc">每个正在录制的直播、每个正在直播的关注频道都有「观看」按钮，可在 TikTok 中打开。</string>
 </resources>

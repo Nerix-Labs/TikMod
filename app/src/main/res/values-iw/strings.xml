@@ -888,4 +888,26 @@
         <item quantity="many">%1$s מחק/ה %2$d סטוריז</item>
         <item quantity="other">%1$s מחק/ה %2$d סטוריז</item>
     </plurals>
+
+    <!-- 4.10.0: Studio look (home, stories tab, LIVE watch) -->
+    <string name="greet_morning">בוקר טוב</string>
+    <string name="greet_afternoon">צהריים טובים</string>
+    <string name="greet_evening">ערב טוב</string>
+    <string name="greet_night">לילה טוב</string>
+    <string name="today_min">דק׳</string>
+    <string name="today_watched">נצפו</string>
+    <string name="today_videos">סרטונים</string>
+    <string name="today_creators">יוצרים</string>
+    <string name="today_stories">סטוריז נשמרו</string>
+    <string name="today_deleted">נמחקו, נשארו אצלך</string>
+    <string name="today_empty">עדיין אין כלום היום. פותחים את טיקטוק, והיום שלך יופיע כאן.</string>
+    <string name="live_watch">צפייה</string>
+    <string name="stories_stat_kept">בארכיון</string>
+    <string name="stories_stat_deleted">נמחקו</string>
+    <string name="cl4100_design">מראה חדש לגמרי</string>
+    <string name="cl4100_design_desc">רגוע, עמוק וקל לקריאה: צבעים וכרטיסים חדשים, מסך בית שמראה את היום שלך, ופס תחתון עם כל החלקים.</string>
+    <string name="cl4100_tabs">לסטוריז יש כרטיסייה משלהם</string>
+    <string name="cl4100_tabs_desc">ארכיון, שמירה אוטומטית וצפייה אנונימית, במרחק נגיעה מכל מקום.</string>
+    <string name="cl4100_live">לצפות במה שמוקלט</string>
+    <string name="cl4100_live_desc">כפתור צפייה בכל שידור שמוקלט ובכל ערוץ במעקב שמשדר עכשיו פותח אותו בטיקטוק.</string>
 </resources>

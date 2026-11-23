@@ -35,6 +35,7 @@ Made by **Nerix Labs**.
 - Auto-record: follow channels and recording starts by itself when they go live, even when TikTok is closed —
   private accounts you follow included (as soon as TikTok shows their LIVE), with a quality per channel
 - Stop any single recording from the LIVE you're watching; the others keep going
+- Watch: one tap from TikMod opens any stream being recorded, or any followed channel that's live, in TikTok
 - Recordings run in TikMod's own foreground service, so they keep going after TikTok is swiped away
 
 **Stories**

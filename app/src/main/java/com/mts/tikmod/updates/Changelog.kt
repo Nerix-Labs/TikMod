@@ -19,7 +19,10 @@ object Changelog {
     val versions: List<Version> = listOf(
         Version(
             "4.10.0", "2026-11-23", listOf(
+                Item(Icons.Rounded.AutoAwesome, R.string.cl4100_design, R.string.cl4100_design_desc) { Neon.Violet },
                 Item(Icons.Rounded.Restore, R.string.cl4100_watch, R.string.cl4100_watch_desc) { Neon.Cyan },
+                Item(Icons.Rounded.PlayCircle, R.string.cl4100_live, R.string.cl4100_live_desc) { Neon.Pink },
+                Item(Icons.Rounded.AutoStories, R.string.cl4100_tabs, R.string.cl4100_tabs_desc) { Neon.Pink },
                 Item(Icons.Rounded.NotificationsActive, R.string.cl4100_notify, R.string.cl4100_notify_desc) { Neon.Pink },
                 Item(Icons.Rounded.People, R.string.cl4100_creators, R.string.cl4100_creators_desc) { Neon.Violet },
                 Item(Icons.Rounded.Search, R.string.cl4100_search, R.string.cl4100_search_desc) { Neon.Amber },

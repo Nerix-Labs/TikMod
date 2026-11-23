@@ -888,4 +888,26 @@
         <item quantity="many">%1$s удалил(а) %2$d историй</item>
         <item quantity="other">%1$s удалил(а) %2$d истории</item>
     </plurals>
+
+    <!-- 4.10.0: Studio look (home, stories tab, LIVE watch) -->
+    <string name="greet_morning">Доброе утро</string>
+    <string name="greet_afternoon">Добрый день</string>
+    <string name="greet_evening">Добрый вечер</string>
+    <string name="greet_night">Доброй ночи</string>
+    <string name="today_min">мин</string>
+    <string name="today_watched">просмотрено</string>
+    <string name="today_videos">видео</string>
+    <string name="today_creators">авторов</string>
+    <string name="today_stories">историй сохранено</string>
+    <string name="today_deleted">удалены, но у вас</string>
+    <string name="today_empty">Сегодня пока пусто. Откройте TikTok — и ваш день появится здесь.</string>
+    <string name="live_watch">Смотреть</string>
+    <string name="stories_stat_kept">В архиве</string>
+    <string name="stories_stat_deleted">Удалено</string>
+    <string name="cl4100_design">Совершенно новый вид</string>
+    <string name="cl4100_design_desc">Спокойнее, глубже и читабельнее: новые цвета и карточки, главный экран с вашим днём и нижняя панель со всеми разделами.</string>
+    <string name="cl4100_tabs">У историй своя вкладка</string>
+    <string name="cl4100_tabs_desc">Архив, автосохранение и анонимный просмотр — в одно касание откуда угодно.</string>
+    <string name="cl4100_live">Смотрите то, что записываете</string>
+    <string name="cl4100_live_desc">Кнопка «Смотреть» у каждой записываемой трансляции и у каждого канала в эфире открывает её в TikTok.</string>
 </resources>

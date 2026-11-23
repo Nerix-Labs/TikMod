@@ -46,6 +46,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate as rotateDraw
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -59,36 +60,47 @@ import com.mts.tikmod.ui.theme.Neon
 import kotlinx.coroutines.delay
 
 /*
- * TikMod design system v4 — "glass & neon".
- * Aurora background, glass cards with a hairline gradient border, icon tiles, sliding segmented controls,
- * staggered entrance animations. Every control is bound directly to a Prefs key.
+ * TikMod design system v5 — "Studio".
+ * Deep ink background with one slow light source, quiet opaque surfaces with a fine edge, tinted icon tiles,
+ * small-caps overlines, a single brand gradient used sparingly. Every control is bound directly to a Prefs key.
  */
 
 /** Secondary text: readable on every scheme (dynamic schemes have a very muted onSurfaceVariant). */
 val Subtle: Color
-    @Composable get() = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.72f)
+    @Composable get() = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.66f)
+
+/** The fine edge every surface has. */
+val Edge: Color
+    @Composable get() = MaterialTheme.colorScheme.onSurface.copy(alpha = if (Neon.isDark) 0.07f else 0.09f)
 
 // ------------------------------------------------------------------ background
 
-/** Slowly drifting neon blobs behind everything. */
+/** One soft light from the top, drifting very slowly, and a faint dot grid: depth without noise. */
 @Composable
 fun AuroraBackground(modifier: Modifier = Modifier) {
-    val t = rememberInfiniteTransition(label = "aurora")
-    val a by t.animateFloat(0f, 1f, infiniteRepeatable(tween(14000, easing = LinearEasing), RepeatMode.Reverse), label = "a")
-    val b by t.animateFloat(0f, 1f, infiniteRepeatable(tween(19000, easing = LinearEasing), RepeatMode.Reverse), label = "b")
+    val t = rememberInfiniteTransition(label = "light")
+    val a by t.animateFloat(0f, 1f, infiniteRepeatable(tween(16000, easing = LinearEasing), RepeatMode.Reverse), label = "a")
     val bg = MaterialTheme.colorScheme.background
     val dark = bg.luminance() < 0.5f
-    val strength = if (dark) 0.6f else 0.45f
+    val dot = MaterialTheme.colorScheme.onSurface.copy(alpha = if (dark) 0.035f else 0.05f)
     Canvas(modifier.fillMaxSize()) {
         drawRect(bg)
-        fun blob(c: Color, x: Float, y: Float, r: Float) = drawCircle(
-            Brush.radialGradient(listOf(c.copy(alpha = 0.22f * strength), Color.Transparent), center = Offset(x, y), radius = r),
+        val w = size.width; val h = size.height
+        fun glow(c: Color, x: Float, y: Float, r: Float, alpha: Float) = drawCircle(
+            Brush.radialGradient(listOf(c.copy(alpha = alpha), Color.Transparent), center = Offset(x, y), radius = r),
             radius = r, center = Offset(x, y)
         )
-        val w = size.width; val h = size.height
-        blob(Neon.Cyan, w * (0.15f + 0.25f * a), h * (0.12f + 0.10f * b), w * 0.75f)
-        blob(Neon.Pink, w * (0.95f - 0.30f * b), h * (0.38f + 0.15f * a), w * 0.70f)
-        blob(Neon.Violet, w * (0.30f + 0.40f * b), h * (0.85f - 0.12f * a), w * 0.80f)
+        glow(Neon.Cyan, w * (0.10f + 0.20f * a), -h * 0.02f, w * 0.95f, if (dark) 0.16f else 0.10f)
+        glow(Neon.Pink, w * (0.95f - 0.15f * a), h * 0.10f, w * 0.65f, if (dark) 0.08f else 0.06f)
+        // Dot grid, fading out towards the bottom.
+        val step = 22.dp.toPx()
+        var y = step / 2
+        while (y < h * 0.55f) {
+            val fade = 1f - y / (h * 0.55f)
+            var x = step / 2
+            while (x < w) { drawCircle(dot.copy(alpha = dot.alpha * fade), radius = 1.1f, center = Offset(x, y)); x += step }
+            y += step
+        }
     }
 }
 
@@ -111,16 +123,23 @@ fun Appear(index: Int, content: @Composable () -> Unit) {
 
 // ------------------------------------------------------------------ cards
 
+/**
+ * The one surface everything sits on: opaque, a fine edge, a faint light along the top. `glow` washes it with the
+ * brand gradient instead (hero cards, something that's on).
+ */
 @Composable
 fun GlassCard(modifier: Modifier = Modifier, glow: Boolean = false, padding: Dp = 18.dp, content: @Composable ColumnScope.() -> Unit) {
     val cs = MaterialTheme.colorScheme
-    val border = if (glow) Brush.linearGradient(listOf(Neon.Cyan, Neon.Violet, Neon.Pink))
-    else Brush.linearGradient(listOf(cs.onSurface.copy(alpha = 0.14f), cs.onSurface.copy(alpha = 0.05f), Neon.Pink.copy(alpha = 0.18f)))
+    val shape = RoundedCornerShape(24.dp)
+    val fill = if (glow) Brush.linearGradient(listOf(Neon.Cyan.copy(alpha = 0.16f), Neon.Violet.copy(alpha = 0.08f), cs.surfaceContainer.copy(alpha = 0.97f)))
+    else Brush.verticalGradient(listOf(cs.surfaceContainerHigh.copy(alpha = 0.97f), cs.surfaceContainer.copy(alpha = 0.97f)))
+    val edge = if (glow) Brush.linearGradient(listOf(Neon.Cyan.copy(alpha = 0.45f), Neon.Violet.copy(alpha = 0.18f), Edge))
+    else Brush.verticalGradient(listOf(cs.onSurface.copy(alpha = if (Neon.isDark) 0.10f else 0.10f), Edge))
     Column(
         modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(26.dp))
-            .background(cs.surfaceContainerHigh.copy(alpha = 0.94f))
-            .border(1.dp, border, RoundedCornerShape(26.dp))
+            .clip(shape)
+            .background(fill)
+            .border(1.dp, edge, shape)
             .padding(padding),
         content = content
     )
@@ -146,14 +165,14 @@ fun Section(
                 .then(if (collapsible) Modifier.clickable { expanded = !expanded } else Modifier),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconTile(icon, accent, 44.dp)
+            IconTile(icon, accent, 40.dp)
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(title, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                    Text(title, fontWeight = FontWeight.Bold, fontSize = 16.5.sp, letterSpacing = (-0.2).sp)
                     if (badge != null) { Spacer(Modifier.width(8.dp)); Tag(badge) }
                 }
-                if (subtitle != null) Text(subtitle, fontSize = 13.sp, color = Subtle, lineHeight = 17.sp)
+                if (subtitle != null) Text(subtitle, fontSize = 12.5.sp, color = Subtle, lineHeight = 16.sp)
             }
             if (collapsible) Icon(Icons.Rounded.ExpandMore, null, Modifier.rotate(arrow), tint = Subtle)
         }
@@ -166,27 +185,28 @@ fun Section(
 @Composable
 fun IconTile(icon: ImageVector, accent: Color, size: Dp = 40.dp) {
     Box(
-        Modifier.size(size).clip(RoundedCornerShape(size * 0.32f))
-            .background(Brush.linearGradient(listOf(accent.copy(alpha = 0.30f), accent.copy(alpha = 0.10f))))
-            .border(1.dp, accent.copy(alpha = 0.35f), RoundedCornerShape(size * 0.32f)),
+        Modifier.size(size).clip(RoundedCornerShape(size * 0.30f))
+            .background(accent.copy(alpha = if (Neon.isDark) 0.14f else 0.12f)),
         contentAlignment = Alignment.Center
-    ) { Icon(icon, null, tint = accent, modifier = Modifier.size(size * 0.52f)) }
+    ) { Icon(icon, null, tint = accent, modifier = Modifier.size(size * 0.50f)) }
 }
 
 @Composable
 fun Tag(text: String, color: Color = when (text) { L.t(R.string.tag_new) -> Neon.Lime; L.t(R.string.tag_experimental) -> Neon.Amber; else -> Neon.Cyan }) {
     Text(
-        text, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Neon.OnAccent,
-        modifier = Modifier.clip(CircleShape).background(color).padding(horizontal = 8.dp, vertical = 2.dp)
+        text.uppercase(), fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = color, letterSpacing = 0.8.sp,
+        modifier = Modifier.clip(RoundedCornerShape(6.dp)).background(color.copy(alpha = 0.16f)).padding(horizontal = 6.dp, vertical = 2.dp)
     )
 }
 
+/** Small-caps overline between groups of cards. */
 @Composable
 fun SectionLabel(text: String) {
-    Text(
-        text, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp,
-        color = Subtle, modifier = Modifier.padding(start = 6.dp, top = 6.dp)
-    )
+    Row(Modifier.padding(start = 6.dp, top = 10.dp, end = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(text.uppercase(), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.6.sp, color = Subtle)
+        Spacer(Modifier.width(10.dp))
+        Box(Modifier.weight(1f).height(1.dp).background(Brush.horizontalGradient(listOf(Edge, Color.Transparent))))
+    }
 }
 
 // ------------------------------------------------------------------ controls
@@ -259,19 +279,20 @@ fun SegmentedPref(title: String, key: String, options: List<Opt>, description: S
 fun Segmented(options: List<Opt>, selected: String, accent: Color = Neon.Cyan, onSelect: (String) -> Unit) {
     val index = options.indexOfFirst { it.value == selected }.coerceAtLeast(0)
     BoxWithConstraints(
-        Modifier.fillMaxWidth().height(46.dp).clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)).padding(4.dp)
+        Modifier.fillMaxWidth().height(44.dp).clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            .border(1.dp, Edge, RoundedCornerShape(14.dp)).padding(4.dp)
     ) {
         val segW = maxWidth / options.size
         val offset by animateDpAsState(segW * index, spring(Spring.DampingRatioLowBouncy, Spring.StiffnessMediumLow), label = "seg")
         Box(
-            Modifier.offset(x = offset).width(segW).fillMaxHeight().clip(RoundedCornerShape(12.dp))
-                .background(accent)
+            Modifier.offset(x = offset).width(segW).fillMaxHeight().clip(RoundedCornerShape(10.dp))
+                .background(accent.copy(alpha = 0.20f)).border(1.dp, accent.copy(alpha = 0.55f), RoundedCornerShape(10.dp))
         )
         Row(Modifier.fillMaxSize()) {
             options.forEachIndexed { i, o ->
                 val on = i == index
-                val color by animateColorAsState(if (on) Neon.OnAccent else MaterialTheme.colorScheme.onSurface, label = "c")
+                val color by animateColorAsState(if (on) accent else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f), label = "c")
                 Row(
                     Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(12.dp))
                         .clickable(remember { MutableInteractionSource() }, null) { onSelect(o.value) },
@@ -294,8 +315,9 @@ fun Hairline() = Box(
 @Composable
 fun Hint(text: String) {
     Row(
-        Modifier.fillMaxWidth().padding(top = 6.dp).clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f)).padding(12.dp)
+        Modifier.fillMaxWidth().padding(top = 6.dp).clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f))
+            .border(1.dp, Edge, RoundedCornerShape(14.dp)).padding(12.dp)
     ) {
         Icon(Icons.Rounded.Info, null, tint = Subtle, modifier = Modifier.size(16.dp).padding(top = 1.dp))
         Spacer(Modifier.width(8.dp))
@@ -326,11 +348,14 @@ fun CountUp(value: Long, fontSize: androidx.compose.ui.unit.TextUnit = 26.sp, co
 }
 
 @Composable
-fun StatTile(icon: ImageVector, value: Long, label: String, accent: Color, modifier: Modifier = Modifier) {
+fun StatTile(icon: ImageVector, value: Long, label: String, accent: Color, modifier: Modifier = Modifier, suffix: String = "") {
     GlassCard(modifier, padding = 14.dp) {
-        Icon(icon, null, tint = accent, modifier = Modifier.size(20.dp))
-        Spacer(Modifier.height(8.dp))
-        CountUp(value, 24.sp)
+        IconTile(icon, accent, 30.dp)
+        Spacer(Modifier.height(10.dp))
+        Row(verticalAlignment = Alignment.Bottom) {
+            CountUp(value, 24.sp)
+            if (suffix.isNotEmpty()) Text(suffix, fontSize = 12.sp, color = Subtle, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 2.dp, bottom = 4.dp))
+        }
         Text(label, fontSize = 11.5.sp, color = Subtle, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
@@ -340,47 +365,67 @@ fun StatTile(icon: ImageVector, value: Long, label: String, accent: Color, modif
 fun QuickTile(icon: ImageVector, title: String, key: String, accent: Color, modifier: Modifier = Modifier, onChange: (Boolean) -> Unit = {}) {
     val ctx = LocalContext.current
     var on by remember(key) { mutableStateOf(Prefs.bool(ctx, key)) }
-    val bg by animateColorAsState(if (on) accent.copy(alpha = 0.18f) else MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.94f), tween(300), label = "qbg")
-    val borderA by animateFloatAsState(if (on) 0.9f else 0.12f, tween(300), label = "qb")
+    val bg by animateColorAsState(if (on) accent.copy(alpha = 0.13f) else MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.97f), tween(300), label = "qbg")
+    val borderA by animateFloatAsState(if (on) 0.45f else 0f, tween(300), label = "qb")
     val press by animateFloatAsState(if (on) 1f else 0.98f, spring(Spring.DampingRatioMediumBouncy), label = "qs")
-    Column(
-        modifier.scale(press).clip(RoundedCornerShape(22.dp)).background(bg)
-            .border(1.dp, accent.copy(alpha = borderA), RoundedCornerShape(22.dp))
+    val knob by animateDpAsState(if (on) 14.dp else 0.dp, spring(Spring.DampingRatioMediumBouncy), label = "knob")
+    Row(
+        modifier.scale(press).clip(RoundedCornerShape(18.dp)).background(bg)
+            .border(1.dp, if (on) accent.copy(alpha = borderA) else Edge, RoundedCornerShape(18.dp))
             .clickable { on = !on; Prefs.setBool(ctx, key, on); onChange(on) }
-            .padding(14.dp)
+            .padding(horizontal = 12.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, null, tint = if (on) accent else Subtle, modifier = Modifier.size(24.dp))
-            Spacer(Modifier.weight(1f))
-            Box(Modifier.size(8.dp).clip(CircleShape).background(if (on) accent else MaterialTheme.colorScheme.outline))
+        IconTile(icon, if (on) accent else Subtle, 34.dp)
+        Spacer(Modifier.width(10.dp))
+        Column(Modifier.weight(1f)) {
+            Text(title, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, lineHeight = 16.sp, overflow = TextOverflow.Ellipsis)
+            Text(if (on) L.t(R.string.state_on) else L.t(R.string.state_off), fontSize = 11.sp, color = if (on) accent else Subtle)
         }
-        Spacer(Modifier.height(14.dp))
-        Text(title, fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, lineHeight = 17.sp)
-        Text(if (on) L.t(R.string.state_on) else L.t(R.string.state_off), fontSize = 11.sp, color = if (on) accent else Subtle)
+        // A tiny switch, so it reads as a toggle at a glance.
+        Box(
+            Modifier.width(30.dp).height(16.dp).clip(CircleShape)
+                .background(if (on) accent.copy(alpha = 0.85f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)).padding(2.dp)
+        ) { Box(Modifier.offset(x = knob).size(12.dp).clip(CircleShape).background(if (on) Neon.OnAccent else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))) }
     }
 }
 
-/** Rotating rings around a status core (home hero). */
+/**
+ * Progress ring with a value in the middle (home: today's time on TikTok against a daily reference).
+ * [progress] 0..1 fills it; the rest of the track stays faint.
+ */
 @Composable
-fun CoreOrb(active: Boolean, size: Dp = 112.dp) {
+fun ProgressRing(progress: Float, size: Dp, stroke: Dp = 9.dp, colors: List<Color> = Neon.brand, content: @Composable () -> Unit) {
+    val p by animateFloatAsState(progress.coerceIn(0f, 1f), tween(1100, easing = FastOutSlowInEasing), label = "ring")
+    val track = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
+    Box(Modifier.size(size), contentAlignment = Alignment.Center) {
+        Canvas(Modifier.fillMaxSize()) {
+            val s = stroke.toPx()
+            val inset = s / 2
+            val arcSize = androidx.compose.ui.geometry.Size(this.size.width - s, this.size.height - s)
+            drawArc(track, 0f, 360f, false, topLeft = Offset(inset, inset), size = arcSize, style = Stroke(s))
+            if (p > 0f) rotateDraw(-90f) {
+                drawArc(Brush.sweepGradient(colors + colors.first()), 0f, 360f * p, false, topLeft = Offset(inset, inset), size = arcSize,
+                    style = Stroke(s, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+            }
+        }
+        content()
+    }
+}
+
+/** Status mark for the home header: a breathing dot inside a slowly turning gradient ring. */
+@Composable
+fun CoreOrb(active: Boolean, size: Dp = 64.dp) {
     val t = rememberInfiniteTransition(label = "orb")
-    val r1 by t.animateFloat(0f, 360f, infiniteRepeatable(tween(7000, easing = LinearEasing)), label = "r1")
-    val r2 by t.animateFloat(360f, 0f, infiniteRepeatable(tween(11000, easing = LinearEasing)), label = "r2")
-    val breathe by t.animateFloat(0.85f, 1f, infiniteRepeatable(tween(1800, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "br")
+    val r by t.animateFloat(0f, 360f, infiniteRepeatable(tween(9000, easing = LinearEasing)), label = "r")
+    val breathe by t.animateFloat(0.82f, 1f, infiniteRepeatable(tween(1800, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "br")
     val core = if (active) Neon.Lime else Neon.Pink
     Box(Modifier.size(size), contentAlignment = Alignment.Center) {
-        Canvas(Modifier.fillMaxSize().rotate(r1)) {
-            drawArc(Brush.sweepGradient(listOf(Color.Transparent, Neon.Cyan, Neon.Violet, Color.Transparent)), 0f, 280f, false, style = Stroke(3.dp.toPx()))
+        Canvas(Modifier.fillMaxSize().rotate(r)) {
+            drawCircle(Brush.sweepGradient(Neon.brand + Neon.brand.first()), style = Stroke(2.dp.toPx()), radius = this.size.minDimension / 2 - 2.dp.toPx())
         }
-        Canvas(Modifier.fillMaxSize(0.78f).rotate(r2)) {
-            drawArc(Brush.sweepGradient(listOf(Color.Transparent, Neon.Pink, Neon.Amber, Color.Transparent)), 40f, 220f, false, style = Stroke(2.dp.toPx()))
-        }
-        Box(
-            Modifier.size(size * 0.46f).scale(breathe).clip(CircleShape)
-                .background(Brush.radialGradient(listOf(core.copy(alpha = 0.95f), core.copy(alpha = 0.25f))))
-        )
-        Box(Modifier.size(size * 0.46f).alpha(0.9f), contentAlignment = Alignment.Center) {
-            Text(if (active) "ON" else "OFF", fontWeight = FontWeight.Black, fontSize = 15.sp, color = Neon.OnAccent)
+        Box(Modifier.size(size * 0.62f).clip(CircleShape).background(core.copy(alpha = 0.12f)), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(size * 0.24f).scale(breathe).clip(CircleShape).background(core))
         }
     }
 }

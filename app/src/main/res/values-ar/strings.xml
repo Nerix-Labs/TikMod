@@ -916,4 +916,26 @@
         <item quantity="many">حذف %1$s %2$d قصص</item>
         <item quantity="other">حذف %1$s %2$d قصص</item>
     </plurals>
+
+    <!-- 4.10.0: Studio look (home, stories tab, LIVE watch) -->
+    <string name="greet_morning">صباح الخير</string>
+    <string name="greet_afternoon">طاب يومك</string>
+    <string name="greet_evening">مساء الخير</string>
+    <string name="greet_night">تصبح على خير</string>
+    <string name="today_min">د</string>
+    <string name="today_watched">مشاهدة</string>
+    <string name="today_videos">فيديوهات</string>
+    <string name="today_creators">منشئين</string>
+    <string name="today_stories">قصص محفوظة</string>
+    <string name="today_deleted">حُذفت وما زالت لديك</string>
+    <string name="today_empty">لا شيء اليوم بعد. افتح تيك توك وسيظهر يومك هنا.</string>
+    <string name="live_watch">شاهد</string>
+    <string name="stories_stat_kept">في الأرشيف</string>
+    <string name="stories_stat_deleted">محذوفة</string>
+    <string name="cl4100_design">مظهر جديد كليًا</string>
+    <string name="cl4100_design_desc">أهدأ وأعمق وأسهل قراءة: ألوان وبطاقات جديدة، شاشة رئيسية تعرض يومك، وشريط سفلي يضم كل الأقسام.</string>
+    <string name="cl4100_tabs">للقصص تبويب خاص</string>
+    <string name="cl4100_tabs_desc">الأرشيف والحفظ التلقائي والمشاهدة المجهولة، بلمسة واحدة من أي مكان.</string>
+    <string name="cl4100_live">شاهد ما تسجّله</string>
+    <string name="cl4100_live_desc">زر مشاهدة على كل بث يُسجَّل وكل قناة متابَعة تبث الآن يفتحه في تيك توك.</string>
 </resources>

@@ -1,6 +1,14 @@
 {
   "releases": [
     {
+      "version": "4.10.0",
+      "date": "2026-11-23",
+      "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.10.0/TikMod-4.10.0.apk",
+      "notes": "- Beta: please report problems from About > Report a bug\n- A whole new look, and Stories get their own tab\n- Home shows your day: minutes watched, videos, stories kept, deletions caught\n- Watch history: every video you scroll to, searchable, on the phone only\n- Watch button: open any stream being recorded, or any followed channel that's live, in TikTok\n- A notification when a story in your archive is deleted; archive by creator; search in downloads\n- Works on TikTok 47.9.2",
+      "size": 31222417,
+      "sha256": "62dd2dfc854e8762bd682597baba865b1f4f3a07078e29820d32313840196413"
+    },
+    {
       "version": "4.9.0",
       "date": "2026-11-23",
       "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.9.0/TikMod-4.9.0.apk",

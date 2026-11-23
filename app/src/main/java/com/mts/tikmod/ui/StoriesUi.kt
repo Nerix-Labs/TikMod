@@ -99,16 +99,27 @@ private fun StoryRing(icon: androidx.compose.ui.graphics.vector.ImageVector, siz
 
 /** The full page: settings, auto-save channels and the archive. */
 @Composable
-fun StoriesScreen(onBack: () -> Unit) {
+fun StoriesScreen(onBack: (() -> Unit)?) {
     val stories by rememberStories()
 
     Appear(0) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
+        if (onBack == null) com.mts.tikmod.ScreenTitle(L.t(R.string.stories_title), L.t(R.string.stories_subtitle), Neon.Pink)
+        else Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, L.t(R.string.action_back)) }
             Column {
                 Text(L.t(R.string.stories_title), fontSize = 26.sp, fontWeight = FontWeight.Black)
                 Text(L.t(R.string.stories_subtitle), fontSize = 13.sp, color = Subtle)
             }
+        }
+    }
+    // At a glance: what's in the archive, and how much of it was deleted by its creator.
+    if (stories.isNotEmpty()) Appear(1) {
+        val deleted = stories.count { it.optBoolean("deleted") }
+        val creators = stories.map { it.optString("handle").lowercase() }.distinct().size
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            StatTile(Icons.Rounded.AutoStories, stories.size.toLong(), L.t(R.string.stories_stat_kept), Neon.Pink, Modifier.weight(1f))
+            StatTile(Icons.Rounded.DeleteSweep, deleted.toLong(), L.t(R.string.stories_stat_deleted), Neon.Amber, Modifier.weight(1f))
+            StatTile(Icons.Rounded.People, creators.toLong(), L.t(R.string.today_creators), Neon.Violet, Modifier.weight(1f))
         }
     }
 

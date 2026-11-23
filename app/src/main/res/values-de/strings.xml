@@ -860,4 +860,26 @@
         <item quantity="one">%1$s hat eine Story gelöscht</item>
         <item quantity="other">%1$s hat %2$d Stories gelöscht</item>
     </plurals>
+
+    <!-- 4.10.0: Studio look (home, stories tab, LIVE watch) -->
+    <string name="greet_morning">Guten Morgen</string>
+    <string name="greet_afternoon">Guten Tag</string>
+    <string name="greet_evening">Guten Abend</string>
+    <string name="greet_night">Gute Nacht</string>
+    <string name="today_min">Min.</string>
+    <string name="today_watched">angesehen</string>
+    <string name="today_videos">Videos</string>
+    <string name="today_creators">Creator</string>
+    <string name="today_stories">Stories gesichert</string>
+    <string name="today_deleted">gelöscht, bei dir</string>
+    <string name="today_empty">Heute noch nichts. Öffne TikTok, dann erscheint dein Tag hier.</string>
+    <string name="live_watch">Ansehen</string>
+    <string name="stories_stat_kept">Archiviert</string>
+    <string name="stories_stat_deleted">Gelöscht</string>
+    <string name="cl4100_design">Ein ganz neuer Look</string>
+    <string name="cl4100_design_desc">Ruhiger, tiefer und besser lesbar: neue Farben und Karten, ein Startbildschirm mit deinem Tag und eine Leiste mit allen Bereichen.</string>
+    <string name="cl4100_tabs">Stories bekommen einen eigenen Tab</string>
+    <string name="cl4100_tabs_desc">Archiv, automatisches Speichern und anonymes Ansehen, von überall mit einem Tipp.</string>
+    <string name="cl4100_live">Sieh dir an, was du aufnimmst</string>
+    <string name="cl4100_live_desc">Ein Ansehen-Knopf bei jeder laufenden Aufnahme und jedem gefolgten Kanal, der live ist, öffnet ihn in TikTok.</string>
 </resources>

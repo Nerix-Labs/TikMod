@@ -860,4 +860,26 @@
         <item quantity="one">%1$s bir hikâye sildi</item>
         <item quantity="other">%1$s %2$d hikâye sildi</item>
     </plurals>
+
+    <!-- 4.10.0: Studio look (home, stories tab, LIVE watch) -->
+    <string name="greet_morning">Günaydın</string>
+    <string name="greet_afternoon">İyi günler</string>
+    <string name="greet_evening">İyi akşamlar</string>
+    <string name="greet_night">İyi geceler</string>
+    <string name="today_min">dk</string>
+    <string name="today_watched">izlendi</string>
+    <string name="today_videos">video</string>
+    <string name="today_creators">üretici</string>
+    <string name="today_stories">hikâye saklandı</string>
+    <string name="today_deleted">silindi, sende duruyor</string>
+    <string name="today_empty">Bugün henüz bir şey yok. TikTok\'u aç, günün burada görünsün.</string>
+    <string name="live_watch">İzle</string>
+    <string name="stories_stat_kept">Arşivde</string>
+    <string name="stories_stat_deleted">Silinen</string>
+    <string name="cl4100_design">Baştan yeni bir görünüm</string>
+    <string name="cl4100_design_desc">Daha sakin, derin ve okunaklı: yeni renkler ve kartlar, gününü gösteren bir ana ekran ve tüm bölümleri içeren alt çubuk.</string>
+    <string name="cl4100_tabs">Hikâyelerin kendi sekmesi var</string>
+    <string name="cl4100_tabs_desc">Arşiv, otomatik kaydetme ve gizli izleme, her yerden tek dokunuşla.</string>
+    <string name="cl4100_live">Kaydettiğini izle</string>
+    <string name="cl4100_live_desc">Kaydedilen her yayında ve şu an canlı olan her takip edilen kanalda bir İzle düğmesi onu TikTok\'ta açar.</string>
 </resources>

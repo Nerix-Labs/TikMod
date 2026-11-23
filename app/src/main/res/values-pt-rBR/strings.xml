@@ -874,4 +874,26 @@
         <item quantity="many">%1$s apagou %2$d stories</item>
         <item quantity="other">%1$s apagou %2$d stories</item>
     </plurals>
+
+    <!-- 4.10.0: Studio look (home, stories tab, LIVE watch) -->
+    <string name="greet_morning">Bom dia</string>
+    <string name="greet_afternoon">Boa tarde</string>
+    <string name="greet_evening">Boa noite</string>
+    <string name="greet_night">Boa noite</string>
+    <string name="today_min">min</string>
+    <string name="today_watched">assistido</string>
+    <string name="today_videos">vídeos</string>
+    <string name="today_creators">criadores</string>
+    <string name="today_stories">stories guardados</string>
+    <string name="today_deleted">apagados, ainda seus</string>
+    <string name="today_empty">Nada ainda hoje. Abra o TikTok e seu dia aparece aqui.</string>
+    <string name="live_watch">Assistir</string>
+    <string name="stories_stat_kept">Arquivados</string>
+    <string name="stories_stat_deleted">Apagados</string>
+    <string name="cl4100_design">Um visual totalmente novo</string>
+    <string name="cl4100_design_desc">Mais calmo, profundo e legível: novas cores e cartões, uma tela inicial com o seu dia e uma barra com todas as seções.</string>
+    <string name="cl4100_tabs">Stories ganham sua própria aba</string>
+    <string name="cl4100_tabs_desc">Arquivo, salvamento automático e visualização anônima, a um toque de qualquer lugar.</string>
+    <string name="cl4100_live">Assista ao que você grava</string>
+    <string name="cl4100_live_desc">Um botão Assistir em cada live sendo gravada e em cada canal seguido ao vivo abre no TikTok.</string>
 </resources>
