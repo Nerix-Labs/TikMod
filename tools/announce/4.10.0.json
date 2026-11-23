@@ -2,31 +2,27 @@
   "en": {
     "badge": { "e": "✨", "id": "" },
     "title": "TikMod 4.10.0 Beta — A whole new look",
-    "summary": "Glowing neon (or calm Studio), a home that shows your day, and a feed that calms down by itself.",
+    "summary": "A control center of live tiles, and a feed that calms down by itself.",
     "bullets": [
-      { "icon": { "e": "🎨", "id": "" }, "text": "New design in four themes: Neon, Studio, You and System" },
-      { "icon": { "e": "📈", "id": "" }, "text": "Dynamic stop the addiction: always on, the feed gets calmer the longer you scroll" },
-      { "icon": { "e": "📊", "id": "" }, "text": "Home shows your day: minutes watched, videos, stories kept, deletions caught" },
-      { "icon": { "e": "🕘", "id": "" }, "text": "Watch history: every video you scroll to, searchable, on the phone only" },
-      { "icon": { "e": "▶️", "id": "" }, "text": "Watch button and tap-to-open: recorded streams and followed channels open in TikTok" },
-      { "icon": { "e": "📖", "id": "" }, "text": "Stories get their own tab, with the archive as a grid" },
-      { "icon": { "e": "🔎", "id": "" }, "text": "Search any setting from Home and flip it right there" },
-      { "icon": { "e": "🔔", "id": "" }, "text": "A notification when a story in your archive gets deleted; search in downloads" }
+      { "icon": { "e": "🎛", "id": "" }, "text": "Tiles everywhere: tap to switch, tap to choose" },
+      { "icon": { "e": "📈", "id": "" }, "text": "Dynamic stop the addiction: calmer the longer you scroll" },
+      { "icon": { "e": "🕘", "id": "" }, "text": "Watch history of every video, on the phone only" },
+      { "icon": { "e": "▶️", "id": "" }, "text": "Watch any recorded or followed LIVE in one tap" },
+      { "icon": { "e": "📖", "id": "" }, "text": "Stories tab: archive grid + deleted-story alerts" },
+      { "icon": { "e": "🔎", "id": "" }, "text": "Search any setting from Home" }
     ]
   },
   "he": {
     "badge": { "e": "✨", "id": "" },
     "title": "TikMod 4.10.0 בטא — מראה חדש לגמרי",
-    "summary": "ניאון זוהר (או סטודיו רגוע), מסך בית שמראה את היום שלכם, ופיד שנרגע מעצמו.",
+    "summary": "מרכז בקרה של אריחים חיים, ופיד שנרגע מעצמו.",
     "bullets": [
-      { "icon": { "e": "🎨", "id": "" }, "text": "עיצוב חדש בארבעה מראות: ניאון, סטודיו, You ומערכת" },
-      { "icon": { "e": "📈", "id": "" }, "text": "עצירת התמכרות דינמית: תמיד פועלת, הפיד נרגע ככל שגוללים יותר" },
-      { "icon": { "e": "📊", "id": "" }, "text": "מסך הבית מראה את היום שלכם: דקות צפייה, סרטונים, סטוריז שנשמרו ומחיקות שנתפסו" },
-      { "icon": { "e": "🕘", "id": "" }, "text": "היסטוריית צפייה: כל סרטון שגללתם אליו, עם חיפוש, רק בטלפון" },
-      { "icon": { "e": "▶️", "id": "" }, "text": "כפתור צפייה ולחיצה על ערוץ: שידורים מוקלטים וערוצים במעקב נפתחים בטיקטוק" },
-      { "icon": { "e": "📖", "id": "" }, "text": "לסטוריז יש כרטיסייה משלהם, והארכיון מוצג ברשת ריבועים" },
-      { "icon": { "e": "🔎", "id": "" }, "text": "חיפוש כל הגדרה ממסך הבית, והפעלה ישר מהתוצאות" },
-      { "icon": { "e": "🔔", "id": "" }, "text": "התראה כשסטורי מהארכיון נמחק; חיפוש בהורדות" }
+      { "icon": { "e": "🎛", "id": "" }, "text": "אריחים בכל מקום: נגיעה מדליקה, נגיעה בוחרת" },
+      { "icon": { "e": "📈", "id": "" }, "text": "עצירת התמכרות דינמית: נרגע ככל שגוללים" },
+      { "icon": { "e": "🕘", "id": "" }, "text": "היסטוריית צפייה של כל סרטון, רק בטלפון" },
+      { "icon": { "e": "▶️", "id": "" }, "text": "צפייה בכל לייב מוקלט או במעקב בנגיעה" },
+      { "icon": { "e": "📖", "id": "" }, "text": "כרטיסיית סטוריז: ארכיון בריבועים + התראה על מחיקה" },
+      { "icon": { "e": "🔎", "id": "" }, "text": "חיפוש כל הגדרה ממסך הבית" }
     ]
   },
   "footer": "Beta · Works on TikTok 47.9.2 · בטא · עובד על טיקטוק 47.9.2"
