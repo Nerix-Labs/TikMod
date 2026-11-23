@@ -11,6 +11,12 @@ All notable changes to TikMod. Versions follow [semantic versioning](https://sem
   dot grid. **You** (Material You) and **System** (Studio, light or dark like the phone). Everywhere: editorial
   headlines with small-caps overlines, compact quick toggles with mini switches, a docked bottom bar that names every
   section.
+- **A control center instead of lists.** Home is a grid of live tiles: LIVE (pulses and shows the stream while
+  recording, with Watch), Stories and Watch history as mosaics of the latest covers, ads blocked and downloads as big
+  numbers, dynamic stop and chat privacy — each with its own switch, each opening its section. Every tab starts with
+  tiles too: tap a switch tile anywhere to flip it (it dims when off), tap a choice tile to step to the next option
+  (quality, codec, share mode, folder, LIVE quality, check interval, read receipts, playback speed). Settings sit
+  behind a gear on Home; the rarer options are in collapsed sections below the tiles.
 - **Search every setting from Home.** Type a word in any of the 10 languages: matching settings show up with their
   switch, flip them right there, or jump to where they live. Round shortcuts below it (watch history, stories, record
   LIVE, stop the addiction, downloads, chat).

@@ -169,11 +169,14 @@ fun Appear(index: Int, content: @Composable () -> Unit) {
  * brand gradient instead (hero cards, something that's on).
  */
 @Composable
-fun GlassCard(modifier: Modifier = Modifier, glow: Boolean = false, padding: Dp = 18.dp, content: @Composable ColumnScope.() -> Unit) {
+fun GlassCard(modifier: Modifier = Modifier, glow: Boolean = false, padding: Dp = 18.dp, accent: Color? = null, content: @Composable ColumnScope.() -> Unit) {
     val cs = MaterialTheme.colorScheme
-    val shape = RoundedCornerShape(24.dp)
+    val shape = RoundedCornerShape(if (accent != null) 28.dp else 24.dp)
     val neon = Neon.glow
     val fill = when {
+        // Sections look like the tiles: washed with their color from one corner.
+        accent != null && !glow -> Brush.linearGradient(listOf(accent.copy(alpha = if (Neon.isDark) 0.16f else 0.10f), cs.surfaceContainerHigh.copy(alpha = 0.96f)),
+            start = Offset.Zero, end = Offset(700f, 700f))
         glow && neon -> Brush.linearGradient(listOf(Neon.Cyan.copy(alpha = 0.20f), Neon.Violet.copy(alpha = 0.12f), Neon.Pink.copy(alpha = 0.10f), cs.surfaceContainer.copy(alpha = 0.95f)))
         glow -> Brush.linearGradient(listOf(Neon.Cyan.copy(alpha = 0.16f), Neon.Violet.copy(alpha = 0.08f), cs.surfaceContainer.copy(alpha = 0.97f)))
         neon -> Brush.verticalGradient(listOf(cs.surfaceContainerHigh.copy(alpha = 0.90f), cs.surfaceContainer.copy(alpha = 0.86f)))
@@ -188,6 +191,7 @@ fun GlassCard(modifier: Modifier = Modifier, glow: Boolean = false, padding: Dp 
     val brandColors = Neon.brand + Neon.brand.first()
     val edge = when {
         glow && neon -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)) // drawn below, rotating
+        accent != null -> Brush.linearGradient(listOf(accent.copy(alpha = 0.45f), accent.copy(alpha = 0.05f)))
         glow -> Brush.linearGradient(listOf(Neon.Cyan.copy(alpha = 0.45f), Neon.Violet.copy(alpha = 0.18f), Edge))
         neon -> Brush.verticalGradient(listOf(cs.onSurface.copy(alpha = 0.11f), cs.onSurface.copy(alpha = 0.05f)))
         else -> Brush.verticalGradient(listOf(cs.onSurface.copy(alpha = 0.10f), Edge))
@@ -231,7 +235,7 @@ fun Section(
 ) {
     var expanded by rememberSaveable(title) { mutableStateOf(initiallyExpanded) }
     val arrow by animateFloatAsState(if (expanded) 180f else 0f, spring(Spring.DampingRatioMediumBouncy), label = "arrow")
-    GlassCard {
+    GlassCard(accent = accent) {
         Row(
             Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
                 .then(if (collapsible) Modifier.clickable { expanded = !expanded } else Modifier),

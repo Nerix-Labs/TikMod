@@ -122,20 +122,24 @@ fun BentoTile(
     accent: Color,
     modifier: Modifier = Modifier,
     height: Dp = 150.dp,
+    dim: Boolean = false,
     onClick: () -> Unit,
     background: (@Composable BoxScope.() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val shape = RoundedCornerShape(28.dp)
     val cs = MaterialTheme.colorScheme
+    // Off / dim: the color fades out, so on and off read at a glance.
+    val wash by animateFloatAsState(if (dim) 0.07f else if (Neon.isDark) 0.34f else 0.22f, tween(300), label = "wash")
+    val edge by animateFloatAsState(if (dim) 0.12f else 0.55f, tween(300), label = "edge")
     Box(
         modifier.height(height)
-            .then(if (Neon.glow) Modifier.shadow(16.dp, shape, clip = false, ambientColor = accent, spotColor = accent) else Modifier)
+            .then(if (Neon.glow && !dim) Modifier.shadow(16.dp, shape, clip = false, ambientColor = accent, spotColor = accent) else Modifier)
             .clip(shape)
             .background(cs.surfaceContainerHigh)
-            .background(Brush.linearGradient(listOf(accent.copy(alpha = if (Neon.isDark) 0.34f else 0.22f), accent.copy(alpha = 0.04f)),
+            .background(Brush.linearGradient(listOf(accent.copy(alpha = wash), accent.copy(alpha = 0.03f)),
                 start = Offset.Zero, end = Offset(600f, 600f)))
-            .border(1.dp, Brush.linearGradient(listOf(accent.copy(alpha = 0.55f), accent.copy(alpha = 0.05f))), shape)
+            .border(1.dp, Brush.linearGradient(listOf(accent.copy(alpha = edge), accent.copy(alpha = 0.04f))), shape)
             .pressable(onClick = onClick)
     ) {
         background?.invoke(this)
@@ -270,6 +274,100 @@ fun BentoGrid(go: (String) -> Unit) {
                 TileText(L.t(R.string.nav_chat), "", L.t(R.string.quick_deleted), Neon.Violet, Modifier.align(Alignment.BottomStart))
             }
         }
+    }
+}
+
+// ------------------------------------------------------------------ the tile kit used by every tab
+
+/** A row of tiles, equal widths. */
+@Composable
+fun TileRow(content: @Composable RowScope.() -> Unit) =
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), content = content)
+
+/** A small on/off pill for the tile corner (the whole tile is the switch). */
+@Composable
+private fun TilePill(on: Boolean, accent: Color) {
+    val knob by animateDpAsState(if (on) 16.dp else 0.dp, spring(Spring.DampingRatioMediumBouncy), label = "knob")
+    // offset() and CenterStart both follow the layout direction, so "on" ends up at the end in RTL too.
+    Box(Modifier.width(38.dp).height(22.dp).clip(CircleShape)
+        .background(if (on) accent else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.18f)).padding(3.dp)) {
+        Box(Modifier.align(Alignment.CenterStart).offset(x = knob).size(16.dp).clip(CircleShape)
+            .background(if (on) Neon.OnAccent else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)))
+    }
+}
+
+/** On / off tile: tap anywhere to flip it; it lights up in its color when on. */
+@Composable
+fun RowScope.SwitchTile(icon: ImageVector, title: String, key: String, accent: Color, sub: String? = null, height: Dp = 128.dp,
+                        onChange: (Boolean) -> Unit = {}) {
+    val ctx = LocalContext.current
+    var on by remember(key) { mutableStateOf(Prefs.bool(ctx, key)) }
+    BentoTile(accent, Modifier.weight(1f), height = height, dim = !on, onClick = { on = !on; Prefs.setBool(ctx, key, on); onChange(on) }) {
+        TileIcon(icon, if (on) accent else Subtle)
+        Box(Modifier.align(Alignment.TopEnd)) { TilePill(on, accent) }
+        Column(Modifier.align(Alignment.BottomStart)) {
+            Text(title, fontSize = 14.sp, fontWeight = FontWeight.Bold, lineHeight = 17.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(sub ?: L.t(if (on) R.string.state_on else R.string.state_off), fontSize = 11.5.sp, color = if (on) accent else Subtle,
+                maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+/** A choice tile: shows the current option big; each tap moves to the next one (dots show where you are). */
+@Composable
+fun RowScope.CycleTile(icon: ImageVector, title: String, key: String, options: List<Pair<String, String>>, accent: Color,
+                       height: Dp = 128.dp, onChange: (String) -> Unit = {}) {
+    val ctx = LocalContext.current
+    var value by remember(key) { mutableStateOf(Prefs.string(ctx, key)) }
+    val index = options.indexOfFirst { it.first == value }.coerceAtLeast(0)
+    BentoTile(accent, Modifier.weight(1f), height = height, onClick = {
+        value = options[(index + 1) % options.size].first
+        Prefs.setString(ctx, key, value); onChange(value)
+    }) {
+        TileIcon(icon, accent)
+        Row(Modifier.align(Alignment.TopEnd).padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            options.indices.forEach { i ->
+                Box(Modifier.size(if (i == index) 8.dp else 6.dp).clip(CircleShape).background(if (i == index) accent else Subtle.copy(alpha = 0.4f)))
+            }
+        }
+        Column(Modifier.align(Alignment.BottomStart)) {
+            androidx.compose.animation.AnimatedContent(options[index].second, label = "cycle") { label ->
+                Text(label, fontSize = 20.sp, fontWeight = FontWeight.Black, color = accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            Text(title, fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold, color = Subtle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+/** A tile that opens something: icon, a value and a title. */
+@Composable
+fun RowScope.NavTile(icon: ImageVector, title: String, value: String, sub: String?, accent: Color, height: Dp = 128.dp, onClick: () -> Unit) {
+    BentoTile(accent, Modifier.weight(1f), height = height, onClick = onClick) {
+        TileIcon(icon, accent)
+        Icon(Icons.Rounded.ChevronRight, null, tint = Subtle, modifier = Modifier.align(Alignment.TopEnd))
+        TileText(title, value, sub, accent, Modifier.align(Alignment.BottomStart))
+    }
+}
+
+/** Stories: the latest covers as a mosaic, with the count. */
+@Composable
+fun RowScope.StoriesTile(d: BentoData, height: Dp = 210.dp, onClick: () -> Unit) {
+    BentoTile(Neon.Pink, Modifier.weight(1f), height = height, onClick = onClick, background = { Mosaic(d.storyThumbs, Neon.Pink) }) {
+        if (d.storyThumbs.isEmpty()) TileIcon(Icons.Rounded.AutoStories, Neon.Pink)
+        if (d.storyDeleted > 0) Text("🗑 ${d.storyDeleted}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White,
+            modifier = Modifier.align(Alignment.TopEnd).clip(CircleShape).background(Neon.Pink).padding(horizontal = 8.dp, vertical = 3.dp))
+        TileText(L.t(R.string.stories_title), "${d.storyCount}", L.t(R.string.stories_stat_kept), Neon.Pink,
+            Modifier.align(Alignment.BottomStart), light = d.storyThumbs.isNotEmpty())
+    }
+}
+
+/** Watch history: the latest covers, today's count and minutes. */
+@Composable
+fun RowScope.WatchTile(d: BentoData, height: Dp = 210.dp, onClick: () -> Unit) {
+    BentoTile(Neon.Cyan, Modifier.weight(1f), height = height, onClick = onClick, background = { Mosaic(d.watchThumbs, Neon.Cyan) }) {
+        if (d.watchThumbs.isEmpty()) TileIcon(Icons.Rounded.Restore, Neon.Cyan)
+        TileText(L.t(R.string.watch_title), "${d.watchToday}", "${d.minutesToday} ${L.t(R.string.today_min)} · ${L.t(R.string.watch_today)}", Neon.Cyan,
+            Modifier.align(Alignment.BottomStart), light = d.watchThumbs.isNotEmpty())
     }
 }
 

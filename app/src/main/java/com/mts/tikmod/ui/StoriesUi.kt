@@ -113,38 +113,35 @@ fun StoriesScreen(onBack: (() -> Unit)?) {
             }
         }
     }
-    // At a glance: what's in the archive, and how much of it was deleted by its creator.
-    if (stories.isNotEmpty()) Appear(1) {
-        val deleted = stories.count { it.optBoolean("deleted") }
-        val creators = stories.map { it.optString("handle").lowercase() }.distinct().size
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            StatTile(Icons.Rounded.AutoStories, stories.size.toLong(), L.t(R.string.stories_stat_kept), Neon.Pink, Modifier.weight(1f))
-            StatTile(Icons.Rounded.DeleteSweep, deleted.toLong(), L.t(R.string.stories_stat_deleted), Neon.Amber, Modifier.weight(1f))
-            StatTile(Icons.Rounded.People, creators.toLong(), L.t(R.string.today_creators), Neon.Violet, Modifier.weight(1f))
+    // The switches as tiles (tap anywhere on one to flip it), then the archive grid, then the auto-save channels.
+    val ctx = LocalContext.current
+    val ask = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { }
+    val deleted = stories.count { it.optBoolean("deleted") }
+    Appear(1) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            TileRow {
+                SwitchTile(Icons.Rounded.AutoStories, L.t(R.string.stories_archive), Prefs.KEY_STORY_ARCHIVE, Neon.Pink,
+                    sub = L.t(R.string.stories_archive_sub, stories.size, TikModDownloader.formatSize(StoryStore.totalBytes(stories))), height = 150.dp)
+                SwitchTile(Icons.Rounded.NotificationsActive, L.t(R.string.stories_notify), Prefs.KEY_STORY_DELETED_NOTIFY, Neon.Amber,
+                    sub = if (deleted > 0) "🗑 $deleted" else null, height = 150.dp) { on ->
+                    val needs = android.os.Build.VERSION.SDK_INT >= 33 && androidx.core.content.ContextCompat.checkSelfPermission(
+                        ctx, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED
+                    if (on && needs) runCatching { ask.launch(android.Manifest.permission.POST_NOTIFICATIONS) }
+                }
+            }
+            TileRow {
+                SwitchTile(Icons.Rounded.VisibilityOff, L.t(R.string.stories_hide_views), Prefs.KEY_HIDE_STORY_VIEWS, Neon.Violet)
+                SwitchTile(Icons.Rounded.PersonOff, L.t(R.string.profile_hide_views), Prefs.KEY_HIDE_PROFILE_VIEWS, Neon.Violet)
+            }
         }
     }
 
-    // The archive first: it's what this tab is for. Settings below.
-    Appear(1) { ArchiveSection(stories) }
-
-    Appear(2) { SectionLabel(L.t(R.string.home_system)) }
-
-    Appear(2) {
-        Section(Icons.Rounded.VisibilityOff, L.t(R.string.stories_privacy), accent = Neon.Violet, collapsible = true, initiallyExpanded = false) {
-            ToggleRow(L.t(R.string.stories_hide_views), L.t(R.string.stories_hide_views_desc), Prefs.KEY_HIDE_STORY_VIEWS, Icons.Rounded.VisibilityOff, Neon.Violet)
-            ToggleRow(L.t(R.string.profile_hide_views), L.t(R.string.profile_hide_views_desc), Prefs.KEY_HIDE_PROFILE_VIEWS, Icons.Rounded.PersonOff, Neon.Violet)
-        }
-    }
-
-    Appear(2) {
-        Section(Icons.Rounded.Inventory2, L.t(R.string.stories_keep), accent = Neon.Pink, collapsible = true, initiallyExpanded = false) {
-            ToggleRow(L.t(R.string.stories_archive), L.t(R.string.stories_archive_desc), Prefs.KEY_STORY_ARCHIVE, Icons.Rounded.AutoStories, Neon.Pink)
-            DeletedNotifyToggle()
-            Hint(L.t(R.string.stories_download_hint))
-        }
-    }
+    Appear(2) { ArchiveSection(stories) }
 
     Appear(3) { AutoSaveSection() }
+    Appear(3) { Hint(L.t(R.string.stories_download_hint)) }
 }
 
 /** "Tell me when a story gets deleted"; asks for the notification permission when it's switched on (Android 13+). */

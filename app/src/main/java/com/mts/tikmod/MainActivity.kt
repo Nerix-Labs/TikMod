@@ -531,35 +531,44 @@ internal fun ActionButton(icon: ImageVector, text: String, modifier: Modifier = 
 @Composable
 private fun DownloadsScreen(onOpenWatch: () -> Unit) {
     val ctx = LocalContext.current
+    val d by rememberBento()
     Appear(0) { ScreenTitle(L.t(R.string.nav_downloads), L.t(R.string.dl_subtitle), Neon.Cyan) }
-    Appear(1) { WatchHistoryEntryCard(onOpenWatch) }
+    // The everyday choices as tiles: tap to switch / to go to the next option.
     Appear(1) {
-        Section(Icons.Rounded.Download, L.t(R.string.dl_engine), L.t(R.string.dl_engine_sub)) {
-            ToggleRow(L.t(R.string.dl_engine_toggle), L.t(R.string.dl_engine_toggle_desc), Prefs.KEY_REMOVE_WATERMARK, Icons.Rounded.PowerSettingsNew) { Prefs.setForceDownloadEnabled(ctx, it) }
-            Hairline()
-            SegmentedPref(L.t(R.string.dl_quality), Prefs.KEY_DOWNLOAD_QUALITY, listOf(
-                Opt(Prefs.DOWNLOAD_QUALITY_MAX, L.t(R.string.dl_quality_max)), Opt(Prefs.DOWNLOAD_QUALITY_HD, "HD"), Opt(Prefs.DOWNLOAD_QUALITY_SD, L.t(R.string.dl_quality_sd))
-            ))
-            SegmentedPref(L.t(R.string.dl_codec), Prefs.KEY_VIDEO_CODEC, listOf(
-                Opt(Prefs.VIDEO_CODEC_BEST, L.t(R.string.dl_codec_best)), Opt(Prefs.VIDEO_CODEC_H264, L.t(R.string.dl_codec_h264))
-            ), description = L.t(R.string.dl_codec_desc))
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            TileRow {
+                SwitchTile(Icons.Rounded.Download, L.t(R.string.dl_engine_toggle), Prefs.KEY_REMOVE_WATERMARK, Neon.Cyan,
+                    sub = L.p(R.plurals.history_items, d.downloads), height = 210.dp) { Prefs.setForceDownloadEnabled(ctx, it) }
+                WatchTile(d) { onOpenWatch() }
+            }
+            TileRow {
+                CycleTile(Icons.Rounded.HighQuality, L.t(R.string.dl_quality), Prefs.KEY_DOWNLOAD_QUALITY, listOf(
+                    Prefs.DOWNLOAD_QUALITY_MAX to L.t(R.string.dl_quality_max), Prefs.DOWNLOAD_QUALITY_HD to "HD", Prefs.DOWNLOAD_QUALITY_SD to L.t(R.string.dl_quality_sd)
+                ), Neon.Cyan)
+                CycleTile(Icons.Rounded.Movie, L.t(R.string.dl_codec), Prefs.KEY_VIDEO_CODEC, listOf(
+                    Prefs.VIDEO_CODEC_BEST to "H.265", Prefs.VIDEO_CODEC_H264 to "H.264"
+                ), Neon.Violet)
+            }
+            TileRow {
+                CycleTile(Icons.Rounded.Share, L.t(R.string.share_default), Prefs.KEY_SHARE_MODE, listOf(
+                    Prefs.SHARE_MODE_MEDIA to L.t(R.string.share_mode_file), Prefs.SHARE_MODE_MEDIA_LINK to L.t(R.string.share_mode_file_link),
+                    Prefs.SHARE_MODE_LINK to L.t(R.string.share_mode_link)
+                ), Neon.Pink)
+                CycleTile(Icons.Rounded.FolderOpen, L.t(R.string.files_folder), Prefs.KEY_SAVE_LOCATION, listOf(
+                    Prefs.SAVE_LOCATION_MOVIES to "Movies", Prefs.SAVE_LOCATION_DCIM to "DCIM", Prefs.SAVE_LOCATION_DOWNLOAD to "Download"
+                ), Neon.Amber)
+            }
+            TileRow {
+                SwitchTile(Icons.Rounded.Collections, L.t(R.string.card_photos), Prefs.KEY_DOWNLOAD_PHOTOS, Neon.Violet)
+                SwitchTile(Icons.Rounded.MusicNote, L.t(R.string.card_audio), Prefs.KEY_DOWNLOAD_AUDIO, Neon.Lime)
+            }
         }
     }
-    Appear(2) {
-        Section(Icons.Rounded.Share, L.t(R.string.share_title), L.t(R.string.share_sub), collapsible = true, initiallyExpanded = false) {
-            SegmentedPref(L.t(R.string.share_default), Prefs.KEY_SHARE_MODE, listOf(
-                Opt(Prefs.SHARE_MODE_MEDIA, L.t(R.string.share_mode_file), Icons.Rounded.Movie),
-                Opt(Prefs.SHARE_MODE_MEDIA_LINK, L.t(R.string.share_mode_file_link), Icons.Rounded.AddLink),
-                Opt(Prefs.SHARE_MODE_LINK, L.t(R.string.share_mode_link), Icons.Rounded.Link)
-            ))
-            Hint(L.t(R.string.share_hint))
-        }
-    }
+    Appear(2) { HistorySection() }
+    Appear(3) { SectionLabel(L.t(R.string.home_system)) }
     Appear(3) {
         Section(Icons.Rounded.Widgets, L.t(R.string.card_buttons), L.t(R.string.card_buttons_sub), collapsible = true, initiallyExpanded = false) {
-            ToggleRow(L.t(R.string.card_photos), L.t(R.string.card_photos_desc), Prefs.KEY_DOWNLOAD_PHOTOS, Icons.Rounded.Collections)
             ToggleRow(L.t(R.string.card_jpeg), L.t(R.string.card_jpeg_desc), Prefs.KEY_IMAGES_AS_JPEG, Icons.Rounded.Image)
-            ToggleRow(L.t(R.string.card_audio), L.t(R.string.card_audio_desc), Prefs.KEY_DOWNLOAD_AUDIO, Icons.Rounded.MusicNote)
             SegmentedPref(L.t(R.string.card_audio_source), Prefs.KEY_AUDIO_SOURCE, listOf(Opt(Prefs.AUDIO_SOURCE_ORIGINAL, L.t(R.string.card_audio_original)), Opt(Prefs.AUDIO_SOURCE_VIDEO, L.t(R.string.card_audio_video))))
             ToggleRow(L.t(R.string.card_cover), L.t(R.string.card_cover_desc), Prefs.KEY_DOWNLOAD_COVER, Icons.Rounded.Wallpaper)
             ToggleRow(L.t(R.string.card_avatar), L.t(R.string.card_avatar_desc), Prefs.KEY_DOWNLOAD_AVATAR, Icons.Rounded.AccountCircle)
@@ -568,13 +577,11 @@ private fun DownloadsScreen(onOpenWatch: () -> Unit) {
             SegmentedPref(L.t(R.string.card_save_button), Prefs.KEY_DOWNLOAD_UI_MODE, listOf(
                 Opt(Prefs.DOWNLOAD_UI_MODE_ADD, L.t(R.string.card_save_keep)), Opt(Prefs.DOWNLOAD_UI_MODE_REPLACE, L.t(R.string.card_save_tikmod))
             ))
+            Hint(L.t(R.string.share_hint))
         }
     }
     Appear(4) {
         Section(Icons.Rounded.FolderOpen, L.t(R.string.files_title), collapsible = true, initiallyExpanded = false) {
-            SegmentedPref(L.t(R.string.files_folder), Prefs.KEY_SAVE_LOCATION, listOf(
-                Opt(Prefs.SAVE_LOCATION_MOVIES, "Movies"), Opt(Prefs.SAVE_LOCATION_DCIM, "DCIM"), Opt(Prefs.SAVE_LOCATION_DOWNLOAD, "Download")
-            ))
             ToggleRow(L.t(R.string.files_author_folders), "TikMod/@username/…", Prefs.KEY_AUTHOR_FOLDERS, Icons.Rounded.CreateNewFolder)
             ToggleRow(L.t(R.string.files_skip_dupes), L.t(R.string.files_skip_dupes_desc), Prefs.KEY_SKIP_DUPLICATES, Icons.Rounded.FilterNone)
             ToggleRow(L.t(R.string.files_copy_caption), L.t(R.string.files_copy_caption_desc), Prefs.KEY_COPY_CAPTION, Icons.Rounded.ContentCopy)
@@ -584,7 +591,6 @@ private fun DownloadsScreen(onOpenWatch: () -> Unit) {
             FileNamePatternEditor()
         }
     }
-    Appear(5) { HistorySection() }
 }
 
 @Composable
@@ -752,7 +758,23 @@ private fun LiveScreen() {
     }
 
     Appear(0) { ScreenTitle(L.t(R.string.nav_live), L.t(R.string.live_subtitle), Neon.Pink) }
-    Appear(1) { LiveHero(enabled, channels.size, state) { setEnabled(it) } }
+    Appear(1) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            TileRow { LiveHeroTile(enabled, channels.size, state) { setEnabled(it) } }
+            TileRow {
+                CycleTile(Icons.Rounded.HighQuality, L.t(R.string.live_quality), Prefs.KEY_AUTO_LIVE_QUALITY, listOf(
+                    "origin" to L.t(R.string.live_quality_source), "uhd" to "1080p", "hd" to "720p", "sd" to "480p"
+                ), Neon.Pink)
+                CycleTile(Icons.Rounded.Timer, L.t(R.string.live_interval), Prefs.KEY_AUTO_LIVE_INTERVAL, listOf(
+                    "30" to L.t(R.string.live_interval_30s), "60" to L.t(R.string.live_interval_1m), "120" to L.t(R.string.live_interval_2m), "300" to L.t(R.string.live_interval_5m)
+                ), Neon.Violet) { LiveWatchService.checkNow(ctx) }
+            }
+            TileRow {
+                SwitchTile(Icons.Rounded.Forum, L.t(R.string.chat_rec_toggle), Prefs.KEY_RECORD_CHAT, Neon.Pink)
+                SwitchTile(Icons.Rounded.Subtitles, L.t(R.string.chat_in_video), Prefs.KEY_CHAT_IN_VIDEO, Neon.Cyan)
+            }
+        }
+    }
 
     val active = state.keys().asSequence().filter { k ->
         state.optJSONObject(k)?.optString("status").let { it == "recording" || it == "saving" }
@@ -950,6 +972,44 @@ private fun RecordNowCard() {
     }
 }
 
+/** LIVE tab's first tile: auto-record on/off (tap anywhere), with a radar that sweeps while it's watching. */
+@Composable
+private fun RowScope.LiveHeroTile(enabled: Boolean, count: Int, state: JSONObject, onToggle: (Boolean) -> Unit) {
+    val recording = state.keys().asSequence().count { k -> state.optJSONObject(k)?.optString("status") == "recording" }
+    val t = rememberInfiniteTransition(label = "radar")
+    val sweep by t.animateFloat(0f, 360f, infiniteRepeatable(tween(2600, easing = LinearEasing)), label = "sweep")
+    BentoTile(Neon.Pink, Modifier.weight(1f), height = 140.dp, dim = !enabled, onClick = { onToggle(!enabled) }) {
+        Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(78.dp), contentAlignment = Alignment.Center) {
+                Canvas(Modifier.fillMaxSize()) {
+                    val c = if (enabled) Neon.Pink else Color.Gray
+                    drawCircle(c.copy(alpha = 0.12f))
+                    drawCircle(c.copy(alpha = 0.35f), style = Stroke(1.dp.toPx()), radius = size.minDimension / 2 * 0.62f)
+                }
+                if (enabled) Canvas(Modifier.fillMaxSize().rotate(sweep)) {
+                    drawArc(Brush.sweepGradient(listOf(Color.Transparent, Neon.Pink.copy(alpha = 0.6f))), 270f, 90f, true)
+                }
+                Icon(if (recording > 0) Icons.Rounded.FiberManualRecord else Icons.Rounded.Sensors, null,
+                    tint = if (enabled) Neon.Pink else Subtle, modifier = Modifier.size(28.dp))
+            }
+            Spacer(Modifier.width(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text(L.t(R.string.live_auto_title), fontWeight = FontWeight.Black, fontSize = 19.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    when {
+                        recording > 0 -> L.p(R.plurals.live_recording_count, recording)
+                        !enabled -> L.t(R.string.state_off)
+                        count == 0 -> L.t(R.string.live_add_channel_first)
+                        else -> L.p(R.plurals.live_scanning, count)
+                    },
+                    fontSize = 12.5.sp, color = if (enabled) Neon.Pink else Subtle, maxLines = 2
+                )
+            }
+            Switch(enabled, onToggle, colors = SwitchDefaults.colors(checkedTrackColor = Neon.Pink, checkedThumbColor = Neon.OnAccent))
+        }
+    }
+}
+
 @Composable
 private fun LiveHero(enabled: Boolean, count: Int, state: JSONObject, onToggle: (Boolean) -> Unit) {
     val recording = state.keys().asSequence().count { k -> state.optJSONObject(k)?.optString("status") == "recording" }
@@ -1072,30 +1132,30 @@ private fun ChannelRow(
 private fun ChatScreen() {
     Appear(0) { ScreenTitle(L.t(R.string.nav_chat), L.t(R.string.chat_subtitle), Neon.Violet) }
     Appear(1) {
-        Section(Icons.Rounded.DoneAll, L.t(R.string.chat_receipts), L.t(R.string.chat_receipts_sub), accent = Neon.Violet) {
-            SegmentedPref(L.t(R.string.chat_mode), Prefs.KEY_READ_RECEIPTS_MODE, listOf(
-                Opt(Prefs.READ_RECEIPTS_MODE_ON_REPLY, L.t(R.string.chat_mode_reply), Icons.Rounded.Reply),
-                Opt(Prefs.READ_RECEIPTS_MODE_ALWAYS_BLOCK, L.t(R.string.chat_mode_never), Icons.Rounded.VisibilityOff),
-                Opt(Prefs.READ_RECEIPTS_MODE_NORMAL, L.t(R.string.chat_mode_normal), Icons.Rounded.Visibility)
-            ), accent = Neon.Violet)
-            Hint(L.t(R.string.chat_receipts_hint))
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            TileRow {
+                CycleTile(Icons.Rounded.DoneAll, L.t(R.string.chat_receipts), Prefs.KEY_READ_RECEIPTS_MODE, listOf(
+                    Prefs.READ_RECEIPTS_MODE_ON_REPLY to L.t(R.string.chat_mode_reply),
+                    Prefs.READ_RECEIPTS_MODE_ALWAYS_BLOCK to L.t(R.string.chat_mode_never),
+                    Prefs.READ_RECEIPTS_MODE_NORMAL to L.t(R.string.chat_mode_normal)
+                ), Neon.Violet)
+                SwitchTile(Icons.Rounded.KeyboardHide, L.t(R.string.chat_hide_typing), Prefs.KEY_DISABLE_TYPING_INDICATOR, Neon.Violet)
+            }
+            TileRow {
+                SwitchTile(Icons.Rounded.WifiOff, L.t(R.string.chat_hide_online), Prefs.KEY_HIDE_ONLINE_STATUS, Neon.Cyan)
+                SwitchTile(Icons.Rounded.Restore, L.t(R.string.chat_keep_deleted), Prefs.KEY_ANTI_RECALL, Neon.Pink)
+            }
+            TileRow {
+                SwitchTile(Icons.Rounded.SaveAlt, L.t(R.string.chat_save_deleted_media), Prefs.KEY_SAVE_DELETED_MEDIA, Neon.Pink)
+                SwitchTile(Icons.Rounded.PlayDisabled, L.t(R.string.chat_hide_views), Prefs.KEY_HIDE_VIEWS, Neon.Amber, sub = L.t(R.string.tag_experimental))
+            }
+            TileRow {
+                SwitchTile(Icons.Rounded.AutoStories, L.t(R.string.stories_hide_views), Prefs.KEY_HIDE_STORY_VIEWS, Neon.Violet)
+                SwitchTile(Icons.Rounded.PersonOff, L.t(R.string.profile_hide_views), Prefs.KEY_HIDE_PROFILE_VIEWS, Neon.Violet)
+            }
         }
     }
-    Appear(2) {
-        Section(Icons.Rounded.VisibilityOff, L.t(R.string.chat_presence), accent = Neon.Violet) {
-            ToggleRow(L.t(R.string.chat_hide_typing), L.t(R.string.chat_hide_typing_desc), Prefs.KEY_DISABLE_TYPING_INDICATOR, Icons.Rounded.KeyboardHide, Neon.Violet)
-            ToggleRow(L.t(R.string.chat_hide_online), L.t(R.string.chat_hide_online_desc), Prefs.KEY_HIDE_ONLINE_STATUS, Icons.Rounded.WifiOff, Neon.Violet)
-            ToggleRow(L.t(R.string.chat_hide_views), L.t(R.string.chat_hide_views_desc), Prefs.KEY_HIDE_VIEWS, Icons.Rounded.PlayDisabled, Neon.Violet, badge = L.t(R.string.tag_experimental))
-            ToggleRow(L.t(R.string.stories_hide_views), L.t(R.string.stories_hide_views_desc), Prefs.KEY_HIDE_STORY_VIEWS, Icons.Rounded.AutoStories, Neon.Violet, badge = L.t(R.string.tag_new))
-            ToggleRow(L.t(R.string.profile_hide_views), L.t(R.string.profile_hide_views_desc), Prefs.KEY_HIDE_PROFILE_VIEWS, Icons.Rounded.PersonOff, Neon.Violet, badge = L.t(R.string.tag_new))
-        }
-    }
-    Appear(3) {
-        Section(Icons.Rounded.DeleteSweep, L.t(R.string.chat_deleted), L.t(R.string.chat_deleted_sub), accent = Neon.Violet) {
-            ToggleRow(L.t(R.string.chat_keep_deleted), L.t(R.string.chat_keep_deleted_desc), Prefs.KEY_ANTI_RECALL, Icons.Rounded.Restore, Neon.Violet)
-            ToggleRow(L.t(R.string.chat_save_deleted_media), L.t(R.string.chat_save_deleted_media_desc), Prefs.KEY_SAVE_DELETED_MEDIA, Icons.Rounded.SaveAlt, Neon.Violet)
-        }
-    }
+    Appear(2) { Hint(L.t(R.string.chat_receipts_hint)) }
 }
 
 // ================================================================== FEED
@@ -1105,46 +1165,40 @@ private fun FeedScreen(onOpenFocus: () -> Unit) {
     val ctx = LocalContext.current
     val blocked = remember { Prefs.readStat(ctx, Prefs.STAT_ADS_BLOCKED) }
     Appear(0) { ScreenTitle(L.t(R.string.nav_feed), L.t(R.string.feed_subtitle), Neon.Amber) }
-    Appear(1) { FocusEntryCard(onOpenFocus) }
-    Appear(1) { com.mts.tikmod.ui.DynamicSection(collapsed = true) }
     Appear(1) {
-        GlassCard(padding = 18.dp) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconTile(Icons.Rounded.Shield, Neon.Amber, 52.dp)
-                Spacer(Modifier.width(16.dp))
-                Column {
-                    CountUp(blocked, 32.sp, Neon.Amber)
-                    Text(L.t(R.string.feed_ads_counter), fontSize = 12.5.sp, color = Subtle)
-                }
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            TileRow {
+                NavTile(Icons.Rounded.SelfImprovement, L.t(R.string.focus_title), "", L.t(R.string.focus_open), Neon.Lime, height = 150.dp) { onOpenFocus() }
+                SwitchTile(Icons.Rounded.AutoGraph, L.t(R.string.focus_dyn_on), Prefs.KEY_FOCUS_DYNAMIC, Neon.Lime, height = 150.dp)
+            }
+            TileRow {
+                SwitchTile(Icons.Rounded.Block, L.t(R.string.feed_ads), Prefs.KEY_REMOVE_ADS, Neon.Amber, sub = "%,d".format(blocked), height = 150.dp)
+                SwitchTile(Icons.Rounded.FastForward, L.t(R.string.feed_splash), Prefs.KEY_BLOCK_SPLASH_ADS, Neon.Amber, height = 150.dp)
+            }
+            TileRow {
+                SwitchTile(Icons.Rounded.CommentsDisabled, L.t(R.string.feed_comment_ads), Prefs.KEY_HIDE_COMMENT_ADS, Neon.Amber)
+                SwitchTile(Icons.Rounded.Handshake, L.t(R.string.feed_paid), Prefs.KEY_HIDE_PAID_PARTNERSHIP, Neon.Amber)
+            }
+            TileRow {
+                SwitchTile(Icons.Rounded.Sensors, L.t(R.string.feed_live), Prefs.KEY_HIDE_FEED_LIVE, Neon.Pink)
+                SwitchTile(Icons.Rounded.ShoppingBag, L.t(R.string.feed_shop), Prefs.KEY_HIDE_SHOP, Neon.Pink)
+            }
+            TileRow {
+                SwitchTile(Icons.Rounded.Timeline, L.t(R.string.feed_seekbar), Prefs.KEY_FORCE_SEEKBAR, Neon.Cyan)
+                CycleTile(Icons.Rounded.Speed, L.t(R.string.feed_speed), Prefs.KEY_PLAYBACK_SPEED, listOf(
+                    // Isolated left-to-right, so "1.5×" doesn't turn into "×1.5" in Hebrew / Arabic.
+                    "1.0" to "⁦1×⁩", "1.5" to "⁦1.5×⁩", "2.0" to "⁦2×⁩", "3.0" to "⁦3×⁩",
+                    "0.5" to "⁦0.5×⁩", "0.25" to "⁦0.25×⁩"
+                ), Neon.Cyan)
+            }
+            TileRow {
+                SwitchTile(Icons.Rounded.VolumeOff, L.t(R.string.feed_mute), Prefs.KEY_MUTE_DEFAULT, Neon.Violet)
+                SwitchTile(Icons.Rounded.Collections, L.t(R.string.card_photos), Prefs.KEY_HIDE_PHOTO_POSTS, Neon.Violet, sub = L.t(R.string.feed_photos_desc))
             }
         }
     }
-    Appear(2) {
-        Section(Icons.Rounded.Block, L.t(R.string.quick_ads), accent = Neon.Amber) {
-            ToggleRow(L.t(R.string.feed_ads), L.t(R.string.feed_ads_desc), Prefs.KEY_REMOVE_ADS, Icons.Rounded.Campaign, Neon.Amber)
-            ToggleRow(L.t(R.string.feed_splash), L.t(R.string.feed_splash_desc), Prefs.KEY_BLOCK_SPLASH_ADS, Icons.Rounded.FastForward, Neon.Amber)
-            ToggleRow(L.t(R.string.feed_comment_ads), L.t(R.string.feed_comment_ads_desc), Prefs.KEY_HIDE_COMMENT_ADS, Icons.Rounded.CommentsDisabled, Neon.Amber)
-            ToggleRow(L.t(R.string.feed_paid), L.t(R.string.feed_paid_desc), Prefs.KEY_HIDE_PAID_PARTNERSHIP, Icons.Rounded.Handshake, Neon.Amber)
-        }
-    }
-    Appear(3) {
-        Section(Icons.Rounded.FilterAlt, L.t(R.string.feed_clean), L.t(R.string.feed_clean_sub), accent = Neon.Amber, collapsible = true, initiallyExpanded = false) {
-            ToggleRow(L.t(R.string.feed_live), L.t(R.string.feed_live_desc), Prefs.KEY_HIDE_FEED_LIVE, Icons.Rounded.Sensors, Neon.Amber)
-            ToggleRow(L.t(R.string.feed_shop), L.t(R.string.feed_shop_desc), Prefs.KEY_HIDE_SHOP, Icons.Rounded.ShoppingBag, Neon.Amber)
-            ToggleRow(L.t(R.string.card_photos), L.t(R.string.feed_photos_desc), Prefs.KEY_HIDE_PHOTO_POSTS, Icons.Rounded.Collections, Neon.Amber)
-            Hint(L.t(R.string.feed_hint))
-        }
-    }
-    Appear(4) {
-        Section(Icons.Rounded.Speed, L.t(R.string.feed_playback), accent = Neon.Cyan, collapsible = true, initiallyExpanded = false) {
-            SegmentedPref(L.t(R.string.feed_speed), Prefs.KEY_PLAYBACK_SPEED, listOf(
-                Opt("0.25", "0.25×"), Opt("0.5", "0.5×"), Opt("1.0", "1×"),
-                Opt("1.5", "1.5×"), Opt("2.0", "2×"), Opt("3.0", "3×")
-            ), accent = Neon.Cyan)
-            ToggleRow(L.t(R.string.feed_seekbar), L.t(R.string.feed_seekbar_desc), Prefs.KEY_FORCE_SEEKBAR, Icons.Rounded.Timeline, Neon.Cyan)
-            ToggleRow(L.t(R.string.feed_mute), L.t(R.string.feed_mute_desc), Prefs.KEY_MUTE_DEFAULT, Icons.Rounded.VolumeOff, Neon.Cyan)
-        }
-    }
+    Appear(2) { SectionLabel(L.t(R.string.home_system)) }
+    Appear(2) { com.mts.tikmod.ui.DynamicSection(collapsed = true) }
     Appear(5) {
         Section(Icons.Rounded.FilterList, L.t(R.string.feed_filters), L.t(R.string.feed_filters_sub), accent = Neon.Amber, collapsible = true, initiallyExpanded = false) {
             ToggleRow(L.t(R.string.feed_reposts), L.t(R.string.feed_reposts_desc), Prefs.KEY_HIDE_REPOSTS, Icons.Rounded.Repeat, Neon.Amber)
