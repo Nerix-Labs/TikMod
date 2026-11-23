@@ -103,6 +103,8 @@ object Prefs {
     const val KEY_STORY_ARCHIVE = "key_story_archive"             // keep a copy of every story I watch (deleted ones get marked)
     const val KEY_STORY_AUTO = "key_story_auto"                   // save stories of the channels below by themselves
     const val KEY_STORY_AUTO_CHANNELS = "key_story_auto_channels" // comma-separated handles
+    const val KEY_STORY_DELETED_NOTIFY = "key_story_deleted_notify" // notify when an archived story gets deleted
+    const val KEY_WATCH_HISTORY = "key_watch_history"             // keep a list of the videos I watch (on the phone only)
     const val KEY_LIVE_HISTORY = "key_live_history"               // keep a list of LIVE streams I entered
     const val KEY_LIVE_HISTORY_JSON = "live_history_json"         // the list itself (not exported)
     const val KEY_APP_LANGUAGE = "key_app_language"             // "system" or a language tag (see L.LANGUAGES)
@@ -293,6 +295,8 @@ object Prefs {
         KEY_STORY_ARCHIVE to true,
         KEY_STORY_AUTO to false,
         KEY_STORY_AUTO_CHANNELS to "",
+        KEY_STORY_DELETED_NOTIFY to true,
+        KEY_WATCH_HISTORY to true,
         KEY_LIVE_CAPTIONS to false,
         KEY_CAPTION_SOURCE to "auto",
         KEY_CAPTION_TARGET to "",

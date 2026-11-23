@@ -2,6 +2,26 @@
 
 All notable changes to TikMod. Versions follow [semantic versioning](https://semver.org).
 
+## 4.10.0 — 2026-11-23
+
+### Added
+- **Watch history.** Every video and photo post the feed puts on screen (`VideoViewCell.onPageSelected`, the same
+  target "Stop the addiction" learns from) is kept on the phone (Downloads → Watch history): author, caption, a small
+  cover, how many times you saw it and how long it was on screen. Search by name, @handle or caption, grouped by day;
+  tap to open it again in TikTok, or copy / share the link. Ads, stories and LIVE previews are left out. The newest
+  1,000 are kept; one switch turns it off.
+- **Know when a story is deleted.** When a story you have in the archive gets deleted, a notification says who
+  deleted it (one per creator, with the cover when TikMod has it); tapping it opens the archive. On by default, with
+  its own switch in Stories.
+- **Story archive by creator.** Chips with every creator in the archive, how many of their stories are kept and how
+  many were deleted; tap one to see only theirs.
+- **Search the download history**, and filter it by kind (videos, photos, audio, covers, profile pictures, LIVE).
+
+### Notes
+- **Beta.** The TikMod side (storage, screens, notification, search, 10 languages) was tested on an emulator with
+  TikTok's calls played over adb (debug builds only accept them from the shell). The watch-history hook itself
+  wasn't run in TikTok yet; it uses the same `VideoViewCell.onPageSelected` the Focus hook already uses on 47.9.2.
+
 ## 4.9.0 — 2026-11-22
 
 ### Added

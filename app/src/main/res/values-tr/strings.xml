@@ -809,4 +809,55 @@
     <string name="cl490_anon_desc">İki yeni anahtar: bir hikâyenin izleyici listesinde görünmemek ve birini ziyaret ettiğinde \"Profil görüntülemeleri\"nde görünmemek.</string>
     <string name="cl490_views">\"İzlemeleri bildirme\" artık her şeyi yakalıyor</string>
     <string name="cl490_views_desc">TikTok, daha önce gözden kaçan ikinci ve hızlı bir oynatma raporu gönderiyor. Artık o da engelleniyor.</string>
+
+    <!-- 4.10.0: watch history, deleted-story notifications, archive by creator, download search -->
+    <string name="watch_title">İzleme geçmişi</string>
+    <string name="watch_subtitle">Kaydırdığın her video, yalnızca bu telefonda</string>
+    <string name="watch_entry_empty">İzlediğin her video, aranabilir. Hiçbir şey telefondan çıkmaz.</string>
+    <string name="watch_entry_counts">%1$d video • bugün %2$d</string>
+    <string name="watch_toggle">İzleme geçmişini tut</string>
+    <string name="watch_toggle_desc">Akıştaki videolar ve fotoğraf gönderileri. Reklamlar, hikâyeler ve LIVE önizlemeleri tutulmaz.</string>
+    <string name="watch_search">Ad, @kullanıcı adı veya açıklamaya göre ara</string>
+    <string name="watch_empty">Henüz bir şey yok. TikTok\'ta kaydır, izlediğin videolar burada görünür.</string>
+    <string name="watch_no_match">Aramanla eşleşen video yok.</string>
+    <string name="watch_today">Bugün</string>
+    <string name="watch_yesterday">Dün</string>
+    <string name="watch_on_screen">Ekranda %1$s</string>
+    <string name="watch_open">TikTok\'ta aç</string>
+    <string name="watch_copy_link">Bağlantıyı kopyala</string>
+    <string name="watch_clear_q">İzleme geçmişi temizlensin mi?</string>
+    <string name="watch_clear_desc">Tüm kayıtlar ve kapakları TikMod\'dan silinir. TikTok\'un kendi geçmişine dokunulmaz.</string>
+    <string name="watch_hint">Yalnızca bu telefonda tutulur; en yeni %1$d kayıt saklanır.</string>
+    <string name="stories_notify">Bir hikâye silinince bana haber ver</string>
+    <string name="stories_notify_desc">Bir üretici arşivindeki bir hikâyeyi sildiğinde bildirim</string>
+    <plurals name="notif_stories_deleted_text">
+        <item quantity="one">Hâlâ TikMod hikâye arşivinde duruyor.</item>
+        <item quantity="other">Hâlâ TikMod hikâye arşivinde duruyorlar.</item>
+    </plurals>
+    <string name="channel_stories">Hikâyeler</string>
+    <string name="channel_stories_desc">Arşivinden silinen hikâyeler</string>
+    <string name="stories_creators_all">Tüm üreticiler</string>
+    <string name="history_search">İndirmelerde ara</string>
+    <string name="history_no_match">Aramanla eşleşen bir şey yok.</string>
+    <string name="hist_kind_video">Videolar</string>
+    <string name="hist_kind_photo">Fotoğraflar</string>
+    <string name="hist_kind_audio">Ses</string>
+    <string name="hist_kind_cover">Kapaklar</string>
+    <string name="hist_kind_avatar">Profil fotoğrafları</string>
+    <string name="cl4100_watch">İzleme geçmişi</string>
+    <string name="cl4100_watch_desc">Kaydırdığın her video telefonda kalır: ad, @kullanıcı adı veya açıklamaya göre ara, TikTok\'ta yeniden aç ve ekranda ne kadar kaldığını gör.</string>
+    <string name="cl4100_notify">Bir hikâye silinince haberin olsun</string>
+    <string name="cl4100_notify_desc">Bir üretici arşivindeki bir hikâyeyi silerse, kapağıyla birlikte bir bildirim gelir.</string>
+    <string name="cl4100_creators">Üreticiye göre hikâye arşivi</string>
+    <string name="cl4100_creators_desc">Bir üretici seç; yalnızca onun hikâyelerini ve kaçının silindiğini gör.</string>
+    <string name="cl4100_search">İndirmelerinde ara</string>
+    <string name="cl4100_search_desc">İndirme geçmişinde ara; videolar, fotoğraflar, ses ve daha fazlasına göre filtrele.</string>
+    <plurals name="watch_times">
+        <item quantity="one">%d kez izlendi</item>
+        <item quantity="other">%d kez izlendi</item>
+    </plurals>
+    <plurals name="notif_stories_deleted">
+        <item quantity="one">%1$s bir hikâye sildi</item>
+        <item quantity="other">%1$s %2$d hikâye sildi</item>
+    </plurals>
 </resources>

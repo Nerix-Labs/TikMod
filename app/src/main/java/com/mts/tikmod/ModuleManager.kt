@@ -25,6 +25,7 @@ object ModuleManager {
             ChatPrivacyHook(),
             PresenceHook(),
             StoryHook(),
+            WatchHistoryHook(),
             LiveCaptionHook(),
             LiveChatHook(),
             TweaksHook(),

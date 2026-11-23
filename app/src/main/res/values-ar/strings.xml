@@ -853,4 +853,67 @@
     <string name="cl490_anon_desc">مفتاحان جديدان: عدم الظهور في قائمة مشاهدي القصة، وعدم الظهور في \"مشاهدات الملف الشخصي\" عندما تزور أحدًا.</string>
     <string name="cl490_views">\"عدم الإبلاغ عن المشاهدات\" يلتقط كل شيء الآن</string>
     <string name="cl490_views_desc">يرسل تيك توك تقرير تشغيل ثانيًا وأسرع كان يفلت من قبل. الآن يُحظر هو أيضًا.</string>
+
+    <!-- 4.10.0: watch history, deleted-story notifications, archive by creator, download search -->
+    <string name="watch_title">سجل المشاهدة</string>
+    <string name="watch_subtitle">كل فيديو تمرّ عليه، على هذا الهاتف فقط</string>
+    <string name="watch_entry_empty">كل فيديو تشاهده، مع البحث. لا شيء يغادر الهاتف.</string>
+    <string name="watch_entry_counts">%1$d فيديو • %2$d اليوم</string>
+    <string name="watch_toggle">الاحتفاظ بسجل المشاهدة</string>
+    <string name="watch_toggle_desc">الفيديوهات ومنشورات الصور من الخلاصة. لا تُحفظ الإعلانات والقصص ومعاينات البث المباشر.</string>
+    <string name="watch_search">ابحث بالاسم أو @المعرّف أو الوصف</string>
+    <string name="watch_empty">لا شيء بعد. تصفّح تيك توك وستظهر هنا الفيديوهات التي شاهدتها.</string>
+    <string name="watch_no_match">لا يوجد فيديو يطابق بحثك.</string>
+    <string name="watch_today">اليوم</string>
+    <string name="watch_yesterday">أمس</string>
+    <string name="watch_on_screen">%1$s على الشاشة</string>
+    <string name="watch_open">فتح في تيك توك</string>
+    <string name="watch_copy_link">نسخ الرابط</string>
+    <string name="watch_clear_q">مسح سجل المشاهدة؟</string>
+    <string name="watch_clear_desc">ستُحذف كل الإدخالات وصورها من TikMod. سجل تيك توك نفسه لا يتأثر.</string>
+    <string name="watch_hint">يُحفظ على هذا الهاتف فقط؛ يُحتفظ بآخر %1$d.</string>
+    <string name="stories_notify">أخبرني عند حذف قصة</string>
+    <string name="stories_notify_desc">إشعار عندما يحذف منشئ قصة موجودة في أرشيفك</string>
+    <plurals name="notif_stories_deleted_text">
+        <item quantity="zero">لا تزال محفوظة في أرشيف القصص في TikMod.</item>
+        <item quantity="one">لا تزال محفوظة في أرشيف القصص في TikMod.</item>
+        <item quantity="two">لا تزال محفوظة في أرشيف القصص في TikMod.</item>
+        <item quantity="few">لا تزال محفوظة في أرشيف القصص في TikMod.</item>
+        <item quantity="many">لا تزال محفوظة في أرشيف القصص في TikMod.</item>
+        <item quantity="other">لا تزال محفوظة في أرشيف القصص في TikMod.</item>
+    </plurals>
+    <string name="channel_stories">القصص</string>
+    <string name="channel_stories_desc">قصص حُذفت من أرشيفك</string>
+    <string name="stories_creators_all">كل المنشئين</string>
+    <string name="history_search">البحث في التنزيلات</string>
+    <string name="history_no_match">لا شيء يطابق بحثك.</string>
+    <string name="hist_kind_video">فيديوهات</string>
+    <string name="hist_kind_photo">صور</string>
+    <string name="hist_kind_audio">صوت</string>
+    <string name="hist_kind_cover">أغلفة</string>
+    <string name="hist_kind_avatar">صور الملف الشخصي</string>
+    <string name="cl4100_watch">سجل المشاهدة</string>
+    <string name="cl4100_watch_desc">كل فيديو تمرّ عليه يُحفظ على الهاتف: ابحث بالاسم أو @المعرّف أو الوصف، وافتحه مجددًا في تيك توك، واعرف كم بقي على الشاشة.</string>
+    <string name="cl4100_notify">اعرف عند حذف قصة</string>
+    <string name="cl4100_notify_desc">عندما يحذف منشئ قصة موجودة في أرشيفك، يظهر إشعار مع غلافها.</string>
+    <string name="cl4100_creators">أرشيف القصص حسب المنشئ</string>
+    <string name="cl4100_creators_desc">اختر منشئًا لترى قصصه فقط، مع عدد ما حُذف منها.</string>
+    <string name="cl4100_search">ابحث في تنزيلاتك</string>
+    <string name="cl4100_search_desc">ابحث في سجل التنزيلات وصفّه حسب الفيديوهات والصور والصوت وغيرها.</string>
+    <plurals name="watch_times">
+        <item quantity="zero">شوهد %d مرات</item>
+        <item quantity="one">شوهد مرة واحدة</item>
+        <item quantity="two">شوهد %d مرات</item>
+        <item quantity="few">شوهد %d مرات</item>
+        <item quantity="many">شوهد %d مرات</item>
+        <item quantity="other">شوهد %d مرات</item>
+    </plurals>
+    <plurals name="notif_stories_deleted">
+        <item quantity="zero">حذف %1$s %2$d قصص</item>
+        <item quantity="one">حذف %1$s قصة</item>
+        <item quantity="two">حذف %1$s %2$d قصص</item>
+        <item quantity="few">حذف %1$s %2$d قصص</item>
+        <item quantity="many">حذف %1$s %2$d قصص</item>
+        <item quantity="other">حذف %1$s %2$d قصص</item>
+    </plurals>
 </resources>

@@ -831,4 +831,61 @@
     <string name="cl490_anon_desc">Два новых переключателя: не попадать в список зрителей истории и не появляться в \"Просмотрах профиля\", когда заходите к кому-то.</string>
     <string name="cl490_views">\"Не сообщать о просмотрах\" теперь ловит всё</string>
     <string name="cl490_views_desc">TikTok отправляет второй, быстрый отчёт о просмотре, который раньше проскакивал. Теперь блокируется и он.</string>
+
+    <!-- 4.10.0: watch history, deleted-story notifications, archive by creator, download search -->
+    <string name="watch_title">История просмотров</string>
+    <string name="watch_subtitle">Каждое видео, до которого вы долистали, — только на этом телефоне</string>
+    <string name="watch_entry_empty">Каждое просмотренное видео, с поиском. Ничего не покидает телефон.</string>
+    <string name="watch_entry_counts">Видео: %1$d • сегодня: %2$d</string>
+    <string name="watch_toggle">Вести историю просмотров</string>
+    <string name="watch_toggle_desc">Видео и фотопосты из ленты. Реклама, истории и превью LIVE не сохраняются.</string>
+    <string name="watch_search">Поиск по имени, @нику или подписи</string>
+    <string name="watch_empty">Пока пусто. Листайте TikTok, и просмотренные видео появятся здесь.</string>
+    <string name="watch_no_match">Ни одно видео не подходит под поиск.</string>
+    <string name="watch_today">Сегодня</string>
+    <string name="watch_yesterday">Вчера</string>
+    <string name="watch_on_screen">%1$s на экране</string>
+    <string name="watch_open">Открыть в TikTok</string>
+    <string name="watch_copy_link">Копировать ссылку</string>
+    <string name="watch_clear_q">Очистить историю просмотров?</string>
+    <string name="watch_clear_desc">Все записи и их обложки будут удалены из TikMod. История самого TikTok не затрагивается.</string>
+    <string name="watch_hint">Хранится только на этом телефоне; сохраняются последние %1$d.</string>
+    <string name="stories_notify">Сообщать об удалённых историях</string>
+    <string name="stories_notify_desc">Уведомление, когда автор удаляет историю из вашего архива</string>
+    <plurals name="notif_stories_deleted_text">
+        <item quantity="one">Она по-прежнему есть в архиве историй TikMod.</item>
+        <item quantity="few">Они по-прежнему есть в архиве историй TikMod.</item>
+        <item quantity="many">Они по-прежнему есть в архиве историй TikMod.</item>
+        <item quantity="other">Они по-прежнему есть в архиве историй TikMod.</item>
+    </plurals>
+    <string name="channel_stories">Истории</string>
+    <string name="channel_stories_desc">Истории, удалённые из вашего архива</string>
+    <string name="stories_creators_all">Все авторы</string>
+    <string name="history_search">Поиск по загрузкам</string>
+    <string name="history_no_match">Ничего не найдено.</string>
+    <string name="hist_kind_video">Видео</string>
+    <string name="hist_kind_photo">Фото</string>
+    <string name="hist_kind_audio">Аудио</string>
+    <string name="hist_kind_cover">Обложки</string>
+    <string name="hist_kind_avatar">Фото профиля</string>
+    <string name="cl4100_watch">История просмотров</string>
+    <string name="cl4100_watch_desc">Каждое видео, до которого вы долистали, сохраняется на телефоне: поиск по имени, @нику или подписи, повторное открытие в TikTok и время на экране.</string>
+    <string name="cl4100_notify">Узнавайте об удалённых историях</string>
+    <string name="cl4100_notify_desc">Когда автор удаляет историю из вашего архива, приходит уведомление с её обложкой.</string>
+    <string name="cl4100_creators">Архив историй по авторам</string>
+    <string name="cl4100_creators_desc">Выберите автора, чтобы видеть только его истории и сколько из них удалено.</string>
+    <string name="cl4100_search">Поиск по загрузкам</string>
+    <string name="cl4100_search_desc">Ищите в истории загрузок и фильтруйте по видео, фото, аудио и другому.</string>
+    <plurals name="watch_times">
+        <item quantity="one">Просмотрено %d раз</item>
+        <item quantity="few">Просмотрено %d раза</item>
+        <item quantity="many">Просмотрено %d раз</item>
+        <item quantity="other">Просмотрено %d раза</item>
+    </plurals>
+    <plurals name="notif_stories_deleted">
+        <item quantity="one">%1$s удалил(а) %2$d историю</item>
+        <item quantity="few">%1$s удалил(а) %2$d истории</item>
+        <item quantity="many">%1$s удалил(а) %2$d историй</item>
+        <item quantity="other">%1$s удалил(а) %2$d истории</item>
+    </plurals>
 </resources>

@@ -798,4 +798,52 @@
     <string name="cl490_anon_desc">两个新开关：不出现在快拍的观看者列表中；访问别人时不出现在\"主页访客\"中。</string>
     <string name="cl490_views">\"不上报观看记录\" 现在全部拦截</string>
     <string name="cl490_views_desc">TikTok 会发送第二个更快的播放上报，之前会漏掉。现在它也会被拦截。</string>
+
+    <!-- 4.10.0: watch history, deleted-story notifications, archive by creator, download search -->
+    <string name="watch_title">观看记录</string>
+    <string name="watch_subtitle">你刷到的每个视频，只保存在这台手机上</string>
+    <string name="watch_entry_empty">你看过的每个视频，都可以搜索。数据不会离开手机。</string>
+    <string name="watch_entry_counts">%1$d 个视频 • 今天 %2$d 个</string>
+    <string name="watch_toggle">保存观看记录</string>
+    <string name="watch_toggle_desc">来自推荐流的视频和图文。广告、快拍和直播预览不会保存。</string>
+    <string name="watch_search">按名字、@用户名或文案搜索</string>
+    <string name="watch_empty">还没有内容。在 TikTok 里刷视频，看过的会出现在这里。</string>
+    <string name="watch_no_match">没有符合搜索的视频。</string>
+    <string name="watch_today">今天</string>
+    <string name="watch_yesterday">昨天</string>
+    <string name="watch_on_screen">在屏幕上 %1$s</string>
+    <string name="watch_open">在 TikTok 中打开</string>
+    <string name="watch_copy_link">复制链接</string>
+    <string name="watch_clear_q">清除观看记录？</string>
+    <string name="watch_clear_desc">所有记录及其封面都会从 TikMod 中删除。TikTok 自己的记录不受影响。</string>
+    <string name="watch_hint">只保存在这台手机上；保留最近的 %1$d 条。</string>
+    <string name="stories_notify">快拍被删除时通知我</string>
+    <string name="stories_notify_desc">创作者删除你存档中的快拍时发送通知</string>
+    <plurals name="notif_stories_deleted_text">
+        <item quantity="other">仍保存在 TikMod 的快拍存档中。</item>
+    </plurals>
+    <string name="channel_stories">快拍</string>
+    <string name="channel_stories_desc">从你的存档中被删除的快拍</string>
+    <string name="stories_creators_all">全部创作者</string>
+    <string name="history_search">搜索下载</string>
+    <string name="history_no_match">没有符合搜索的内容。</string>
+    <string name="hist_kind_video">视频</string>
+    <string name="hist_kind_photo">图片</string>
+    <string name="hist_kind_audio">音频</string>
+    <string name="hist_kind_cover">封面</string>
+    <string name="hist_kind_avatar">头像</string>
+    <string name="cl4100_watch">观看记录</string>
+    <string name="cl4100_watch_desc">你刷到的每个视频都会保存在手机上：可按名字、@用户名或文案搜索，在 TikTok 中再次打开，并查看它在屏幕上停留了多久。</string>
+    <string name="cl4100_notify">快拍被删除时第一时间知道</string>
+    <string name="cl4100_notify_desc">创作者删除你存档中的快拍时，会收到带封面的通知。</string>
+    <string name="cl4100_creators">按创作者查看快拍存档</string>
+    <string name="cl4100_creators_desc">选择一位创作者，只看他的快拍，以及其中有多少被删除。</string>
+    <string name="cl4100_search">搜索你的下载</string>
+    <string name="cl4100_search_desc">搜索下载记录，并按视频、图片、音频等筛选。</string>
+    <plurals name="watch_times">
+        <item quantity="other">看过 %d 次</item>
+    </plurals>
+    <plurals name="notif_stories_deleted">
+        <item quantity="other">%1$s 删除了 %2$d 条快拍</item>
+    </plurals>
 </resources>

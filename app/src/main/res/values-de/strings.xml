@@ -809,4 +809,55 @@
     <string name="cl490_anon_desc">Zwei neue Schalter: nicht in der Zuschauerliste einer Story erscheinen und nicht in den \"Profilaufrufen\", wenn du jemanden besuchst.</string>
     <string name="cl490_views">\"Aufrufe nicht melden\" erfasst jetzt alles</string>
     <string name="cl490_views_desc">TikTok sendet eine zweite, schnelle Wiedergabemeldung, die bisher durchrutschte. Sie wird jetzt auch blockiert.</string>
+
+    <!-- 4.10.0: watch history, deleted-story notifications, archive by creator, download search -->
+    <string name="watch_title">Wiedergabeverlauf</string>
+    <string name="watch_subtitle">Jedes Video, zu dem du scrollst – nur auf diesem Handy</string>
+    <string name="watch_entry_empty">Jedes Video, das du ansiehst, durchsuchbar. Nichts verlässt das Handy.</string>
+    <string name="watch_entry_counts">%1$d Videos • %2$d heute</string>
+    <string name="watch_toggle">Wiedergabeverlauf speichern</string>
+    <string name="watch_toggle_desc">Videos und Fotobeiträge aus dem Feed. Werbung, Stories und LIVE-Vorschauen werden nicht gespeichert.</string>
+    <string name="watch_search">Nach Name, @Nutzername oder Beschreibung suchen</string>
+    <string name="watch_empty">Noch leer. Scrolle durch TikTok, dann erscheinen hier die Videos, die du angesehen hast.</string>
+    <string name="watch_no_match">Kein Video passt zu deiner Suche.</string>
+    <string name="watch_today">Heute</string>
+    <string name="watch_yesterday">Gestern</string>
+    <string name="watch_on_screen">%1$s auf dem Bildschirm</string>
+    <string name="watch_open">In TikTok öffnen</string>
+    <string name="watch_copy_link">Link kopieren</string>
+    <string name="watch_clear_q">Wiedergabeverlauf löschen?</string>
+    <string name="watch_clear_desc">Alle Einträge und ihre Vorschaubilder werden aus TikMod entfernt. TikToks eigener Verlauf bleibt unberührt.</string>
+    <string name="watch_hint">Nur auf diesem Handy gespeichert; die neuesten %1$d bleiben.</string>
+    <string name="stories_notify">Melden, wenn eine Story gelöscht wird</string>
+    <string name="stories_notify_desc">Eine Benachrichtigung, wenn ein Creator eine Story aus deinem Archiv löscht</string>
+    <plurals name="notif_stories_deleted_text">
+        <item quantity="one">Du hast sie weiterhin im Story-Archiv von TikMod.</item>
+        <item quantity="other">Du hast sie weiterhin im Story-Archiv von TikMod.</item>
+    </plurals>
+    <string name="channel_stories">Stories</string>
+    <string name="channel_stories_desc">Aus deinem Archiv gelöschte Stories</string>
+    <string name="stories_creators_all">Alle Creator</string>
+    <string name="history_search">Downloads durchsuchen</string>
+    <string name="history_no_match">Nichts passt zu deiner Suche.</string>
+    <string name="hist_kind_video">Videos</string>
+    <string name="hist_kind_photo">Fotos</string>
+    <string name="hist_kind_audio">Audio</string>
+    <string name="hist_kind_cover">Cover</string>
+    <string name="hist_kind_avatar">Profilbilder</string>
+    <string name="cl4100_watch">Wiedergabeverlauf</string>
+    <string name="cl4100_watch_desc">Jedes Video, zu dem du scrollst, bleibt auf dem Handy: Suche nach Name, @Nutzername oder Beschreibung, öffne es erneut in TikTok und sieh, wie lange es zu sehen war.</string>
+    <string name="cl4100_notify">Erfahren, wenn eine Story gelöscht wird</string>
+    <string name="cl4100_notify_desc">Löscht ein Creator eine Story aus deinem Archiv, zeigt eine Benachrichtigung sie samt Cover.</string>
+    <string name="cl4100_creators">Story-Archiv nach Creator</string>
+    <string name="cl4100_creators_desc">Wähle einen Creator, um nur seine Stories zu sehen, mit der Zahl der gelöschten.</string>
+    <string name="cl4100_search">Downloads durchsuchen</string>
+    <string name="cl4100_search_desc">Durchsuche den Download-Verlauf und filtere nach Videos, Fotos, Audio und mehr.</string>
+    <plurals name="watch_times">
+        <item quantity="one">%d-mal angesehen</item>
+        <item quantity="other">%d-mal angesehen</item>
+    </plurals>
+    <plurals name="notif_stories_deleted">
+        <item quantity="one">%1$s hat eine Story gelöscht</item>
+        <item quantity="other">%1$s hat %2$d Stories gelöscht</item>
+    </plurals>
 </resources>

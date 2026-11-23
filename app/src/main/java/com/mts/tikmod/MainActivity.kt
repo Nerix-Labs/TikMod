@@ -117,13 +117,17 @@ private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
     var focusOpen by rememberSaveable { mutableStateOf(false) }
     // Stories (archive, auto-save, anonymous viewing) open as a page inside the Downloads tab.
     var storiesOpen by rememberSaveable { mutableStateOf(false) }
+    // The watch history too.
+    var watchOpen by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(startTab) {
         if (startTab == "live") screen = Screen.LIVE
         if (startTab == "focus") { screen = Screen.FEED; focusOpen = true }
-        if (startTab == "stories") { screen = Screen.DOWNLOADS; storiesOpen = true }
+        if (startTab == "stories") { screen = Screen.DOWNLOADS; watchOpen = false; storiesOpen = true }
+        if (startTab == "watch") { screen = Screen.DOWNLOADS; storiesOpen = false; watchOpen = true }
     }
     androidx.activity.compose.BackHandler(enabled = screen == Screen.FEED && focusOpen) { focusOpen = false }
     androidx.activity.compose.BackHandler(enabled = screen == Screen.DOWNLOADS && storiesOpen) { storiesOpen = false }
+    androidx.activity.compose.BackHandler(enabled = screen == Screen.DOWNLOADS && watchOpen) { watchOpen = false }
     val active = remember { Prefs.isModuleActive(ctx) }
     // "What's new" opens by itself once after every update; the history sheet from Home → Updates.
     var showWhatsNew by remember { mutableStateOf(Updater.shouldShowWhatsNew(ctx) && Changelog.forVersion(BuildConfig.VERSION_NAME) != null) }
@@ -151,7 +155,11 @@ private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
                 when (s) {
                     Screen.HOME -> HomeScreen(active, onNavigate = { screen = it }, onThemeChange = onThemeChange, onShowHistory = { showHistory = true },
                         onOpenFocus = { screen = Screen.FEED; focusOpen = true })
-                    Screen.DOWNLOADS -> if (storiesOpen) StoriesScreen { storiesOpen = false } else DownloadsScreen { storiesOpen = true }
+                    Screen.DOWNLOADS -> when {
+                        storiesOpen -> StoriesScreen { storiesOpen = false }
+                        watchOpen -> WatchHistoryScreen { watchOpen = false }
+                        else -> DownloadsScreen(onOpenStories = { storiesOpen = true }, onOpenWatch = { watchOpen = true })
+                    }
                     Screen.LIVE -> LiveScreen()
                     Screen.CHAT -> ChatScreen()
                     Screen.FEED -> if (focusOpen) FocusScreen { focusOpen = false } else FeedScreen { focusOpen = true }
@@ -434,10 +442,11 @@ internal fun ActionButton(icon: ImageVector, text: String, modifier: Modifier = 
 // ================================================================== DOWNLOADS
 
 @Composable
-private fun DownloadsScreen(onOpenStories: () -> Unit) {
+private fun DownloadsScreen(onOpenStories: () -> Unit, onOpenWatch: () -> Unit) {
     val ctx = LocalContext.current
     Appear(0) { ScreenTitle(L.t(R.string.nav_downloads), L.t(R.string.dl_subtitle), Neon.Cyan) }
     Appear(1) { StoriesEntryCard(onOpenStories) }
+    Appear(1) { WatchHistoryEntryCard(onOpenWatch) }
     Appear(1) {
         Section(Icons.Rounded.Download, L.t(R.string.dl_engine), L.t(R.string.dl_engine_sub)) {
             ToggleRow(L.t(R.string.dl_engine_toggle), L.t(R.string.dl_engine_toggle_desc), Prefs.KEY_REMOVE_WATERMARK, Icons.Rounded.PowerSettingsNew) { Prefs.setForceDownloadEnabled(ctx, it) }
@@ -529,6 +538,8 @@ private fun HistorySection() {
     var history by remember { mutableStateOf(Prefs.readHistory(ctx)) }
     var showAll by remember { mutableStateOf(false) }
     var confirmClear by remember { mutableStateOf(false) }
+    var query by rememberSaveable { mutableStateOf("") }
+    var kind by rememberSaveable { mutableStateOf("") }
     if (confirmClear) {
         AlertDialog(
             onDismissRequest = { confirmClear = false },
@@ -547,10 +558,45 @@ private fun HistorySection() {
         if (history.isEmpty()) {
             Hint(L.t(R.string.history_empty))
         } else {
-            (if (showAll) history else history.take(8)).forEach { HistoryRow(it) }
-            if (history.size > 8) TextButton(onClick = { showAll = !showAll }) { Text(if (showAll) L.t(R.string.history_show_less) else L.p(R.plurals.history_show_all, history.size)) }
+            // Search (title, file name, @creator) and a filter per kind of file.
+            val kinds = remember(history) { history.map { it.optString("kind") }.filter { it.isNotBlank() }.distinct() }
+            if (kind.isNotEmpty() && kind !in kinds) kind = ""
+            val shown = remember(history, query, kind) {
+                val q = query.trim().removePrefix("@").lowercase()
+                history.filter { e ->
+                    (kind.isEmpty() || e.optString("kind") == kind) && (q.isEmpty() ||
+                        listOf("title", "name", "author", "detail").any { e.optString(it).lowercase().contains(q) })
+                }
+            }
+            OutlinedTextField(
+                value = query, onValueChange = { query = it; showAll = false }, singleLine = true,
+                placeholder = { Text(L.t(R.string.history_search)) },
+                leadingIcon = { Icon(Icons.Rounded.Search, null) },
+                trailingIcon = { if (query.isNotEmpty()) IconButton(onClick = { query = "" }) { Icon(Icons.Rounded.Close, L.t(R.string.action_clear)) } },
+                shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp)
+            )
+            if (kinds.size > 1) Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(selected = kind.isEmpty(), onClick = { kind = ""; showAll = false }, label = { Text(L.t(R.string.stories_filter_all)) })
+                kinds.forEach { k ->
+                    FilterChip(selected = kind == k, onClick = { kind = if (kind == k) "" else k; showAll = false },
+                        label = { Text("${historyKindLabel(k)} · ${history.count { it.optString("kind") == k }}") })
+                }
+            }
+            if (shown.isEmpty()) Hint(L.t(R.string.history_no_match))
+            (if (showAll) shown else shown.take(8)).forEach { HistoryRow(it) }
+            if (shown.size > 8) TextButton(onClick = { showAll = !showAll }) { Text(if (showAll) L.t(R.string.history_show_less) else L.p(R.plurals.history_show_all, shown.size)) }
         }
     }
+}
+
+private fun historyKindLabel(kind: String): String = when (kind) {
+    "VIDEO" -> L.t(R.string.hist_kind_video)
+    "PHOTO" -> L.t(R.string.hist_kind_photo)
+    "AUDIO" -> L.t(R.string.hist_kind_audio)
+    "COVER" -> L.t(R.string.hist_kind_cover)
+    "AVATAR" -> L.t(R.string.hist_kind_avatar)
+    "LIVE" -> "LIVE"
+    else -> kind.lowercase().replaceFirstChar { it.uppercase() }
 }
 
 @Composable

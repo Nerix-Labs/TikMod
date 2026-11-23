@@ -122,6 +122,7 @@ fun StoriesScreen(onBack: () -> Unit) {
     Appear(2) {
         Section(Icons.Rounded.Inventory2, L.t(R.string.stories_keep), accent = Neon.Pink) {
             ToggleRow(L.t(R.string.stories_archive), L.t(R.string.stories_archive_desc), Prefs.KEY_STORY_ARCHIVE, Icons.Rounded.AutoStories, Neon.Pink)
+            DeletedNotifyToggle()
             Hint(L.t(R.string.stories_download_hint))
         }
     }
@@ -129,6 +130,23 @@ fun StoriesScreen(onBack: () -> Unit) {
     Appear(3) { AutoSaveSection() }
 
     Appear(4) { ArchiveSection(stories) }
+}
+
+/** "Tell me when a story gets deleted"; asks for the notification permission when it's switched on (Android 13+). */
+@Composable
+private fun DeletedNotifyToggle() {
+    val ctx = LocalContext.current
+    var on by remember { mutableStateOf(Prefs.bool(ctx, Prefs.KEY_STORY_DELETED_NOTIFY)) }
+    val ask = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { }
+    fun needsPermission() = android.os.Build.VERSION.SDK_INT >= 33 && androidx.core.content.ContextCompat.checkSelfPermission(
+        ctx, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED
+    ToggleRowRaw(L.t(R.string.stories_notify), L.t(R.string.stories_notify_desc), on, Icons.Rounded.NotificationsActive, Neon.Pink) {
+        on = it
+        Prefs.setBool(ctx, Prefs.KEY_STORY_DELETED_NOTIFY, it)
+        if (it && needsPermission()) runCatching { ask.launch(android.Manifest.permission.POST_NOTIFICATIONS) }
+    }
 }
 
 @Composable
@@ -192,8 +210,19 @@ private fun ArchiveSection(stories: List<JSONObject>) {
     var filter by remember { mutableStateOf("all") }
     var showAll by remember { mutableStateOf(false) }
     var confirmClear by remember { mutableStateOf(false) }
+    // One creator's stories only ("" = everyone).
+    var creator by remember { mutableStateOf("") }
     val deleted = stories.count { it.optBoolean("deleted") }
-    val shown = if (filter == "deleted") stories.filter { it.optBoolean("deleted") } else stories
+    // Creators by how many of their stories are archived (deleted ones first among equals).
+    val creators = remember(stories) {
+        stories.groupBy { it.optString("handle").lowercase() }.filterKeys { it.isNotBlank() }
+            .map { (h, l) -> Triple(h, l.size, l.count { it.optBoolean("deleted") }) }
+            .sortedWith(compareByDescending<Triple<String, Int, Int>> { it.second }.thenByDescending { it.third })
+    }
+    if (creator.isNotEmpty() && creators.none { it.first == creator }) creator = ""
+    val shown = stories.filter {
+        (filter != "deleted" || it.optBoolean("deleted")) && (creator.isEmpty() || it.optString("handle").lowercase() == creator)
+    }
 
     if (confirmClear) AlertDialog(
         onDismissRequest = { confirmClear = false },
@@ -213,6 +242,19 @@ private fun ArchiveSection(stories: List<JSONObject>) {
             listOf(Opt("all", L.t(R.string.stories_filter_all), Icons.Rounded.AutoStories), Opt("deleted", L.t(R.string.stories_filter_deleted, deleted), Icons.Rounded.DeleteOutline)),
             filter, Neon.Pink
         ) { filter = it; showAll = false }
+        if (creators.size > 1) Row(
+            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 4.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(selected = creator.isEmpty(), onClick = { creator = ""; showAll = false },
+                label = { Text(L.t(R.string.stories_creators_all)) },
+                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Neon.Pink.copy(alpha = 0.22f)))
+            creators.forEach { (h, count, del) ->
+                FilterChip(selected = creator == h, onClick = { creator = if (creator == h) "" else h; showAll = false },
+                    label = { Text("@$h · $count" + if (del > 0) " · 🗑$del" else "", style = LocalTextStyle.current.copy(textDirection = TextDirection.Ltr)) },
+                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Neon.Pink.copy(alpha = 0.22f)))
+            }
+        }
         Spacer(Modifier.height(6.dp))
         if (shown.isEmpty()) Hint(if (filter == "deleted") L.t(R.string.stories_deleted_empty) else L.t(R.string.stories_archive_empty))
         (if (showAll) shown else shown.take(12)).forEach { e -> key(e.optString("aid")) { StoryRow(e) } }
