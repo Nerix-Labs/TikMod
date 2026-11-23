@@ -13,6 +13,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -163,11 +166,42 @@ fun LiveRow(handle: String, st: JSONObject, showStop: Boolean = true) {
     }
 }
 
+class QuickAction(val icon: ImageVector, val label: String, val accent: () -> Color, val onClick: () -> Unit)
+
+/** Home: a row of round shortcuts to the places used most, scrolling sideways. */
+@Composable
+fun QuickActions(items: List<QuickAction>) {
+    Row(
+        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(vertical = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items.forEach { a ->
+            val accent = a.accent()
+            Column(Modifier.width(74.dp).pressable(onClick = a.onClick), horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(
+                    Modifier.size(60.dp)
+                        .then(if (Neon.glow) Modifier.shadow(12.dp, CircleShape, clip = false, ambientColor = accent, spotColor = accent) else Modifier)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .background(Brush.linearGradient(listOf(accent.copy(alpha = 0.30f), accent.copy(alpha = 0.06f))))
+                        .border(1.dp, accent.copy(alpha = if (Neon.glow) 0.7f else 0.35f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) { Icon(a.icon, null, tint = accent, modifier = Modifier.size(26.dp)) }
+                Spacer(Modifier.height(6.dp))
+                Text(a.label, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, lineHeight = 13.sp,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center, overflow = TextOverflow.Ellipsis)
+            }
+        }
+    }
+}
+
 /** "Watch" pill: opens the stream itself in TikTok. */
 @Composable
 fun WatchButton(onClick: () -> Unit) {
     Row(
-        Modifier.clip(CircleShape).background(Neon.Pink).clickable(onClick = onClick).padding(horizontal = 11.dp, vertical = 6.dp),
+        Modifier.pressable(onClick = onClick).clip(CircleShape)
+            .then(if (Neon.glow) Modifier.background(Brush.linearGradient(listOf(Neon.Pink, Neon.Violet))) else Modifier.background(Neon.Pink))
+            .padding(horizontal = 11.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(Icons.Rounded.PlayArrow, null, tint = Neon.OnAccent, modifier = Modifier.size(16.dp))

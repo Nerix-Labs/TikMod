@@ -908,4 +908,9 @@
     <string name="focus_dyn_full">Complet après %1$d min</string>
     <string name="cl4100_dyn">Stop dynamique à l\'addiction</string>
     <string name="cl4100_dyn_desc">Toujours actif : d\'abord libre, puis le fil se calme à mesure que vous continuez. Une courte pause le réinitialise.</string>
+    <string name="search_settings">Rechercher un réglage</string>
+    <string name="search_none">Aucun réglage ne correspond.</string>
+    <string name="search_go">Y aller</string>
+    <string name="cl4100_search_all">Trouvez n\'importe quel réglage</string>
+    <string name="cl4100_search_all_desc">Cherchez depuis l\'accueil et basculez les interrupteurs dans les résultats ; raccourcis vers vos endroits favoris et une sensation plus fluide partout.</string>
 </resources>

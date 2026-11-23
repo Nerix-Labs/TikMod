@@ -908,4 +908,9 @@
     <string name="focus_dyn_full">Completo após %1$d min</string>
     <string name="cl4100_dyn">Freio dinâmico ao vício</string>
     <string name="cl4100_dyn_desc">Sempre ativo: primeiro rolagem livre, depois o feed acalma quanto mais você continua. Uma pausa curta reinicia.</string>
+    <string name="search_settings">Buscar configurações</string>
+    <string name="search_none">Nenhuma configuração corresponde.</string>
+    <string name="search_go">Ir</string>
+    <string name="cl4100_search_all">Encontre qualquer configuração</string>
+    <string name="cl4100_search_all_desc">Busque na tela inicial e alterne os botões direto nos resultados; atalhos para o que você mais usa e uma sensação mais fluida em tudo.</string>
 </resources>

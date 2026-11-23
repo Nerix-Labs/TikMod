@@ -922,4 +922,9 @@
     <string name="focus_dyn_full">מלא אחרי %1$d דק׳</string>
     <string name="cl4100_dyn">עצירת התמכרות דינמית</string>
     <string name="cl4100_dyn_desc">תמיד פועלת: קודם גלילה חופשית, ואז הפיד נרגע ככל שממשיכים. הפסקה קצרה מאפסת.</string>
+    <string name="search_settings">חיפוש בהגדרות</string>
+    <string name="search_none">אף הגדרה לא מתאימה.</string>
+    <string name="search_go">מעבר להגדרה</string>
+    <string name="cl4100_search_all">מוצאים כל הגדרה</string>
+    <string name="cl4100_search_all_desc">חיפוש ממסך הבית עם מתגים ישר בתוצאות, קיצורים למקומות הכי שימושיים, ותחושה חלקה יותר בכל מקום.</string>
 </resources>

@@ -880,4 +880,9 @@
     <string name="focus_dyn_full">%1$d 分钟后全开</string>
     <string name="cl4100_dyn">动态防沉迷</string>
     <string name="cl4100_dyn_desc">始终开启：先自由刷，越往后推荐流越平静。短暂休息即可重置。</string>
+    <string name="search_settings">搜索设置</string>
+    <string name="search_none">没有匹配的设置。</string>
+    <string name="search_go">前往</string>
+    <string name="cl4100_search_all">任何设置一搜即得</string>
+    <string name="cl4100_search_all_desc">在主页搜索，并直接在结果中切换开关；常用位置的快捷入口，处处更流畅。</string>
 </resources>

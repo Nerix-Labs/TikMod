@@ -895,4 +895,9 @@
     <string name="focus_dyn_full">Full after %1$d min</string>
     <string name="cl4100_dyn">Dynamic stop the addiction</string>
     <string name="cl4100_dyn_desc">Always on: free scrolling first, then the feed gets calmer the longer you go. A short break resets it.</string>
+    <string name="search_settings">Search settings</string>
+    <string name="search_none">No setting matches.</string>
+    <string name="search_go">Go to it</string>
+    <string name="cl4100_search_all">Find any setting</string>
+    <string name="cl4100_search_all_desc">Search from Home and flip switches right in the results; shortcuts to the places you use most, and a slicker feel everywhere.</string>
 </resources>

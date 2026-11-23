@@ -11,6 +11,12 @@ All notable changes to TikMod. Versions follow [semantic versioning](https://sem
   dot grid. **You** (Material You) and **System** (Studio, light or dark like the phone). Everywhere: editorial
   headlines with small-caps overlines, compact quick toggles with mini switches, a docked bottom bar that names every
   section.
+- **Search every setting from Home.** Type a word in any of the 10 languages: matching settings show up with their
+  switch, flip them right there, or jump to where they live. Round shortcuts below it (watch history, stories, record
+  LIVE, stop the addiction, downloads, chat).
+- **Feels better everywhere.** Every switch, tile and button sinks a little and ticks under your finger; one tab
+  indicator slides between tabs; a compact title bar appears once a page's big title scrolls away (tap it to jump
+  back up); in Neon the hero cards' gradient edge slowly travels around them.
 - **Dynamic stop the addiction.** Always on, nothing to start: free scrolling for the first minutes of a session
   (5–30), then the feed calms down step by step until your full dial (over 15–60 minutes); a 10-minute break resets
   it, and between 23:00 and 05:00 it kicks in twice as fast. A small chart shows the curve; it's on Home, in Feed and

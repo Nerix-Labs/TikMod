@@ -27,6 +27,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
@@ -69,6 +71,22 @@ import kotlinx.coroutines.delay
 /** Secondary text: readable on every scheme (dynamic schemes have a very muted onSurfaceVariant). */
 val Subtle: Color
     @Composable get() = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.66f)
+
+/**
+ * Tap feedback for anything you can press: it sinks a little under the finger, ripples, and gives a light tick.
+ */
+@Composable
+fun Modifier.pressable(enabled: Boolean = true, haptic: Boolean = true, onClick: () -> Unit): Modifier {
+    val src = remember { MutableInteractionSource() }
+    val pressed by src.collectIsPressedAsState()
+    val s by animateFloatAsState(if (pressed) 0.965f else 1f, spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMedium), label = "press")
+    val h = androidx.compose.ui.platform.LocalHapticFeedback.current
+    return this.graphicsLayer { scaleX = s; scaleY = s }
+        .clickable(src, androidx.compose.foundation.LocalIndication.current, enabled = enabled) {
+            if (haptic) h.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+            onClick()
+        }
+}
 
 /** The fine edge every surface has. */
 val Edge: Color
@@ -165,8 +183,15 @@ fun GlassCard(modifier: Modifier = Modifier, glow: Boolean = false, padding: Dp 
         neon -> Brush.verticalGradient(listOf(cs.surfaceContainerHigh.copy(alpha = 0.90f), cs.surfaceContainer.copy(alpha = 0.86f)))
         else -> Brush.verticalGradient(listOf(cs.surfaceContainerHigh.copy(alpha = 0.97f), cs.surfaceContainer.copy(alpha = 0.97f)))
     }
+    // Neon hero cards: the gradient edge slowly travels around the card.
+    // Read only while drawing, so the card's content isn't recomposed every frame.
+    val spin: State<Float>? = if (glow && neon) {
+        val t = rememberInfiniteTransition(label = "edge")
+        t.animateFloat(0f, (2 * Math.PI).toFloat(), infiniteRepeatable(tween(6000, easing = LinearEasing)), label = "a")
+    } else null
+    val brandColors = Neon.brand + Neon.brand.first()
     val edge = when {
-        glow && neon -> Brush.linearGradient(Neon.brand)
+        glow && neon -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)) // drawn below, rotating
         glow -> Brush.linearGradient(listOf(Neon.Cyan.copy(alpha = 0.45f), Neon.Violet.copy(alpha = 0.18f), Edge))
         neon -> Brush.linearGradient(listOf(Neon.Cyan.copy(alpha = 0.30f), Neon.Violet.copy(alpha = 0.10f), Neon.Pink.copy(alpha = 0.26f)))
         else -> Brush.verticalGradient(listOf(cs.onSurface.copy(alpha = 0.10f), Edge))
@@ -180,7 +205,17 @@ fun GlassCard(modifier: Modifier = Modifier, glow: Boolean = false, padding: Dp 
             // An opaque base, so the glow shadow never shows through the tinted fill.
             .then(if (neon) Modifier.background(cs.surfaceContainer) else Modifier)
             .background(fill)
-            .border(1.dp, edge, shape)
+            .then(if (spin == null) Modifier.border(1.dp, edge, shape) else Modifier.drawWithContent {
+                drawContent()
+                val a = spin.value
+                val c = Offset(size.width / 2, size.height / 2)
+                val r = maxOf(size.width, size.height) / 2
+                val d = Offset(kotlin.math.cos(a) * r, kotlin.math.sin(a) * r)
+                val sw = 1.5.dp.toPx()
+                drawRoundRect(Brush.linearGradient(brandColors, start = c - d, end = c + d),
+                    topLeft = Offset(sw / 2, sw / 2), size = androidx.compose.ui.geometry.Size(size.width - sw, size.height - sw),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(24.dp.toPx()), style = Stroke(sw))
+            })
             .padding(padding),
         content = content
     )
@@ -282,7 +317,7 @@ fun ToggleRowRaw(
     val bg by animateColorAsState(if (checked) accent.copy(alpha = 0.07f) else Color.Transparent, tween(260), label = "bg")
     Row(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(bg)
-            .clickable { onChange(!checked) }
+            .pressable { onChange(!checked) }
             .padding(horizontal = 10.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -417,7 +452,7 @@ fun QuickTile(icon: ImageVector, title: String, key: String, accent: Color, modi
     Row(
         modifier.scale(press).clip(RoundedCornerShape(18.dp)).background(bg)
             .border(1.dp, if (on) accent.copy(alpha = borderA) else Edge, RoundedCornerShape(18.dp))
-            .clickable { on = !on; Prefs.setBool(ctx, key, on); onChange(on) }
+            .pressable { on = !on; Prefs.setBool(ctx, key, on); onChange(on) }
             .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

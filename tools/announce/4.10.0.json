@@ -10,6 +10,7 @@
       { "icon": { "e": "🕘", "id": "" }, "text": "Watch history: every video you scroll to, searchable, on the phone only" },
       { "icon": { "e": "▶️", "id": "" }, "text": "Watch button and tap-to-open: recorded streams and followed channels open in TikTok" },
       { "icon": { "e": "📖", "id": "" }, "text": "Stories get their own tab, with the archive as a grid" },
+      { "icon": { "e": "🔎", "id": "" }, "text": "Search any setting from Home and flip it right there" },
       { "icon": { "e": "🔔", "id": "" }, "text": "A notification when a story in your archive gets deleted; search in downloads" }
     ]
   },
@@ -24,6 +25,7 @@
       { "icon": { "e": "🕘", "id": "" }, "text": "היסטוריית צפייה: כל סרטון שגללתם אליו, עם חיפוש, רק בטלפון" },
       { "icon": { "e": "▶️", "id": "" }, "text": "כפתור צפייה ולחיצה על ערוץ: שידורים מוקלטים וערוצים במעקב נפתחים בטיקטוק" },
       { "icon": { "e": "📖", "id": "" }, "text": "לסטוריז יש כרטיסייה משלהם, והארכיון מוצג ברשת ריבועים" },
+      { "icon": { "e": "🔎", "id": "" }, "text": "חיפוש כל הגדרה ממסך הבית, והפעלה ישר מהתוצאות" },
       { "icon": { "e": "🔔", "id": "" }, "text": "התראה כשסטורי מהארכיון נמחק; חיפוש בהורדות" }
     ]
   },

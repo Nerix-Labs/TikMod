@@ -922,4 +922,9 @@
     <string name="focus_dyn_full">Полностью через %1$d мин</string>
     <string name="cl4100_dyn">Динамическая остановка зависимости</string>
     <string name="cl4100_dyn_desc">Всегда включена: сначала свободная прокрутка, потом лента спокойнее, чем дольше вы листаете. Короткий перерыв сбрасывает.</string>
+    <string name="search_settings">Поиск настроек</string>
+    <string name="search_none">Ничего не найдено.</string>
+    <string name="search_go">Перейти</string>
+    <string name="cl4100_search_all">Любая настройка за секунду</string>
+    <string name="cl4100_search_all_desc">Ищите прямо на главном экране и переключайте прямо в результатах; ярлыки к самым нужным разделам и более плавная работа везде.</string>
 </resources>

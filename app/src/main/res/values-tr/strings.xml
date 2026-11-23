@@ -894,4 +894,9 @@
     <string name="focus_dyn_full">%1$d dk sonra tam</string>
     <string name="cl4100_dyn">Dinamik bağımlılık durdurma</string>
     <string name="cl4100_dyn_desc">Hep açık: önce serbest kaydırma, sonra devam ettikçe akış sakinleşir. Kısa bir ara sıfırlar.</string>
+    <string name="search_settings">Ayarlarda ara</string>
+    <string name="search_none">Eşleşen ayar yok.</string>
+    <string name="search_go">Git</string>
+    <string name="cl4100_search_all">Her ayarı bul</string>
+    <string name="cl4100_search_all_desc">Ana ekrandan ara, anahtarları sonuçlarda aç/kapat; en çok kullandığın yerlere kısayollar ve her yerde daha akıcı bir his.</string>
 </resources>

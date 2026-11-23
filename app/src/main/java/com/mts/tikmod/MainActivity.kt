@@ -68,7 +68,9 @@ import com.mts.tikmod.updates.Changelog
 import com.mts.tikmod.updates.Updater
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.ui.graphics.graphicsLayer
 import org.json.JSONObject
 
 class MainActivity : ComponentActivity() {
@@ -150,20 +152,44 @@ private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
             },
             label = "screens"
         ) { s ->
+            val scroll = rememberScrollState()
+            Box(Modifier.fillMaxSize()) {
             Column(
-                Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                Modifier.fillMaxSize().verticalScroll(scroll)
                     .statusBarsPadding().padding(horizontal = 16.dp).padding(top = 8.dp, bottom = 120.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 when (s) {
                     Screen.HOME -> HomeScreen(active, onNavigate = { screen = it }, onThemeChange = onThemeChange, onShowHistory = { showHistory = true },
-                        onOpenFocus = { screen = Screen.FEED; focusOpen = true }, onOpenWatch = { screen = Screen.DOWNLOADS; watchOpen = true })
+                        onOpenFocus = { screen = Screen.FEED; focusOpen = true }, onOpenWatch = { screen = Screen.DOWNLOADS; watchOpen = true },
+                        onGo = { tab ->
+                            when (tab) {
+                                "downloads" -> { watchOpen = false; screen = Screen.DOWNLOADS }
+                                "watch" -> { watchOpen = true; screen = Screen.DOWNLOADS }
+                                "stories" -> screen = Screen.STORIES
+                                "live" -> screen = Screen.LIVE
+                                "chat" -> screen = Screen.CHAT
+                                "feed" -> { focusOpen = false; screen = Screen.FEED }
+                                "focus" -> { focusOpen = true; screen = Screen.FEED }
+                            }
+                        })
                     Screen.DOWNLOADS -> if (watchOpen) WatchHistoryScreen { watchOpen = false } else DownloadsScreen(onOpenWatch = { watchOpen = true })
                     Screen.STORIES -> StoriesScreen(onBack = null)
                     Screen.LIVE -> LiveScreen()
                     Screen.CHAT -> ChatScreen()
                     Screen.FEED -> if (focusOpen) FocusScreen { focusOpen = false } else FeedScreen { focusOpen = true }
                 }
+            }
+            // Once the big title has scrolled away, a compact bar keeps the place's name (tap: back to the top).
+            val title = when {
+                s == Screen.HOME -> "TikMod"
+                s == Screen.DOWNLOADS && watchOpen -> L.t(R.string.watch_title)
+                s == Screen.FEED && focusOpen -> L.t(R.string.focus_title)
+                else -> s.label
+            }
+            val scope = rememberCoroutineScope()
+            val scrolled by remember { derivedStateOf { scroll.value > 300 } }
+            CompactTopBar(title, s.accent, visible = scrolled) { scope.launch { scroll.animateScrollTo(0) } }
             }
         }
         Box(
@@ -181,6 +207,28 @@ private fun TikModApp(startTab: String?, onThemeChange: (String) -> Unit) {
 
 // ================================================================== navigation
 
+/** Slides in under the status bar once the page's big title is gone; tapping it scrolls back to the top. */
+@Composable
+private fun CompactTopBar(title: String, accent: Color, visible: Boolean, onTap: () -> Unit) {
+    AnimatedVisibility(visible, enter = slideInVertically { -it } + fadeIn(), exit = slideOutVertically { -it } + fadeOut()) {
+        val cs = MaterialTheme.colorScheme
+        Row(
+            Modifier.fillMaxWidth().background(cs.background.copy(alpha = 0.96f))
+                .clickable(remember { MutableInteractionSource() }, null, onClick = onTap)
+                .statusBarsPadding().height(52.dp).padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(Modifier.size(8.dp).clip(CircleShape).background(accent))
+            Spacer(Modifier.width(10.dp))
+            Text(title, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.2).sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                style = if (Neon.glow) LocalTextStyle.current.copy(brush = Brush.linearGradient(listOf(Color.White, accent))) else LocalTextStyle.current,
+                modifier = Modifier.weight(1f))
+            Icon(Icons.Rounded.KeyboardArrowUp, null, tint = Subtle)
+        }
+        Box(Modifier.fillMaxWidth().padding(top = 0.dp).height(1.dp).background(Brush.horizontalGradient(listOf(Color.Transparent, accent.copy(alpha = 0.5f), Color.Transparent))))
+    }
+}
+
 @Composable
 private fun FloatingNav(current: Screen, modifier: Modifier = Modifier, onSelect: (Screen) -> Unit) {
     // A docked bar: every tab keeps its icon and name; the current one gets a tinted pill and a glowing line on top.
@@ -190,38 +238,51 @@ private fun FloatingNav(current: Screen, modifier: Modifier = Modifier, onSelect
             .background(Brush.verticalGradient(listOf(cs.background.copy(alpha = 0f), cs.background.copy(alpha = 0.92f), cs.background)))
             .padding(top = 18.dp)
     ) {
-        Row(
-            Modifier.fillMaxWidth().padding(horizontal = 12.dp).clip(RoundedCornerShape(26.dp))
+        val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+        val glow = Neon.glow
+        BoxWithConstraints(
+            Modifier.fillMaxWidth().padding(horizontal = 12.dp)
+                .then(if (glow) Modifier.shadow(18.dp, RoundedCornerShape(26.dp), clip = false, ambientColor = Neon.Violet, spotColor = Neon.Cyan) else Modifier)
+                .clip(RoundedCornerShape(26.dp))
                 .background(cs.surfaceContainerHigh.copy(alpha = 0.98f))
-                .border(1.dp, Edge, RoundedCornerShape(26.dp))
-                .padding(horizontal = 4.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .border(1.dp, if (glow) Brush.linearGradient(listOf(Neon.Cyan.copy(alpha = 0.35f), Neon.Violet.copy(alpha = 0.15f), Neon.Pink.copy(alpha = 0.35f)))
+                    else Brush.linearGradient(listOf(Edge, Edge)), RoundedCornerShape(26.dp))
+                .padding(horizontal = 4.dp, vertical = 6.dp)
         ) {
-            Screen.entries.forEach { s ->
-                val on = s == current
-                val glow = Neon.glow
-                val pill by animateColorAsState(if (on) s.accent.copy(alpha = 0.18f) else Color.Transparent, tween(250), label = "pill")
-                val fg by animateColorAsState(if (on) s.accent else Subtle, tween(250), label = "fg")
-                val pillW by animateDpAsState(if (on) 52.dp else 34.dp, spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow), label = "pw")
-                Column(
-                    Modifier.weight(1f).clip(RoundedCornerShape(18.dp))
-                        .clickable(remember { MutableInteractionSource() }, null) { onSelect(s) }
-                        .padding(vertical = 4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // Neon: the current tab is a glowing gradient capsule.
-                    Box(
-                        Modifier.width(pillW).height(30.dp)
-                            .then(if (on && glow) Modifier.shadow(14.dp, CircleShape, clip = false, ambientColor = s.accent, spotColor = s.accent) else Modifier)
-                            .clip(CircleShape)
-                            .background(if (on && glow) Brush.linearGradient(listOf(s.accent, Neon.Violet)) else Brush.linearGradient(listOf(pill, pill))),
-                        contentAlignment = Alignment.Center
+            // One indicator that slides from tab to tab (and stretches a little on the way).
+            val count = Screen.entries.size
+            val itemW = maxWidth / count
+            val index = Screen.entries.indexOf(current)
+            val x by animateDpAsState(itemW * index + (itemW - 52.dp) / 2, spring(Spring.DampingRatioLowBouncy, Spring.StiffnessMediumLow), label = "navX")
+            val accent by animateColorAsState(current.accent, tween(300), label = "navC")
+            Box(
+                Modifier.padding(top = 4.dp).offset(x = x).width(52.dp).height(30.dp)
+                    .then(if (glow) Modifier.shadow(14.dp, CircleShape, clip = false, ambientColor = accent, spotColor = accent) else Modifier)
+                    .clip(CircleShape)
+                    .background(if (glow) Brush.linearGradient(listOf(accent, Neon.Violet)) else Brush.linearGradient(listOf(accent.copy(alpha = 0.18f), accent.copy(alpha = 0.18f))))
+            )
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Screen.entries.forEach { s ->
+                    val on = s == current
+                    val fg by animateColorAsState(if (on) (if (glow) Neon.OnAccent else s.accent) else Subtle, tween(250), label = "fg")
+                    val label by animateColorAsState(if (on) s.accent else Subtle, tween(250), label = "lbl")
+                    val lift by animateFloatAsState(if (on) 1.08f else 1f, spring(Spring.DampingRatioMediumBouncy), label = "lift")
+                    Column(
+                        Modifier.weight(1f).clip(RoundedCornerShape(18.dp))
+                            .clickable(remember { MutableInteractionSource() }, null) {
+                                if (!on) haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                                onSelect(s)
+                            }
+                            .padding(vertical = 4.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Icon(s.icon, s.label, tint = if (on && glow) Neon.OnAccent else fg, modifier = Modifier.size(21.dp))
+                        Box(Modifier.height(30.dp), contentAlignment = Alignment.Center) {
+                            Icon(s.icon, s.label, tint = fg, modifier = Modifier.size(21.dp).graphicsLayer { scaleX = lift; scaleY = lift })
+                        }
+                        Spacer(Modifier.height(3.dp))
+                        Text(s.label, color = label, fontSize = 10.5.sp, fontWeight = if (on) FontWeight.Bold else FontWeight.Medium,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
-                    Spacer(Modifier.height(3.dp))
-                    Text(s.label, color = fg, fontSize = 10.5.sp, fontWeight = if (on) FontWeight.Bold else FontWeight.Medium,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
@@ -274,7 +335,7 @@ private fun HomeLiveState(ctx: android.content.Context): List<Pair<String, JSONO
 }
 
 @Composable
-private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onThemeChange: (String) -> Unit, onShowHistory: () -> Unit, onOpenFocus: () -> Unit, onOpenWatch: () -> Unit) {
+private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onThemeChange: (String) -> Unit, onShowHistory: () -> Unit, onOpenFocus: () -> Unit, onOpenWatch: () -> Unit, onGo: (String) -> Unit) {
     val ctx = LocalContext.current
     val history = remember { Prefs.readHistory(ctx) }
     val ads = remember { Prefs.readStat(ctx, Prefs.STAT_ADS_BLOCKED) }
@@ -305,7 +366,19 @@ private fun HomeScreen(active: Boolean, onNavigate: (Screen) -> Unit, onThemeCha
             CoreOrb(active, 64.dp)
         }
     }
-    Appear(1) { TodayCard(onOpenWatch, onOpenStories = { onNavigate(Screen.STORIES) }) }
+    Appear(1) { SettingsSearch(onGo) }
+    Appear(1) {
+        // One tap to the places used most.
+        QuickActions(listOf(
+            QuickAction(Icons.Rounded.Restore, L.t(R.string.watch_title), { Neon.Cyan }) { onGo("watch") },
+            QuickAction(Icons.Rounded.AutoStories, L.t(R.string.stories_title), { Neon.Pink }) { onGo("stories") },
+            QuickAction(Icons.Rounded.Videocam, L.t(R.string.live_instant), { Neon.Pink }) { onGo("live") },
+            QuickAction(Icons.Rounded.SelfImprovement, L.t(R.string.focus_title), { Neon.Lime }) { onGo("focus") },
+            QuickAction(Icons.Rounded.Download, L.t(R.string.nav_downloads), { Neon.Cyan }) { onGo("downloads") },
+            QuickAction(Icons.Rounded.Forum, L.t(R.string.nav_chat), { Neon.Violet }) { onGo("chat") },
+        ))
+    }
+    Appear(2) { TodayCard(onOpenWatch, onOpenStories = { onNavigate(Screen.STORIES) }) }
     AnimatedVisibility(recording.isNotEmpty(), enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
         LiveNowCard(recording) { onNavigate(Screen.LIVE) }
     }
@@ -486,7 +559,7 @@ internal fun ActionButton(icon: ImageVector, text: String, modifier: Modifier = 
     Row(
         modifier.height(48.dp).clip(RoundedCornerShape(16.dp))
             .background(accent.copy(alpha = 0.12f)).border(1.dp, accent.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick).padding(horizontal = 10.dp),
+            .pressable(onClick = onClick).padding(horizontal = 10.dp),
         horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(icon, null, tint = accent, modifier = Modifier.size(18.dp))

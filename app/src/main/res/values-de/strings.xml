@@ -894,4 +894,9 @@
     <string name="focus_dyn_full">Voll nach %1$d Min.</string>
     <string name="cl4100_dyn">Dynamischer Sucht-Stopp</string>
     <string name="cl4100_dyn_desc">Immer an: erst frei scrollen, dann wird der Feed ruhiger, je länger du bleibst. Eine kurze Pause setzt ihn zurück.</string>
+    <string name="search_settings">Einstellungen suchen</string>
+    <string name="search_none">Keine passende Einstellung.</string>
+    <string name="search_go">Hingehen</string>
+    <string name="cl4100_search_all">Jede Einstellung finden</string>
+    <string name="cl4100_search_all_desc">Vom Start aus suchen und Schalter direkt in den Ergebnissen umlegen; Abkürzungen zu den meistgenutzten Bereichen und ein flüssigeres Gefühl überall.</string>
 </resources>

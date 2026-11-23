@@ -908,4 +908,9 @@
     <string name="focus_dyn_full">Completo a los %1$d min</string>
     <string name="cl4100_dyn">Freno dinámico a la adicción</string>
     <string name="cl4100_dyn_desc">Siempre activo: primero deslizas libre, luego el feed se calma cuanto más sigues. Una pausa corta lo reinicia.</string>
+    <string name="search_settings">Buscar ajustes</string>
+    <string name="search_none">Ningún ajuste coincide.</string>
+    <string name="search_go">Ir</string>
+    <string name="cl4100_search_all">Encuentra cualquier ajuste</string>
+    <string name="cl4100_search_all_desc">Busca desde Inicio y cambia interruptores en los mismos resultados; atajos a lo que más usas y una sensación más fluida en todas partes.</string>
 </resources>
