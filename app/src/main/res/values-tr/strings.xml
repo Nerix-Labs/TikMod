@@ -809,4 +809,94 @@
     <string name="cl490_anon_desc">İki yeni anahtar: bir hikâyenin izleyici listesinde görünmemek ve birini ziyaret ettiğinde \"Profil görüntülemeleri\"nde görünmemek.</string>
     <string name="cl490_views">\"İzlemeleri bildirme\" artık her şeyi yakalıyor</string>
     <string name="cl490_views_desc">TikTok, daha önce gözden kaçan ikinci ve hızlı bir oynatma raporu gönderiyor. Artık o da engelleniyor.</string>
+
+    <!-- 4.10.0: watch history, deleted-story notifications, archive by creator, download search -->
+    <string name="watch_title">İzleme geçmişi</string>
+    <string name="watch_subtitle">Kaydırdığın her video, yalnızca bu telefonda</string>
+    <string name="watch_entry_empty">İzlediğin her video, aranabilir. Hiçbir şey telefondan çıkmaz.</string>
+    <string name="watch_entry_counts">%1$d video • bugün %2$d</string>
+    <string name="watch_toggle">İzleme geçmişini tut</string>
+    <string name="watch_toggle_desc">Akıştaki videolar ve fotoğraf gönderileri. Reklamlar, hikâyeler ve LIVE önizlemeleri tutulmaz.</string>
+    <string name="watch_search">Ad, @kullanıcı adı veya açıklamaya göre ara</string>
+    <string name="watch_empty">Henüz bir şey yok. TikTok\'ta kaydır, izlediğin videolar burada görünür.</string>
+    <string name="watch_no_match">Aramanla eşleşen video yok.</string>
+    <string name="watch_today">Bugün</string>
+    <string name="watch_yesterday">Dün</string>
+    <string name="watch_on_screen">Ekranda %1$s</string>
+    <string name="watch_open">TikTok\'ta aç</string>
+    <string name="watch_copy_link">Bağlantıyı kopyala</string>
+    <string name="watch_clear_q">İzleme geçmişi temizlensin mi?</string>
+    <string name="watch_clear_desc">Tüm kayıtlar ve kapakları TikMod\'dan silinir. TikTok\'un kendi geçmişine dokunulmaz.</string>
+    <string name="watch_hint">Yalnızca bu telefonda tutulur; en yeni %1$d kayıt saklanır.</string>
+    <string name="stories_notify">Bir hikâye silinince bana haber ver</string>
+    <string name="stories_notify_desc">Bir üretici arşivindeki bir hikâyeyi sildiğinde bildirim</string>
+    <plurals name="notif_stories_deleted_text">
+        <item quantity="one">Hâlâ TikMod hikâye arşivinde duruyor.</item>
+        <item quantity="other">Hâlâ TikMod hikâye arşivinde duruyorlar.</item>
+    </plurals>
+    <string name="channel_stories">Hikâyeler</string>
+    <string name="channel_stories_desc">Arşivinden silinen hikâyeler</string>
+    <string name="stories_creators_all">Tüm üreticiler</string>
+    <string name="history_search">İndirmelerde ara</string>
+    <string name="history_no_match">Aramanla eşleşen bir şey yok.</string>
+    <string name="hist_kind_video">Videolar</string>
+    <string name="hist_kind_photo">Fotoğraflar</string>
+    <string name="hist_kind_audio">Ses</string>
+    <string name="hist_kind_cover">Kapaklar</string>
+    <string name="hist_kind_avatar">Profil fotoğrafları</string>
+    <string name="cl4100_watch">İzleme geçmişi</string>
+    <string name="cl4100_watch_desc">Kaydırdığın her video telefonda kalır: ad, @kullanıcı adı veya açıklamaya göre ara, TikTok\'ta yeniden aç ve ekranda ne kadar kaldığını gör.</string>
+    <string name="cl4100_notify">Bir hikâye silinince haberin olsun</string>
+    <string name="cl4100_notify_desc">Bir üretici arşivindeki bir hikâyeyi silerse, kapağıyla birlikte bir bildirim gelir.</string>
+    <string name="cl4100_creators">Üreticiye göre hikâye arşivi</string>
+    <string name="cl4100_creators_desc">Bir üretici seç; yalnızca onun hikâyelerini ve kaçının silindiğini gör.</string>
+    <string name="cl4100_search">İndirmelerinde ara</string>
+    <string name="cl4100_search_desc">İndirme geçmişinde ara; videolar, fotoğraflar, ses ve daha fazlasına göre filtrele.</string>
+    <plurals name="watch_times">
+        <item quantity="one">%d kez izlendi</item>
+        <item quantity="other">%d kez izlendi</item>
+    </plurals>
+    <plurals name="notif_stories_deleted">
+        <item quantity="one">%1$s bir hikâye sildi</item>
+        <item quantity="other">%1$s %2$d hikâye sildi</item>
+    </plurals>
+
+    <!-- 4.10.0: Studio look (home, stories tab, LIVE watch) -->
+    <string name="greet_morning">Günaydın</string>
+    <string name="greet_afternoon">İyi günler</string>
+    <string name="greet_evening">İyi akşamlar</string>
+    <string name="greet_night">İyi geceler</string>
+    <string name="today_min">dk</string>
+    <string name="today_watched">izlendi</string>
+    <string name="today_videos">video</string>
+    <string name="today_creators">üretici</string>
+    <string name="today_stories">hikâye saklandı</string>
+    <string name="today_deleted">silindi, sende duruyor</string>
+    <string name="today_empty">Bugün henüz bir şey yok. TikTok\'u aç, günün burada görünsün.</string>
+    <string name="live_watch">İzle</string>
+    <string name="stories_stat_kept">Arşivde</string>
+    <string name="stories_stat_deleted">Silinen</string>
+    <string name="cl4100_design">Baştan yeni bir görünüm</string>
+    <string name="cl4100_design_desc">Daha sakin, derin ve okunaklı: yeni renkler ve kartlar, gününü gösteren bir ana ekran ve tüm bölümleri içeren alt çubuk.</string>
+    <string name="cl4100_tabs">Hikâyelerin kendi sekmesi var</string>
+    <string name="cl4100_tabs_desc">Arşiv, otomatik kaydetme ve gizli izleme, her yerden tek dokunuşla.</string>
+    <string name="cl4100_live">Kaydettiğini izle</string>
+    <string name="cl4100_live_desc">Kaydedilen her yayında ve şu an canlı olan her takip edilen kanalda bir İzle düğmesi onu TikTok\'ta açar.</string>
+    <string name="theme_studio">Stüdyo</string>
+    <string name="focus_why_dynamic">uzun kaydırma</string>
+    <string name="focus_dyn_title">Dinamik durdurma</string>
+    <string name="focus_dyn_desc">Hep açık, başlatacak bir şey yok: ara vermeden ne kadar uzun kaydırırsan akış o kadar sakinleşir.</string>
+    <string name="focus_dyn_on">Dinamik durdurma</string>
+    <string name="focus_dyn_grace">Önce serbest kaydırma</string>
+    <string name="focus_dyn_rise">Sonra sakinleşme süresi</string>
+    <string name="focus_dyn_hint">10 dakikalık bir ara onu sıfırlar. Gece (23:00–05:00) iki kat hızlı devreye girer. Ayarladığın kadranı ve konuları kullanır.</string>
+    <string name="focus_dyn_free">%1$d dk normal</string>
+    <string name="focus_dyn_full">%1$d dk sonra tam</string>
+    <string name="cl4100_dyn">Dinamik bağımlılık durdurma</string>
+    <string name="cl4100_dyn_desc">Hep açık: önce serbest kaydırma, sonra devam ettikçe akış sakinleşir. Kısa bir ara sıfırlar.</string>
+    <string name="search_settings">Ayarlarda ara</string>
+    <string name="search_none">Eşleşen ayar yok.</string>
+    <string name="search_go">Git</string>
+    <string name="cl4100_search_all">Her ayarı bul</string>
+    <string name="cl4100_search_all_desc">Ana ekrandan ara, anahtarları sonuçlarda aç/kapat; en çok kullandığın yerlere kısayollar ve her yerde daha akıcı bir his.</string>
 </resources>

@@ -23,7 +23,8 @@ Made by **Nerix Labs**.
 - Original sound or the video's audio track as a separate file
 - HD cover frame and full-size profile picture
 - Smart share: send the actual file (or file + link) to WhatsApp, Telegram etc. instead of just a link
-- Custom file-name patterns, per-creator folders, duplicate detection and a download history
+- Custom file-name patterns, per-creator folders, duplicate detection and a searchable download history
+- Watch history: every video you scroll to, on the phone only — search it and open any video again
 
 **LIVE**
 - Record any live stream from the share sheet into a standard MP4 that plays everywhere
@@ -34,11 +35,13 @@ Made by **Nerix Labs**.
 - Auto-record: follow channels and recording starts by itself when they go live, even when TikTok is closed —
   private accounts you follow included (as soon as TikTok shows their LIVE), with a quality per channel
 - Stop any single recording from the LIVE you're watching; the others keep going
+- Watch: one tap from TikMod opens any stream being recorded, or any followed channel that's live, in TikTok
 - Recordings run in TikMod's own foreground service, so they keep going after TikTok is swiped away
 
 **Stories**
 - Download any story without a watermark (video or photos) from its share sheet
-- Story archive: every story you watch is kept for 30 days; stories their creator deletes stay, marked 🗑
+- Story archive: every story you watch is kept for 30 days; stories their creator deletes stay, marked 🗑, and
+  a notification tells you when it happens. Browse the archive by creator
 - Auto-save the stories of chosen channels to the gallery
 - Watch stories anonymously (you're not on the viewer list) and hide your profile visits from "Profile views"
 
@@ -140,6 +143,7 @@ Modifying apps may violate their terms of service — use at your own risk.
 **TikMod** הוא מודול LSPosed לטיקטוק, מבית **Nerix Labs**.
 
 - **הורדות:** סרטונים בלי סימן מים באיכות הגבוהה ביותר, קרוסלות תמונות, שמע, קאבר ותמונת פרופיל.
+- **היסטוריית צפייה:** כל סרטון שגללתם אליו נשמר בטלפון בלבד, עם חיפוש ופתיחה מחדש בטיקטוק.
 - **שיתוף חכם:** שליחת הקובץ עצמו לוואטסאפ ולטלגרם במקום קישור בלבד.
 - **לייב:** הקלטת שידורים חיים ל-MP4 תקין, כולל הקלטה אוטומטית של ערוצים במעקב, שממשיכה גם כשטיקטוק סגור.
 - **סטוריז:** הורדה בלי סימן מים, ארכיון של כל סטורי שצפיתם בו (סטוריז שנמחקו נשארים עם סימן 🗑), שמירה אוטומטית מערוצים נבחרים, וצפייה אנונימית בסטוריז ובפרופילים.

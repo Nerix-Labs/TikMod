@@ -34,6 +34,8 @@ class TikModProvider : ContentProvider() {
     private fun callerAllowed(): Boolean {
         val uid = Binder.getCallingUid()
         if (uid == Process.myUid()) return true
+        // Debug builds only: `adb shell content call` plays TikTok's part, so the app can be tested on an emulator.
+        if (BuildConfig.DEBUG && uid == 2000 /* shell */) return true
         // An app calling our provider is always visible to us, so this works under Android 11 package visibility.
         val pkgs = runCatching { context?.packageManager?.getPackagesForUid(uid) }.getOrNull() ?: return false
         return pkgs.any { it in HOST_PACKAGES }
@@ -85,6 +87,11 @@ class TikModProvider : ContentProvider() {
                 }
                 "story_deleted" -> {
                     if (!arg.isNullOrBlank()) runCatching { com.mts.tikmod.stories.StoryStore.markDeleted(ctx, arg) }
+                    Bundle().apply { putBoolean("success", true) }
+                }
+                // Watch history: each post the feed puts on screen.
+                "add_watch" -> {
+                    if (!arg.isNullOrBlank()) runCatching { com.mts.tikmod.history.WatchHistory.add(ctx, JSONObject(arg)) }
                     Bundle().apply { putBoolean("success", true) }
                 }
                 "add_stat" -> {

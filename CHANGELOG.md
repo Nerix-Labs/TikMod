@@ -2,6 +2,60 @@
 
 All notable changes to TikMod. Versions follow [semantic versioning](https://semver.org).
 
+## 4.10.0 — 2026-11-23
+
+### Added
+- **A whole new look, in four themes that really differ.** **Neon** (default): true black, electric cyan / magenta /
+  violet, cards that glow in their colors, gradient headlines, a synthwave floor grid rolling at the bottom, and a
+  glowing capsule for the current tab. **Studio**: the same layout, calm — deep ink, iris / rose / lavender, a faint
+  dot grid. **You** (Material You) and **System** (Studio, light or dark like the phone). Everywhere: editorial
+  headlines with small-caps overlines, compact quick toggles with mini switches, a docked bottom bar that names every
+  section.
+- **A control center instead of lists.** Home is a grid of live tiles: LIVE (pulses and shows the stream while
+  recording, with Watch), Stories and Watch history as mosaics of the latest covers, ads blocked and downloads as big
+  numbers, dynamic stop and chat privacy — each with its own switch, each opening its section. Every tab starts with
+  tiles too: tap a switch tile anywhere to flip it (it dims when off), tap a choice tile to step to the next option
+  (quality, codec, share mode, folder, LIVE quality, check interval, read receipts, playback speed). Settings sit
+  behind a gear on Home; the rarer options are in collapsed sections below the tiles.
+- **Search every setting from Home.** Type a word in any of the 10 languages: matching settings show up with their
+  switch, flip them right there, or jump to where they live. Round shortcuts below it (watch history, stories, record
+  LIVE, stop the addiction, downloads, chat).
+- **Feels better everywhere.** Every switch, tile and button sinks a little and ticks under your finger; one tab
+  indicator slides between tabs; a compact title bar appears once a page's big title scrolls away (tap it to jump
+  back up); in Neon the hero cards' gradient edge slowly travels around them.
+- **Dynamic stop the addiction.** Always on, nothing to start: free scrolling for the first minutes of a session
+  (5–30), then the feed calms down step by step until your full dial (over 15–60 minutes); a 10-minute break resets
+  it, and between 23:00 and 05:00 it kicks in twice as fast. A small chart shows the curve; it's on Home, in Feed and
+  in Stop the addiction → Automatic.
+- **Tap a channel to open it in TikTok**: a followed channel opens its LIVE when it's live, its profile otherwise;
+  auto-save channels and archived stories open the profile too.
+- **Story archive as a grid** of 9:16 tiles (three per row, like a profile), at the top of the Stories tab: cover,
+  name, time, a 🗑 mark on deleted ones; tap to open, ⋮ or long-press for save / share / profile / remove.
+- **Home shows your day.** A greeting, a "Today" card (minutes watched in the feed as a ring, videos, creators,
+  stories kept, deletions caught) and, while something is recording, a "Recording now" card.
+- **Stories have their own tab**, with archive / deleted / creator counts at the top (it used to live inside
+  Downloads).
+- **Watch what you record.** Every stream being recorded (Home and LIVE) and every followed channel that's live has a
+  Watch button that opens that LIVE in TikTok; tapping a live channel's row does the same.
+- **Watch history.** Every video and photo post the feed puts on screen (`VideoViewCell.onPageSelected`, the same
+  target "Stop the addiction" learns from) is kept on the phone (Downloads → Watch history): author, caption, a small
+  cover, how many times you saw it and how long it was on screen. Search by name, @handle or caption, grouped by day;
+  tap to open it again in TikTok, or copy / share the link. Ads, stories and LIVE previews are left out. The newest
+  1,000 are kept; one switch turns it off.
+- **Know when a story is deleted.** When a story you have in the archive gets deleted, a notification says who
+  deleted it (one per creator, with the cover when TikMod has it); tapping it opens the archive. On by default, with
+  its own switch in Stories.
+- **Story archive by creator.** Chips with every creator in the archive, how many of their stories are kept and how
+  many were deleted; tap one to see only theirs.
+- **Search the download history**, and filter it by kind (videos, photos, audio, covers, profile pictures, LIVE).
+
+### Notes
+- **Beta.** Watch history was checked in TikTok 47.9.2 on a phone (posts, covers and time on screen recorded; the
+  feed ad left out), and the new look on the phone in Hebrew. Notifications, the archive by creator and download
+  search were tested on an emulator with TikTok's calls played over adb (debug builds only accept them from the
+  shell). The Watch button was tried on a stream being recorded and opened that channel's LIVE in TikTok. Dynamic
+  mode was checked in the settings only, not over a long session.
+
 ## 4.9.0 — 2026-11-22
 
 ### Added

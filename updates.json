@@ -1,6 +1,14 @@
 {
   "releases": [
     {
+      "version": "4.10.0",
+      "date": "2026-11-23",
+      "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.10.0/TikMod-4.10.0.apk",
+      "notes": "- Beta: please report problems from About > Report a bug\n- A whole new look in four themes (Neon, Studio, You, System); Stories get their own tab\n- Search every setting from Home and flip it right there; round shortcuts\n- Dynamic stop the addiction: always on, the feed calms down the longer you scroll\n- Home shows your day; watch history of every video you scroll to\n- Watch button and tap-to-open: recorded streams and followed channels open in TikTok\n- Story archive as a grid; a notification when a story is deleted; search in downloads\n- Works on TikTok 47.9.2",
+      "size": 31275665,
+      "sha256": "7395b406120ae6e94d0538f6883561caf3ebc3064de88dac3510cb269737742d"
+    },
+    {
       "version": "4.9.0",
       "date": "2026-11-23",
       "apk": "https://github.com/Nerix-Labs/TikMod/releases/download/v4.9.0/TikMod-4.9.0.apk",

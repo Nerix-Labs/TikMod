@@ -87,7 +87,7 @@ fun CaptionsSection() {
         }
     }
 
-    Section(Icons.Rounded.ClosedCaption, L.t(R.string.captions_title), L.t(R.string.captions_sub), accent = accent, badge = L.t(R.string.tag_new), collapsible = true) {
+    Section(Icons.Rounded.ClosedCaption, L.t(R.string.captions_title), L.t(R.string.captions_sub), accent = accent, collapsible = true, initiallyExpanded = false) {
         if (!CaptionService.supported()) { Hint(L.t(R.string.caption_unsupported)); return@Section }
         ToggleRowRaw(L.t(R.string.captions_toggle), L.t(R.string.captions_toggle_desc), enabled, Icons.Rounded.Subtitles, accent) { on ->
             // Android's speech recognizer asks its caller for this permission even though no microphone is used.
@@ -155,7 +155,7 @@ fun CaptionsSection() {
 /** Save the chat of streams you watch to a text file. Works only while TikTok is open on the room. */
 @Composable
 fun ChatRecordingSection() {
-    Section(Icons.Rounded.Forum, L.t(R.string.chat_rec_title), L.t(R.string.chat_rec_sub), accent = Neon.Pink, badge = L.t(R.string.tag_new), collapsible = true) {
+    Section(Icons.Rounded.Forum, L.t(R.string.chat_rec_title), L.t(R.string.chat_rec_sub), accent = Neon.Pink, collapsible = true, initiallyExpanded = false) {
         ToggleRow(L.t(R.string.chat_rec_toggle), L.t(R.string.chat_rec_toggle_desc), Prefs.KEY_RECORD_CHAT, Icons.Rounded.Forum, Neon.Pink)
         ToggleRow(L.t(R.string.chat_in_video), L.t(R.string.chat_in_video_desc), Prefs.KEY_CHAT_IN_VIDEO, Icons.Rounded.Subtitles, Neon.Pink)
         SegmentedPref(L.t(R.string.gifts_in_video), Prefs.KEY_GIFTS_IN_VIDEO, listOf(

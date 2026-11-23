@@ -214,6 +214,7 @@ private fun whyText(st: Focus.State): String = st.why.filter { it != Focus.Why.M
         Focus.Why.WINDOW -> R.string.focus_why_window
         Focus.Why.BEDTIME -> R.string.focus_why_bedtime
         Focus.Why.WINDDOWN -> R.string.focus_why_winddown
+        Focus.Why.DYNAMIC -> R.string.focus_why_dynamic
         else -> R.string.focus_why_session
     })
 }
@@ -690,6 +691,7 @@ private fun LearnedGroup(title: String, emoji: String, items: List<Pair<String, 
 
 @Composable
 private fun AutoTab(changed: () -> Unit) {
+    DynamicSection(changed)
     Section(Icons.Rounded.EventRepeat, L.t(R.string.focus_schedule), L.t(R.string.focus_schedule_desc), accent = Neon.Cyan) {
         ToggleRow(L.t(R.string.focus_schedule_on), null, Prefs.KEY_FOCUS_SCHEDULE, Icons.Rounded.EventRepeat, Neon.Cyan) { changed() }
         TimeRange(Prefs.KEY_FOCUS_FROM, Prefs.KEY_FOCUS_TO, Neon.Cyan, changed)
@@ -714,6 +716,51 @@ private fun AutoTab(changed: () -> Unit) {
     }
     Hint(L.t(R.string.f2_hint))
     Hint(L.t(R.string.f2_tile_tip))
+}
+
+/**
+ * Dynamic mode: always on, nothing to start. Free scrolling first, then the feed calms down the longer the session
+ * goes; a 10-minute break resets it. A small chart shows the curve with the chosen numbers.
+ */
+@Composable
+internal fun DynamicSection(changed: () -> Unit = {}, collapsed: Boolean = false) {
+    val ctx = LocalContext.current
+    var grace by remember { mutableStateOf(Prefs.string(ctx, Prefs.KEY_FOCUS_DYN_GRACE).toIntOrNull() ?: 10) }
+    var rise by remember { mutableStateOf(Prefs.string(ctx, Prefs.KEY_FOCUS_DYN_RISE).toIntOrNull() ?: 30) }
+    Section(Icons.Rounded.AutoGraph, L.t(R.string.focus_dyn_title), L.t(R.string.focus_dyn_desc), accent = Neon.Lime, collapsible = collapsed, initiallyExpanded = !collapsed) {
+        ToggleRow(L.t(R.string.focus_dyn_on), null, Prefs.KEY_FOCUS_DYNAMIC, Icons.Rounded.AutoGraph, Neon.Lime) { changed() }
+        // The curve: 0 during the free minutes, then up to the full dial.
+        val total = (grace + rise) * 1.25f
+        val line = Neon.Lime
+        val track = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+        // Time runs with the reading direction (right to left in Hebrew / Arabic).
+        val rtl = androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl
+        Canvas(Modifier.fillMaxWidth().height(74.dp).padding(horizontal = 12.dp, vertical = 8.dp)
+            .graphicsLayer { scaleX = if (rtl) -1f else 1f }) {
+            val w = size.width; val h = size.height
+            drawLine(track, androidx.compose.ui.geometry.Offset(0f, h), androidx.compose.ui.geometry.Offset(w, h), strokeWidth = 2f)
+            val path = androidx.compose.ui.graphics.Path()
+            val gx = w * grace / total
+            val rx = w * (grace + rise) / total
+            path.moveTo(0f, h); path.lineTo(gx, h); path.lineTo(gx, h * 0.85f); path.lineTo(rx, 0f); path.lineTo(w, 0f)
+            val fill = androidx.compose.ui.graphics.Path().apply { addPath(path); lineTo(w, h); lineTo(0f, h); close() }
+            drawPath(fill, androidx.compose.ui.graphics.Brush.verticalGradient(listOf(line.copy(alpha = 0.35f), line.copy(alpha = 0f))))
+            drawPath(path, line, style = androidx.compose.ui.graphics.drawscope.Stroke(3.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                join = androidx.compose.ui.graphics.StrokeJoin.Round))
+        }
+        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+            Text(L.t(R.string.focus_dyn_free, grace), fontSize = 11.sp, color = Subtle, modifier = Modifier.weight(1f))
+            Text(L.t(R.string.focus_dyn_full, grace + rise), fontSize = 11.sp, color = Neon.Lime, fontWeight = FontWeight.SemiBold)
+        }
+        SegmentedPref(L.t(R.string.focus_dyn_grace), Prefs.KEY_FOCUS_DYN_GRACE, listOf(
+            Opt("5", L.t(R.string.focus_minutes, 5)), Opt("10", L.t(R.string.focus_minutes, 10)),
+            Opt("20", L.t(R.string.focus_minutes, 20)), Opt("30", L.t(R.string.focus_minutes, 30))
+        ), accent = Neon.Lime) { grace = it.toInt(); changed() }
+        SegmentedPref(L.t(R.string.focus_dyn_rise), Prefs.KEY_FOCUS_DYN_RISE, listOf(
+            Opt("15", L.t(R.string.focus_minutes, 15)), Opt("30", L.t(R.string.focus_minutes, 30)), Opt("60", L.t(R.string.focus_minutes, 60))
+        ), accent = Neon.Lime) { rise = it.toInt(); changed() }
+        Hint(L.t(R.string.focus_dyn_hint))
+    }
 }
 
 // ------------------------------------------------------------------ pieces

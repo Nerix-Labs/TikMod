@@ -1,0 +1,29 @@
+{
+  "en": {
+    "badge": { "e": "✨", "id": "" },
+    "title": "TikMod 4.10.0 Beta — A whole new look",
+    "summary": "A control center of live tiles, and a feed that calms down by itself.",
+    "bullets": [
+      { "icon": { "e": "🎛", "id": "" }, "text": "Tiles everywhere: tap to switch, tap to choose" },
+      { "icon": { "e": "📈", "id": "" }, "text": "Dynamic stop the addiction: calmer the longer you scroll" },
+      { "icon": { "e": "🕘", "id": "" }, "text": "Watch history of every video, on the phone only" },
+      { "icon": { "e": "▶️", "id": "" }, "text": "Watch any recorded or followed LIVE in one tap" },
+      { "icon": { "e": "📖", "id": "" }, "text": "Stories tab: archive grid + deleted-story alerts" },
+      { "icon": { "e": "🔎", "id": "" }, "text": "Search any setting from Home" }
+    ]
+  },
+  "he": {
+    "badge": { "e": "✨", "id": "" },
+    "title": "TikMod 4.10.0 בטא — מראה חדש לגמרי",
+    "summary": "מרכז בקרה של אריחים חיים, ופיד שנרגע מעצמו.",
+    "bullets": [
+      { "icon": { "e": "🎛", "id": "" }, "text": "אריחים בכל מקום: נגיעה מדליקה, נגיעה בוחרת" },
+      { "icon": { "e": "📈", "id": "" }, "text": "עצירת התמכרות דינמית: נרגע ככל שגוללים" },
+      { "icon": { "e": "🕘", "id": "" }, "text": "היסטוריית צפייה של כל סרטון, רק בטלפון" },
+      { "icon": { "e": "▶️", "id": "" }, "text": "צפייה בכל לייב מוקלט או במעקב בנגיעה" },
+      { "icon": { "e": "📖", "id": "" }, "text": "כרטיסיית סטוריז: ארכיון בריבועים + התראה על מחיקה" },
+      { "icon": { "e": "🔎", "id": "" }, "text": "חיפוש כל הגדרה ממסך הבית" }
+    ]
+  },
+  "footer": "Beta · Works on TikTok 47.9.2 · בטא · עובד על טיקטוק 47.9.2"
+}

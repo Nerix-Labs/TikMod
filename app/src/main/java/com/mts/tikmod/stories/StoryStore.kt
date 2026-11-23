@@ -128,26 +128,31 @@ object StoryStore {
         val handle = json.optString("handle").lowercase().takeIf { it.isNotBlank() } ?: return
         val ids = json.optJSONArray("aids")?.let { a -> (0 until a.length()).map { a.optString(it) }.toSet() } ?: return
         val time = json.optLong("time").takeIf { it > 0 } ?: System.currentTimeMillis()
+        val gone = ArrayList<JSONObject>()
         synchronized(lock) {
             val list = readAll(ctx)
-            var changed = 0
             for (e in list) {
                 if (e.optBoolean("deleted") || e.optString("handle").lowercase() != handle) continue
                 if (e.optString("aid") in ids || e.optLong("seen") >= time) continue
                 if (!stillUp(e, time)) continue
                 e.put("deleted", true).put("deletedAt", time)
-                changed++
+                gone += JSONObject(e.toString())
             }
-            if (changed > 0) {
+            if (gone.isNotEmpty()) {
                 writeAll(ctx, list)
-                XLog.log("Stories: @$handle deleted $changed archived ${if (changed == 1) "story" else "stories"}")
+                XLog.log("Stories: @$handle deleted ${gone.size} archived ${if (gone.size == 1) "story" else "stories"}")
             }
         }
+        if (gone.isNotEmpty()) StoryNotifier.deleted(ctx, gone)
     }
 
     /** TikTok itself says this story is deleted. */
     fun markDeleted(ctx: Context, aid: String) {
-        update(ctx, aid) { e -> if (!e.optBoolean("deleted")) e.put("deleted", true).put("deletedAt", System.currentTimeMillis()) }
+        var newly = false
+        val e = update(ctx, aid) { e ->
+            if (!e.optBoolean("deleted")) { e.put("deleted", true).put("deletedAt", System.currentTimeMillis()); newly = true }
+        }
+        if (newly && e != null) StoryNotifier.deleted(ctx, listOf(JSONObject(e.toString())))
     }
 
     /** Should this story still be online at [now]? (Expired stories missing from a list weren't deleted.) */

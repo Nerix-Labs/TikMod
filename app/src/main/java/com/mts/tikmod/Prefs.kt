@@ -103,6 +103,8 @@ object Prefs {
     const val KEY_STORY_ARCHIVE = "key_story_archive"             // keep a copy of every story I watch (deleted ones get marked)
     const val KEY_STORY_AUTO = "key_story_auto"                   // save stories of the channels below by themselves
     const val KEY_STORY_AUTO_CHANNELS = "key_story_auto_channels" // comma-separated handles
+    const val KEY_STORY_DELETED_NOTIFY = "key_story_deleted_notify" // notify when an archived story gets deleted
+    const val KEY_WATCH_HISTORY = "key_watch_history"             // keep a list of the videos I watch (on the phone only)
     const val KEY_LIVE_HISTORY = "key_live_history"               // keep a list of LIVE streams I entered
     const val KEY_LIVE_HISTORY_JSON = "live_history_json"         // the list itself (not exported)
     const val KEY_APP_LANGUAGE = "key_app_language"             // "system" or a language tag (see L.LANGUAGES)
@@ -174,6 +176,9 @@ object Prefs {
     const val KEY_BEDTIME_SCREEN = "key_bedtime_screen"         // gentle "time to sleep" screen inside TikTok
     const val KEY_WINDDOWN = "key_winddown"                     // minutes before bedtime the feed calms down (0 = off)
     const val KEY_SESSION_LIMIT = "key_session_limit"           // minutes of scrolling before it gets stricter (0 = off)
+    const val KEY_FOCUS_DYNAMIC = "key_focus_dynamic"           // dynamic: always on, stricter the longer you scroll
+    const val KEY_FOCUS_DYN_GRACE = "key_focus_dyn_grace"       // minutes of free scrolling first
+    const val KEY_FOCUS_DYN_RISE = "key_focus_dyn_rise"         // minutes to reach the full dial after that
     const val KEY_SESSION_REMIND = "key_session_remind"         // a gentle reminder when the limit is reached
     const val STAT_FOCUS_FILTERED = "stat_focus_filtered"
 
@@ -268,6 +273,9 @@ object Prefs {
         KEY_BEDTIME_SCREEN to true,
         KEY_WINDDOWN to "30",
         KEY_SESSION_LIMIT to "0",
+        KEY_FOCUS_DYNAMIC to false,
+        KEY_FOCUS_DYN_GRACE to "10",
+        KEY_FOCUS_DYN_RISE to "30",
         KEY_SESSION_REMIND to true,
         KEY_DISABLE_READ_RECEIPTS to true,
         KEY_DISABLE_TYPING_INDICATOR to true,
@@ -293,6 +301,8 @@ object Prefs {
         KEY_STORY_ARCHIVE to true,
         KEY_STORY_AUTO to false,
         KEY_STORY_AUTO_CHANNELS to "",
+        KEY_STORY_DELETED_NOTIFY to true,
+        KEY_WATCH_HISTORY to true,
         KEY_LIVE_CAPTIONS to false,
         KEY_CAPTION_SOURCE to "auto",
         KEY_CAPTION_TARGET to "",

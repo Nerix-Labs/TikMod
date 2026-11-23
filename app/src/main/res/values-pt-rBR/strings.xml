@@ -820,4 +820,97 @@
     <string name="cl490_anon_desc">Dois novos interruptores: não aparecer na lista de espectadores de um story e não aparecer em \"Visualizações do perfil\" quando você visita alguém.</string>
     <string name="cl490_views">\"Não informar visualizações\" agora pega tudo</string>
     <string name="cl490_views_desc">O TikTok envia um segundo relatório de reprodução, mais rápido, que escapava antes. Agora ele também é bloqueado.</string>
+
+    <!-- 4.10.0: watch history, deleted-story notifications, archive by creator, download search -->
+    <string name="watch_title">Histórico de visualização</string>
+    <string name="watch_subtitle">Cada vídeo que você rola, só neste celular</string>
+    <string name="watch_entry_empty">Cada vídeo que você assiste, com busca. Nada sai do celular.</string>
+    <string name="watch_entry_counts">%1$d vídeos • %2$d hoje</string>
+    <string name="watch_toggle">Manter histórico de visualização</string>
+    <string name="watch_toggle_desc">Vídeos e posts de fotos do feed. Anúncios, stories e prévias de LIVE ficam de fora.</string>
+    <string name="watch_search">Buscar por nome, @usuário ou legenda</string>
+    <string name="watch_empty">Nada ainda. Role o TikTok e os vídeos que você assistir aparecem aqui.</string>
+    <string name="watch_no_match">Nenhum vídeo corresponde à sua busca.</string>
+    <string name="watch_today">Hoje</string>
+    <string name="watch_yesterday">Ontem</string>
+    <string name="watch_on_screen">%1$s na tela</string>
+    <string name="watch_open">Abrir no TikTok</string>
+    <string name="watch_copy_link">Copiar link</string>
+    <string name="watch_clear_q">Limpar o histórico de visualização?</string>
+    <string name="watch_clear_desc">Todas as entradas e capas são removidas do TikMod. O histórico do próprio TikTok não muda.</string>
+    <string name="watch_hint">Fica só neste celular; os %1$d mais recentes são mantidos.</string>
+    <string name="stories_notify">Avisar quando um story for apagado</string>
+    <string name="stories_notify_desc">Uma notificação quando um criador apaga um story que está no seu arquivo</string>
+    <plurals name="notif_stories_deleted_text">
+        <item quantity="one">Ele continua no arquivo de stories do TikMod.</item>
+        <item quantity="many">Eles continuam no arquivo de stories do TikMod.</item>
+        <item quantity="other">Eles continuam no arquivo de stories do TikMod.</item>
+    </plurals>
+    <string name="channel_stories">Stories</string>
+    <string name="channel_stories_desc">Stories apagados do seu arquivo</string>
+    <string name="stories_creators_all">Todos os criadores</string>
+    <string name="history_search">Buscar downloads</string>
+    <string name="history_no_match">Nada corresponde à sua busca.</string>
+    <string name="hist_kind_video">Vídeos</string>
+    <string name="hist_kind_photo">Fotos</string>
+    <string name="hist_kind_audio">Áudio</string>
+    <string name="hist_kind_cover">Capas</string>
+    <string name="hist_kind_avatar">Fotos de perfil</string>
+    <string name="cl4100_watch">Histórico de visualização</string>
+    <string name="cl4100_watch_desc">Cada vídeo que você rola fica no celular: busque por nome, @usuário ou legenda, abra de novo no TikTok e veja quanto tempo ficou na tela.</string>
+    <string name="cl4100_notify">Saiba quando um story é apagado</string>
+    <string name="cl4100_notify_desc">Quando um criador apaga um story do seu arquivo, uma notificação mostra o story com a capa.</string>
+    <string name="cl4100_creators">Arquivo de stories por criador</string>
+    <string name="cl4100_creators_desc">Escolha um criador para ver só os stories dele, com quantos foram apagados.</string>
+    <string name="cl4100_search">Busque nos seus downloads</string>
+    <string name="cl4100_search_desc">Busque no histórico de downloads e filtre por vídeos, fotos, áudio e mais.</string>
+    <plurals name="watch_times">
+        <item quantity="one">Visto %d vez</item>
+        <item quantity="many">Visto %d vezes</item>
+        <item quantity="other">Visto %d vezes</item>
+    </plurals>
+    <plurals name="notif_stories_deleted">
+        <item quantity="one">%1$s apagou um story</item>
+        <item quantity="many">%1$s apagou %2$d stories</item>
+        <item quantity="other">%1$s apagou %2$d stories</item>
+    </plurals>
+
+    <!-- 4.10.0: Studio look (home, stories tab, LIVE watch) -->
+    <string name="greet_morning">Bom dia</string>
+    <string name="greet_afternoon">Boa tarde</string>
+    <string name="greet_evening">Boa noite</string>
+    <string name="greet_night">Boa noite</string>
+    <string name="today_min">min</string>
+    <string name="today_watched">assistido</string>
+    <string name="today_videos">vídeos</string>
+    <string name="today_creators">criadores</string>
+    <string name="today_stories">stories guardados</string>
+    <string name="today_deleted">apagados, ainda seus</string>
+    <string name="today_empty">Nada ainda hoje. Abra o TikTok e seu dia aparece aqui.</string>
+    <string name="live_watch">Assistir</string>
+    <string name="stories_stat_kept">Arquivados</string>
+    <string name="stories_stat_deleted">Apagados</string>
+    <string name="cl4100_design">Um visual totalmente novo</string>
+    <string name="cl4100_design_desc">Mais calmo, profundo e legível: novas cores e cartões, uma tela inicial com o seu dia e uma barra com todas as seções.</string>
+    <string name="cl4100_tabs">Stories ganham sua própria aba</string>
+    <string name="cl4100_tabs_desc">Arquivo, salvamento automático e visualização anônima, a um toque de qualquer lugar.</string>
+    <string name="cl4100_live">Assista ao que você grava</string>
+    <string name="cl4100_live_desc">Um botão Assistir em cada live sendo gravada e em cada canal seguido ao vivo abre no TikTok.</string>
+    <string name="theme_studio">Estúdio</string>
+    <string name="focus_why_dynamic">rolagem longa</string>
+    <string name="focus_dyn_title">Freio dinâmico</string>
+    <string name="focus_dyn_desc">Sempre ativo, nada para iniciar: quanto mais você rola sem pausa, mais calmo o feed fica.</string>
+    <string name="focus_dyn_on">Freio dinâmico</string>
+    <string name="focus_dyn_grace">Primeiro livre</string>
+    <string name="focus_dyn_rise">Depois mais calmo em</string>
+    <string name="focus_dyn_hint">Uma pausa de 10 minutos o reinicia. À noite (23:00–05:00) ele age duas vezes mais rápido. Usa o seu controle e os seus temas.</string>
+    <string name="focus_dyn_free">Normal por %1$d min</string>
+    <string name="focus_dyn_full">Completo após %1$d min</string>
+    <string name="cl4100_dyn">Freio dinâmico ao vício</string>
+    <string name="cl4100_dyn_desc">Sempre ativo: primeiro rolagem livre, depois o feed acalma quanto mais você continua. Uma pausa curta reinicia.</string>
+    <string name="search_settings">Buscar configurações</string>
+    <string name="search_none">Nenhuma configuração corresponde.</string>
+    <string name="search_go">Ir</string>
+    <string name="cl4100_search_all">Encontre qualquer configuração</string>
+    <string name="cl4100_search_all_desc">Busque na tela inicial e alterne os botões direto nos resultados; atalhos para o que você mais usa e uma sensação mais fluida em tudo.</string>
 </resources>

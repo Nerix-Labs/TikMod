@@ -810,4 +810,94 @@
     <string name="cl490_anon_desc">Two new switches: stay off a story\'s viewer list, and stay out of \"Profile views\" when you visit someone.</string>
     <string name="cl490_views">\"Don\'t report views\" now catches everything</string>
     <string name="cl490_views_desc">TikTok sends a second, faster play report that slipped through before. It\'s blocked too now.</string>
+
+    <!-- 4.10.0: watch history, deleted-story notifications, archive by creator, download search -->
+    <string name="watch_title">Watch history</string>
+    <string name="watch_subtitle">Every video you scroll to, on this phone only</string>
+    <string name="watch_entry_empty">Every video you watch, searchable. Nothing leaves the phone.</string>
+    <string name="watch_entry_counts">%1$d videos • %2$d today</string>
+    <string name="watch_toggle">Keep a watch history</string>
+    <string name="watch_toggle_desc">Videos and photo posts from the feed. Ads, stories and LIVE previews are left out.</string>
+    <string name="watch_search">Search by name, @handle or caption</string>
+    <string name="watch_empty">Nothing yet. Scroll through TikTok and the videos you watch show up here.</string>
+    <string name="watch_no_match">No video matches your search.</string>
+    <string name="watch_today">Today</string>
+    <string name="watch_yesterday">Yesterday</string>
+    <string name="watch_on_screen">%1$s on screen</string>
+    <string name="watch_open">Open in TikTok</string>
+    <string name="watch_copy_link">Copy link</string>
+    <string name="watch_clear_q">Clear the watch history?</string>
+    <string name="watch_clear_desc">Every entry and its cover are removed from TikMod. TikTok\'s own history isn\'t touched.</string>
+    <string name="watch_hint">Kept on this phone only; the newest %1$d are kept.</string>
+    <string name="stories_notify">Tell me when a story gets deleted</string>
+    <string name="stories_notify_desc">A notification when a creator deletes a story you have in the archive</string>
+    <plurals name="notif_stories_deleted_text">
+        <item quantity="one">You still have it in TikMod\'s story archive.</item>
+        <item quantity="other">You still have them in TikMod\'s story archive.</item>
+    </plurals>
+    <string name="channel_stories">Stories</string>
+    <string name="channel_stories_desc">Stories deleted from your archive</string>
+    <string name="stories_creators_all">All creators</string>
+    <string name="history_search">Search downloads</string>
+    <string name="history_no_match">Nothing matches your search.</string>
+    <string name="hist_kind_video">Videos</string>
+    <string name="hist_kind_photo">Photos</string>
+    <string name="hist_kind_audio">Audio</string>
+    <string name="hist_kind_cover">Covers</string>
+    <string name="hist_kind_avatar">Profile pictures</string>
+    <string name="cl4100_watch">Watch history</string>
+    <string name="cl4100_watch_desc">Every video you scroll to is kept on the phone: search by name, @handle or caption, open it again in TikTok, and see how long it was on screen.</string>
+    <string name="cl4100_notify">Know when a story is deleted</string>
+    <string name="cl4100_notify_desc">When a creator deletes a story you have in the archive, a notification shows it, cover included.</string>
+    <string name="cl4100_creators">Story archive by creator</string>
+    <string name="cl4100_creators_desc">Pick a creator to see only their stories, and how many of them were deleted.</string>
+    <string name="cl4100_search">Search your downloads</string>
+    <string name="cl4100_search_desc">Search the download history and filter it by videos, photos, audio and more.</string>
+    <plurals name="watch_times">
+        <item quantity="one">Seen %d time</item>
+        <item quantity="other">Seen %d times</item>
+    </plurals>
+    <plurals name="notif_stories_deleted">
+        <item quantity="one">%1$s deleted a story</item>
+        <item quantity="other">%1$s deleted %2$d stories</item>
+    </plurals>
+
+    <!-- 4.10.0: Studio look (home, stories tab, LIVE watch) -->
+    <string name="greet_morning">Good morning</string>
+    <string name="greet_afternoon">Good afternoon</string>
+    <string name="greet_evening">Good evening</string>
+    <string name="greet_night">Up late</string>
+    <string name="today_min">min</string>
+    <string name="today_watched">watched</string>
+    <string name="today_videos">videos</string>
+    <string name="today_creators">creators</string>
+    <string name="today_stories">stories kept</string>
+    <string name="today_deleted">deleted, still yours</string>
+    <string name="today_empty">Nothing yet today. Open TikTok and your day shows up here.</string>
+    <string name="live_watch">Watch</string>
+    <string name="stories_stat_kept">Archived</string>
+    <string name="stories_stat_deleted">Deleted</string>
+    <string name="cl4100_design">A whole new look</string>
+    <string name="cl4100_design_desc">Calmer, deeper and easier to read: new colors and cards, a home screen that shows your day, and a bottom bar with every section.</string>
+    <string name="cl4100_tabs">Stories get their own tab</string>
+    <string name="cl4100_tabs_desc">Archive, auto-save and anonymous viewing, one tap away from anywhere.</string>
+    <string name="cl4100_live">Watch what you record</string>
+    <string name="cl4100_live_desc">A Watch button on every stream being recorded, and on every followed channel that\'s live, opens it in TikTok.</string>
+    <string name="theme_studio">Studio</string>
+    <string name="focus_why_dynamic">long scrolling</string>
+    <string name="focus_dyn_title">Dynamic stop</string>
+    <string name="focus_dyn_desc">Always on, nothing to start: the longer you scroll without a break, the calmer your feed gets.</string>
+    <string name="focus_dyn_on">Dynamic stop</string>
+    <string name="focus_dyn_grace">Free scrolling first</string>
+    <string name="focus_dyn_rise">Then calmer over</string>
+    <string name="focus_dyn_hint">A 10-minute break resets it. Late at night (23:00–05:00) it kicks in twice as fast. It uses the dial and topics you set.</string>
+    <string name="focus_dyn_free">Normal for %1$d min</string>
+    <string name="focus_dyn_full">Full after %1$d min</string>
+    <string name="cl4100_dyn">Dynamic stop the addiction</string>
+    <string name="cl4100_dyn_desc">Always on: free scrolling first, then the feed gets calmer the longer you go. A short break resets it.</string>
+    <string name="search_settings">Search settings</string>
+    <string name="search_none">No setting matches.</string>
+    <string name="search_go">Go to it</string>
+    <string name="cl4100_search_all">Find any setting</string>
+    <string name="cl4100_search_all_desc">Search from Home and flip switches right in the results; shortcuts to the places you use most, and a slicker feel everywhere.</string>
 </resources>

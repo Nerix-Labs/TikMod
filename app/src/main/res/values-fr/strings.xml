@@ -820,4 +820,97 @@
     <string name="cl490_anon_desc">Deux nouveaux interrupteurs : ne pas apparaître dans la liste des spectateurs d\'une story, ni dans les \"Vues du profil\" quand vous rendez visite à quelqu\'un.</string>
     <string name="cl490_views">\"Ne pas signaler les vues\" bloque désormais tout</string>
     <string name="cl490_views_desc">TikTok envoie un second rapport de lecture, plus rapide, qui passait jusqu\'ici. Il est bloqué lui aussi.</string>
+
+    <!-- 4.10.0: watch history, deleted-story notifications, archive by creator, download search -->
+    <string name="watch_title">Historique de visionnage</string>
+    <string name="watch_subtitle">Chaque vidéo sur laquelle vous tombez, sur ce téléphone uniquement</string>
+    <string name="watch_entry_empty">Chaque vidéo regardée, avec recherche. Rien ne quitte le téléphone.</string>
+    <string name="watch_entry_counts">%1$d vidéos • %2$d aujourd\'hui</string>
+    <string name="watch_toggle">Garder un historique de visionnage</string>
+    <string name="watch_toggle_desc">Vidéos et publications photo du fil. Les pubs, stories et aperçus LIVE ne sont pas gardés.</string>
+    <string name="watch_search">Rechercher par nom, @pseudo ou légende</string>
+    <string name="watch_empty">Rien pour l\'instant. Faites défiler TikTok et les vidéos regardées apparaîtront ici.</string>
+    <string name="watch_no_match">Aucune vidéo ne correspond à votre recherche.</string>
+    <string name="watch_today">Aujourd\'hui</string>
+    <string name="watch_yesterday">Hier</string>
+    <string name="watch_on_screen">%1$s à l\'écran</string>
+    <string name="watch_open">Ouvrir dans TikTok</string>
+    <string name="watch_copy_link">Copier le lien</string>
+    <string name="watch_clear_q">Effacer l\'historique de visionnage ?</string>
+    <string name="watch_clear_desc">Toutes les entrées et leurs miniatures sont supprimées de TikMod. L\'historique de TikTok n\'est pas touché.</string>
+    <string name="watch_hint">Gardé sur ce téléphone uniquement ; les %1$d plus récentes sont conservées.</string>
+    <string name="stories_notify">Me prévenir quand une story est supprimée</string>
+    <string name="stories_notify_desc">Une notification quand un créateur supprime une story de votre archive</string>
+    <plurals name="notif_stories_deleted_text">
+        <item quantity="one">Vous l\'avez toujours dans l\'archive des stories de TikMod.</item>
+        <item quantity="many">Vous les avez toujours dans l\'archive des stories de TikMod.</item>
+        <item quantity="other">Vous les avez toujours dans l\'archive des stories de TikMod.</item>
+    </plurals>
+    <string name="channel_stories">Stories</string>
+    <string name="channel_stories_desc">Stories supprimées de votre archive</string>
+    <string name="stories_creators_all">Tous les créateurs</string>
+    <string name="history_search">Rechercher dans les téléchargements</string>
+    <string name="history_no_match">Rien ne correspond à votre recherche.</string>
+    <string name="hist_kind_video">Vidéos</string>
+    <string name="hist_kind_photo">Photos</string>
+    <string name="hist_kind_audio">Audio</string>
+    <string name="hist_kind_cover">Couvertures</string>
+    <string name="hist_kind_avatar">Photos de profil</string>
+    <string name="cl4100_watch">Historique de visionnage</string>
+    <string name="cl4100_watch_desc">Chaque vidéo sur laquelle vous tombez reste sur le téléphone : recherche par nom, @pseudo ou légende, réouverture dans TikTok et durée à l\'écran.</string>
+    <string name="cl4100_notify">Sachez quand une story est supprimée</string>
+    <string name="cl4100_notify_desc">Quand un créateur supprime une story de votre archive, une notification l\'affiche avec sa couverture.</string>
+    <string name="cl4100_creators">Archive des stories par créateur</string>
+    <string name="cl4100_creators_desc">Choisissez un créateur pour ne voir que ses stories, avec le nombre de suppressions.</string>
+    <string name="cl4100_search">Cherchez dans vos téléchargements</string>
+    <string name="cl4100_search_desc">Recherchez dans l\'historique des téléchargements et filtrez par vidéos, photos, audio et plus.</string>
+    <plurals name="watch_times">
+        <item quantity="one">Vue %d fois</item>
+        <item quantity="many">Vue %d fois</item>
+        <item quantity="other">Vue %d fois</item>
+    </plurals>
+    <plurals name="notif_stories_deleted">
+        <item quantity="one">%1$s a supprimé une story</item>
+        <item quantity="many">%1$s a supprimé %2$d stories</item>
+        <item quantity="other">%1$s a supprimé %2$d stories</item>
+    </plurals>
+
+    <!-- 4.10.0: Studio look (home, stories tab, LIVE watch) -->
+    <string name="greet_morning">Bonjour</string>
+    <string name="greet_afternoon">Bon après-midi</string>
+    <string name="greet_evening">Bonsoir</string>
+    <string name="greet_night">Bonne nuit</string>
+    <string name="today_min">min</string>
+    <string name="today_watched">regardé</string>
+    <string name="today_videos">vidéos</string>
+    <string name="today_creators">créateurs</string>
+    <string name="today_stories">stories gardées</string>
+    <string name="today_deleted">supprimées, toujours à vous</string>
+    <string name="today_empty">Rien encore aujourd\'hui. Ouvrez TikTok et votre journée apparaîtra ici.</string>
+    <string name="live_watch">Regarder</string>
+    <string name="stories_stat_kept">Archivées</string>
+    <string name="stories_stat_deleted">Supprimées</string>
+    <string name="cl4100_design">Un tout nouveau look</string>
+    <string name="cl4100_design_desc">Plus calme, plus profond et plus lisible : nouvelles couleurs et cartes, un écran d\'accueil qui montre votre journée et une barre avec toutes les sections.</string>
+    <string name="cl4100_tabs">Les stories ont leur onglet</string>
+    <string name="cl4100_tabs_desc">Archive, sauvegarde auto et visionnage anonyme, à un geste de partout.</string>
+    <string name="cl4100_live">Regardez ce que vous enregistrez</string>
+    <string name="cl4100_live_desc">Un bouton Regarder sur chaque live enregistré et chaque chaîne suivie en direct l\'ouvre dans TikTok.</string>
+    <string name="theme_studio">Studio</string>
+    <string name="focus_why_dynamic">défilement prolongé</string>
+    <string name="focus_dyn_title">Stop dynamique</string>
+    <string name="focus_dyn_desc">Toujours actif, rien à lancer : plus vous défilez sans pause, plus votre fil devient calme.</string>
+    <string name="focus_dyn_on">Stop dynamique</string>
+    <string name="focus_dyn_grace">D\'abord libre</string>
+    <string name="focus_dyn_rise">Puis plus calme en</string>
+    <string name="focus_dyn_hint">Une pause de 10 minutes le réinitialise. La nuit (23:00–05:00), il agit deux fois plus vite. Il utilise votre curseur et vos thèmes.</string>
+    <string name="focus_dyn_free">Normal pendant %1$d min</string>
+    <string name="focus_dyn_full">Complet après %1$d min</string>
+    <string name="cl4100_dyn">Stop dynamique à l\'addiction</string>
+    <string name="cl4100_dyn_desc">Toujours actif : d\'abord libre, puis le fil se calme à mesure que vous continuez. Une courte pause le réinitialise.</string>
+    <string name="search_settings">Rechercher un réglage</string>
+    <string name="search_none">Aucun réglage ne correspond.</string>
+    <string name="search_go">Y aller</string>
+    <string name="cl4100_search_all">Trouvez n\'importe quel réglage</string>
+    <string name="cl4100_search_all_desc">Cherchez depuis l\'accueil et basculez les interrupteurs dans les résultats ; raccourcis vers vos endroits favoris et une sensation plus fluide partout.</string>
 </resources>

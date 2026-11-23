@@ -26,18 +26,35 @@ The token lives only in GitHub Secrets — never in the code or anywhere else.
 
 That manual run is the explicit approval — the bot sends nothing otherwise.
 
+## One message
+
+The post always goes out as **one message**: the APK with the whole post as its caption, plus the buttons.
+Telegram limits a bot's caption to 1024 visible characters; `--dry-run` prints the length. If a post is longer,
+the one-line summaries and then the last bullets are dropped (and listed in the log) until it fits — so keep
+posts short (about 6 short bullets per language fits comfortably).
+
 ## Premium (custom) emoji
 
-You have Telegram Premium, so custom animated emoji render for you. To use one, put its id in a bullet's
-`"id"` (keep `"e"` as the normal fallback for non-premium viewers):
+**The easy way — packs by name.** Put public emoji packs in `tools/announce/emoji_packs.json`, by the name at the
+end of their link (`t.me/addemoji/<name>`):
 
 ```json
-{ "icon": { "e": "🚀", "id": "5368324170671202286" }, "text": "…" }
+["MoonEmoji", "Decoration_Pack"]
 ```
 
-To get an id: send a message containing the custom emoji to [@RawDataBot](https://t.me/RawDataBot) and copy
-the `custom_emoji_id` from the entity it shows. The bot sends it as a `<tg-emoji>`, so it only animates if the
-emoji is accessible to the bot/channel; otherwise viewers see the normal `"e"` emoji.
+When the bot posts, it loads those packs (`getStickerSet`) and every plain emoji in the post that a pack has (🚀,
+🔥, ✨…) is sent as that pack's premium version. Earlier packs win. Nothing else to change in the posts. Packs to
+browse: Telegram's catalog at [tg.me/g/emoji](https://tg.me/g/emoji) and community lists such as
+[@CustomEmojiPacks](https://t.me/s/CustomEmojiPacks).
+
+**One specific emoji:** put its id in `"id"` (keep `"e"` as the fallback):
+`{ "icon": { "e": "🚀", "id": "5368324170671202286" }, "text": "…" }`. To get an id, send the emoji to
+[@RawDataBot](https://t.me/RawDataBot) and copy `custom_emoji_id`.
+
+**Telegram's rule for bots:** a bot may send premium emoji only in private chats, groups and supergroups when
+its owner has Premium — **not in channels** — unless the bot has a username bought on Fragment
+([Bot API, MessageEntity](https://core.telegram.org/bots/api#messageentity)). In a channel the post still goes
+out: if Telegram refuses the premium emoji, the script resends the same single message with the plain ones.
 
 ## Local preview
 
