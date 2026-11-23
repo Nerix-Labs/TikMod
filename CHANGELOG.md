@@ -2,7 +2,7 @@
 
 All notable changes to TikMod. Versions follow [semantic versioning](https://semver.org).
 
-## 4.10.1 — 2026-11-23
+## 4.10.1 — 2026-11-23 (HotFix)
 
 ### Fixed
 - **After an update, TikTok kept running the old TikMod.** The old code then read its texts by id from the new APK,
